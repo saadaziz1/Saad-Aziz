@@ -1,0 +1,12 @@
+
+@import url('fonts.googleapis.com');
+
+@import "tailwindcss";
+
+@theme {
+    --font-poppins: Poppins, sans-serif;
+    --font-imperial: Imperial Script, sans-serif;
+  /* --font-sans: Poppins, sans-serif; */
+}
+
+@custom-variant dark (&:where(.dark, .dark *));

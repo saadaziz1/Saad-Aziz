@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/images/favicon-32x32.png"
+    />
+
+    <title>Frontend Mentor | Notifications page</title>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap");
+      :root {
+        --bg: hsl(210, 60%, 98%);
+        --card: hsl(0, 0%, 100%);
+        --muted: hsl(219, 14%, 63%);
+        --text: hsl(219, 12%, 16%);
+        --soft-blue: hsl(225, 100%, 97%);
+        --accent-blue: hsl(228, 45%, 44%);
+        --light-blue: hsl(210, 60%, 98%);
+        --unread-bg: hsl(205, 33%, 95%);
+        --dot: hsl(354, 76%, 56%);
+        --shadow: 0 20px 30px rgba(46, 61, 73, 0.08);
+      }
+      .attribution {
+        font-size: 11px;
+        text-align: center;
+      }
+      .attribution a {
+        color: var(--accent-blue);
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial;
+        background: var(--bg);
+        color: var(--muted);
+        margin: 0;
+        padding: 0;
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      main {
+        max-width: 730px;
+        margin: 56px auto;
+        background: var(--card);
+        padding: 28px 28px 34px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 18px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .badge {
+        background: var(--accent-blue);
+        color: #fff;
+        padding: 4px 9px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .badge.badge--empty {
+        background: hsl(223, 20%, 95%);
+        color: hsl(219, 12%, 42%);
+      }
+      .mark-all a {
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .mark-all a:hover,
+      .mark-all a:focus {
+        color: var(--text);
+        text-decoration: underline;
+      }
+      .notifications {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 6px 6px 0;
+      }
+      .single-notification {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 10px;
+        background: transparent;
+        position: relative;
+        cursor: pointer;
+      }
+      .dot {
+        display: none;
+        vertical-align: middle;
+        margin-left: 8px;
+      }
+      .single-notification.unread {
+        background: var(--unread-bg);
+      }
+      .single-notification.unread .dot {
+        width: 10px;
+        height: 10px;
+        background: var(--dot);
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 8px;
+      }
+      .single-notification:hover,
+      .single-notification:focus {
+        background: hsl(225, 100%, 98%);
+        outline: 3px solid rgba(34, 76, 160, 0.06);
+        outline-offset: 2px;
+      }
+      .single-notification img.avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        flex: 0 0 48px;
+        object-fit: cover;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+      }
+      .single-notification .content {
+        flex: 1;
+      }
+      .single-notification .content p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .bold-black {
+        font-weight: 700;
+        color: var(--text);
+      }
+      .font-blue {
+        color: var(--accent-blue);
+        font-weight: 700;
+      }
+      .time-span {
+        display: block;
+        margin-top: 8px;
+        color: hsl(219, 11%, 60%);
+        font-size: 13px;
+      }
+      .message-box {
+        margin-top: 12px;
+        background: var(--card);
+        border: 1px solid hsl(219, 14%, 96%);
+        padding: 12px;
+        border-radius: 6px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .small-thumb {
+        width: 46px;
+        height: 46px;
+        border-radius: 6px;
+        object-fit: cover;
+        margin-left: 8px;
+      }
+      @media (max-width: 520px) {
+        main {
+          margin: 24px;
+          padding: 18px;
+        }
+      }
+      @media (max-width: 420px) {
+        body {
+          font-size: 15px;
+        }
+        main {
+          margin: 18px auto;
+          padding: 16px;
+          border-radius: 10px;
+          max-width: 360px;
+        }
+        h1 {
+          font-size: 18px;
+        }
+        .badge {
+          padding: 3px 8px;
+          font-size: 12px;
+        }
+        .mark-all a {
+          font-size: 13px;
+        }
+        .notifications {
+          gap: 12px;
+          padding: 4px 0 0;
+        }
+        .single-notification {
+          padding: 12px;
+          gap: 12px;
+          border-radius: 8px;
+        }
+        .single-notification img.avatar {
+          width: 40px;
+          height: 40px;
+          flex: 0 0 40px;
+        }
+        .small-thumb {
+          width: 40px;
+          height: 40px;
+        }
+        .content p {
+          font-size: 14px;
+        }
+        .time-span {
+          font-size: 12px;
+          margin-top: 6px;
+        }
+        .message-box {
+          font-size: 13px;
+          padding: 10px;
+        }
+        .header {
+          flex-direction: row;
+          align-items: center;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <div class="header">
+        <h1>
+          Notifications
+          <span id="unread-count" class="badge" aria-live="polite">3</span>
+        </h1>
+        <p class="mark-all">
+          <a id="mark-all" href="#" role="button" aria-pressed="false"
+            >Mark all as read</a
+          >
+        </p>
+      </div>
+
+      <div class="notifications">
+        <div
+          class="single-notification unread"
+          data-initial-unread="true"
+          tabindex="0"
+          role="button"
+          aria-pressed="true"
+        >
+          <img
+            class="avatar"
+            src="./assets/images/avatar-mark-webber.webp"
+            alt="Mark Webber Avatar"
+          />
+          <div class="content">
+            <p>
+              <span class="bold-black">Mark Webber</span>
+              reacted to your recent post
+              <span class="font-blue">My first tournament today!</span>
+              <span class="dot" aria-hidden></span>
+            </p>
+            <span class="time-span">1m ago</span>
+          </div>
+        </div>
+        <div
+          class="single-notification unread"
+          data-initial-unread="true"
+          tabindex="0"
+          role="button"
+          aria-pressed="true"
+        >
+          <img
+            class="avatar"
+            src="./assets/images/avatar-angela-gray.webp"
+            alt="Angela Avatar"
+          />
+          <div class="content">
+            <p>
+              <span class="bold-black">Angela Gray</span>
+              followed you
+              <span class="dot" aria-hidden></span>
+            </p>
+            <span class="time-span">5m ago</span>
+          </div>
+        </div>
+
+        <div
+          class="single-notification unread"
+          data-initial-unread="true"
+          tabindex="0"
+          role="button"
+          aria-pressed="true"
+        >
+          <img
+            class="avatar"
+            src="./assets/images/avatar-jacob-thompson.webp"
+            alt="Jacob Thompson Avatar"
+          />
+          <div class="content">
+            <p>
+              <span class="bold-black">Jacob Thompson</span>
+              has joined your group
+              <span class="font-blue">Chess Club</span>
+              <span class="dot" aria-hidden></span>
+            </p>
+            <span class="time-span">1 day ago</span>
+          </div>
+        </div>
+
+        <div
+          class="single-notification"
+          tabindex="0"
+          role="button"
+          aria-pressed="false"
+        >
+          <img
+            class="avatar"
+            src="./assets/images/avatar-rizky-hasanuddin.webp"
+            alt="Rizky Hasanuddin Avatar"
+          />
+          <div class="content">
+            <p>
+              <span class="bold-black">Rizky Hasanuddin</span>
+              sent you a private message
+              <span class="dot" aria-hidden></span>
+            </p>
+            <span class="time-span">5 days ago</span>
+            <div class="message-box">
+              Hello, thanks for setting up the Chess Club. I've been a member
+              for a few weeks now and I'm already having lots of fun and
+              improving my game.
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="single-notification"
+          tabindex="0"
+          role="button"
+          aria-pressed="false"
+        >
+          <img
+            class="avatar"
+            src="./assets/images/avatar-kimberly-smith.webp"
+            alt="Kimberly Smith Avatar"
+          />
+          <div class="content">
+            <p>
+              <span class="bold-black">Kimberly Smith</span>
+              commented on your picture
+              <span class="dot" aria-hidden></span>
+            </p>
+            <span class="time-span">1 week ago</span>
+          </div>
+          <img
+            class="small-thumb"
+            src="./assets/images/image-chess.webp"
+            alt="comment thumbnail"
+          />
+        </div>
+
+        <div
+          class="single-notification"
+          tabindex="0"
+          role="button"
+          aria-pressed="false"
+        >
+          <img
+            class="avatar"
+            src="./assets/images/avatar-nathan-peterson.webp"
+            alt="Nathan Peterson  Avatar"
+          />
+          <div class="content">
+            <p>
+              <span class="bold-black">Nathan Peterson</span>
+              reacted to your recent post
+              <span class="font-blue"
+                >5 end-game strategies to increase your win rate</span
+              >
+              <span class="dot" aria-hidden></span>
+            </p>
+            <span class="time-span">2 weeks ago</span>
+          </div>
+        </div>
+
+        <div
+          class="single-notification"
+          tabindex="0"
+          role="button"
+          aria-pressed="false"
+        >
+          <img
+            class="avatar"
+            src="./assets/images/avatar-anna-kim.webp"
+            alt="Anna Kim Avatar"
+          />
+          <div class="content">
+            <p>
+              <span class="bold-black">Anna Kim</span>
+              left the group
+              <span class="font-blue">Chess Club</span>
+              <span class="dot" aria-hidden></span>
+            </p>
+            <span class="time-span">2 weeks ago</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      !(function () {
+        const n = Array.from(document.querySelectorAll(".single-notification")),
+          b = document.getElementById("unread-count"),
+          m = document.getElementById("mark-all"),
+          u = () => n.filter((x) => x.classList.contains("unread")).length,
+          r = () => {
+            const c = u();
+            b.textContent = c;
+            b.classList.toggle("badge--empty", c === 0);
+            m && m.setAttribute("aria-pressed", String(c === 0));
+          };
+        n.forEach((el) => {
+          el.classList.contains("unread") &&
+            (el.dataset.initialUnread = "true");
+          el.addEventListener("click", () => {
+            const s = el.classList.toggle("unread");
+            el.setAttribute("aria-pressed", String(s));
+            r();
+          });
+          el.addEventListener("keydown", (e) => {
+            ("Enter" === e.key || " " === e.key) &&
+              (e.preventDefault(), el.click());
+          });
+        });
+        if (m) {
+          m.addEventListener("click", (e) => {
+            e.preventDefault();
+            const c = u();
+            if (c > 0) {
+              n.forEach((x) => {
+                x.classList.remove("unread");
+                x.setAttribute("aria-pressed", "false");
+              });
+            } else {
+              n.forEach((x) => {
+                "true" === x.dataset.initialUnread &&
+                  (x.classList.add("unread"),
+                  x.setAttribute("aria-pressed", "true"));
+              });
+            }
+            r();
+          });
+          m.addEventListener("keydown", (e) => {
+            ("Enter" === e.key || " " === e.key) &&
+              (e.preventDefault(), m.click());
+          });
+        }
+        r();
+      })();
+    </script>
+  </body>
+</html>

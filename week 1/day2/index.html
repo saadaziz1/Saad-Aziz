@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <title>Frontend Mentor | [Challenge Name Here]</title>
+
+  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+ <style>
+.attribution { 
+  font-size: 0.6875rem; 
+  text-align: center; 
+}
+.attribution a { color: hsl(228, 45%, 44%); }
+
+body {
+  font-family: 'Barlow Semi Condensed', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-size: 0.75rem;        
+  color: hsl(260, 7%, 20%);
+  background-color: hsl(260, 100%, 95%);
+  margin: 0;
+  padding: 0;
+}
+
+/* Mobile (default) */
+section {
+  display: grid;
+  grid-template-columns: 1fr;
+ gap: 0.75rem;    
+  padding: 0.9rem;
+}
+
+
+.review-container {
+  max-width: 100%;
+  margin: 0 auto;
+ padding: 1rem; 
+  border-radius: 0.6rem;
+  box-sizing: border-box;
+  box-shadow: 20px 20px 20px  #aaa;
+}
+
+.reviewer img {
+  width: 2rem;  
+  height: 2rem;       
+}
+
+.review-container > h3 { 
+   font-size: 1.25rem;
+  line-height: 1.15; 
+
+}
+.review-container > p  { 
+ font-size: 0.85rem;
+  line-height: 1.5; 
+}
+
+
+
+.review-container {
+  border-radius: 2%;
+  padding: 1.25rem; 
+  color: white;
+}
+
+.reviewer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 100;
+}
+
+.reviewer img {
+  border-radius: 50%;
+  width: 1.875rem;
+  height: 1.875rem; 
+  border: 0.125rem solid; 
+}
+
+.reviewer p {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.reviewer span {
+  display: block;
+  font-size: 0.675rem;
+  font-weight: 100;
+}
+
+/* user-specific classes */
+.daniel { background-color: hsl(263, 55%, 52%); }
+.daniel img { border-color: hsl(264, 82%, 80%); }
+
+.Jonathan { background-color: hsl(217, 19%, 35%); }
+.Jonathan img { border-color: hsl(217, 19%, 35%); }
+
+.Jeanette { 
+  background-color: hsl(0, 0%, 100%);
+  color: hsl(217, 19%, 35%);
+}
+.Jeanette img { border-color: hsl(0, 0%, 100%); }
+
+.Patrick { background-color: hsl(219, 29%, 14%); }
+.Patrick img { border-color: hsl(263, 55%, 52%); }
+
+.Kira { 
+  background-color: hsl(0, 0%, 100%);
+  color: hsl(217, 19%, 35%);
+}
+.Kira img { border-color: hsl(0, 0%, 100%); }
+
+
+/* Desktop */
+@media (min-width: 900px) { 
+  section {
+    grid-template-columns: repeat(4, minmax(15rem, 1fr)); 
+     gap: 1rem;     
+    padding: 1.25rem;
+  }
+
+  .review-container.daniel { grid-column: 1 / span 2; }
+  .review-container.Jonathan { grid-column: 3; grid-row: 1; }
+  .review-container.Jeanette { grid-column: 1; grid-row: 2; }
+  .review-container.Patrick  { grid-column: 2 / span 2; grid-row: 2; }
+  .review-container.Kira     { grid-column: 4; grid-row: 1 / span 2; }
+}
+</style>
+
+</head>
+<body>
+  <section >
+      <div class="review-container  daniel" > 
+    <div class="reviewer">
+      
+      <img src="./images/image-daniel.jpg" alt="daniel cliford photo" />
+
+      
+       <p> Daniel Clifford<span>Verified Graduate</span></p>
+
+     
+     </div>
+<h3> I received a job offer mid-course, and the subjects I learned were current, if not more so, 
+  in the company I joined. I honestly feel I got every penny’s worth.
+</h3>
+ <p> “ I was an EMT for many years before I joined the bootcamp. I’ve been looking to make a 
+  transition and have heard some people who had an amazing experience here. I signed up 
+  for the free intro course and found it incredibly fun! I enrolled shortly thereafter. 
+  The next 12 weeks was the best - and most grueling - time of my life. Since completing 
+  the course, I’ve successfully switched careers, working as a Software Engineer at a VR startup. ”
+</p>
+ </div>
+
+  <div class="review-container Jonathan">
+    <div class="reviewer">
+      <img src="./images/image-jonathan.jpg" alt="Jonathan photo" />
+      <p> Jonathan Walters
+<span>Verified Graduate</span></p>
+     </div>
+  
+<h3>The team was very supportive and kept me motivated</h3>
+  <p>  “ I started as a total newbie with virtually no coding skills. I now work as a mobile engineer 
+  for a big company. This was one of the best investments I’ve made in myself. ”
+</p>
+
+</div>
+
+
+  <div class="review-container  Jeanette">
+    <div class="reviewer">
+      <img src="./images/image-jeanette.jpg" alt="Jeanette photo" />
+      <p> Jeanette Harmon
+<span>Verified Graduate</span></p>
+     </div>
+<h3> An overall wonderful and rewarding experience</h3>
+ 
+<p> “ Thank you for the wonderful experience! I now have a job I really enjoy, and make a good living 
+  while doing something I love. ”</p>
+ 
+</div>
+
+  <div class="review-container Patrick">
+    <div class="reviewer">
+      <img src="./images/image-patrick.jpg" alt="Patrick photo" />
+      <p>Patrick Abrams
+<span>Verified Graduate</span></p>
+     </div>
+<h3> Awesome teaching support from TAs who did the bootcamp themselves. Getting guidance from them and 
+  learning from their experiences was easy.
+</h3>
+ <p>“ The staff seem genuinely concerned about my progress which I find really refreshing. The program 
+  gave me the confidence necessary to be able to go out in the world and present myself as a capable 
+  junior developer. The standard is above the rest. You will get the personal attention you need from 
+  an incredible community of smart and amazing people. ”</p>
+  
+</div>
+
+  <div class="review-container Kira">
+    <div class="reviewer">
+      <img src="./images/image-kira.jpg" alt="Kira photo" />
+      <p>Kira Whittle
+<span>Verified Graduate</span></p>
+     </div>
+  
+<h3> Such a life-changing experience. Highly recommended!</h3>
+ <p>“ Before joining the bootcamp, I’ve never written a line of code. I needed some structure from 
+  professionals who can help me learn programming step by step. I was encouraged to enroll by a former 
+  student of theirs who can only say wonderful things about the program. The entire curriculum and staff 
+  did not disappoint. They were very hands-on and I never had to wait long for assistance. The agile team 
+  project, in particular, was outstanding. It took my learning to the next level in a way that no tutorial 
+  could ever have. In fact, I’ve often referred to it during interviews as an example of my developent 
+  experience. It certainly helped me land a job as a full-stack developer after receiving multiple offers. 
+  100% recommend! ”</p>
+
+  </div>
+  </section>
+
+ 
+  
+  
+  
+  
+  
+  <div class="attribution">
+    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+    Coded by <a href="#">Your Name Here</a>.
+  </div>
+</body>
+</html>
