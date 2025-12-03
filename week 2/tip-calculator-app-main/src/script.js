@@ -1,89 +1,168 @@
-// Tip calculator logic
-const billInput = document.getElementById('bill-input');
-const tipButtons = Array.from(document.querySelectorAll('.tip-btn'));
-const customTip = document.getElementById('custom-tip');
-const peopleInput = document.getElementById('people-input');
-const peopleError = document.getElementById('people-error');
-const tipAmountEl = document.getElementById('tip-amount');
-const totalAmountEl = document.getElementById('total-amount');
-const resetBtn = document.getElementById('reset-btn');
 
-let selectedTip = 0;
+const billInput = document.getElementById("bill");
+const peopleInput = document.getElementById("people");
+const customTipInput = document.getElementById("custom-tip");
+const tipButtons = document.querySelectorAll(".tip-btn");
+const tipAmountDisplay = document.getElementById("tip-amount");
+const totalAmountDisplay = document.getElementById("total-amount");
+const resetBtn = document.getElementById("reset-btn");
+const peopleError = document.getElementById("people-error");
 
-function formatMoney(value) {
-  return `$${Number(value).toFixed(2)}`;
+
+let billValue = 0;
+let tipPercentage = 0;
+let numberOfPeople = 0;
+
+
+function init() {
+   
+    billInput.addEventListener("input", handleBillInput);
+    peopleInput.addEventListener("input", handlePeopleInput);
+    customTipInput.addEventListener("input", handleCustomTipInput);
+    resetBtn.addEventListener("click", handleReset);
+
+    
+    tipButtons.forEach((button) => {
+        button.addEventListener("click", () => handleTipButtonClick(button));
+    });
 }
 
-function validatePeople() {
-  const people = Number(peopleInput.value);
-  if (!people || people <= 0) {
-    peopleError.classList.remove('hidden');
-    peopleInput.classList.add('border', 'border-red-500');
-    return false;
-  }
-  peopleError.classList.add('hidden');
-  peopleInput.classList.remove('border', 'border-red-500');
-  return true;
+
+function handleBillInput(e) {
+    const v = parseFloat(e.target.value);
+    if (e.target.value !== "" && v < 0) {
+        // negative not allowed
+        billInput.classList.add("error");
+        billValue = 0;
+    } else {
+        billInput.classList.remove("error");
+        billValue = parseFloat(e.target.value) || 0;
+    }
+    calculateTip();
+    toggleResetButton();
 }
 
-function compute() {
-  const bill = parseFloat(billInput.value) || 0;
-  const people = parseInt(peopleInput.value) || 0;
 
-  if (!validatePeople()) {
-    tipAmountEl.textContent = '$0.00';
-    totalAmountEl.textContent = '$0.00';
-    return;
-  }
+function handlePeopleInput(e) {
+    const value = parseFloat(e.target.value);
 
-  const tipPercent = selectedTip || (parseFloat(customTip.value) || 0);
+    
+    if (e.target.value !== "" && value < 0) {
+        // negative people
+        peopleInput.classList.add("error");
+        peopleError.textContent = "Number of people can't be negative";
+        peopleError.classList.add("show");
+        numberOfPeople = 0;
+    } else if (value === 0 || (e.target.value !== "" && value < 1)) {
+        // zero or less than 1
+        peopleInput.classList.add("error");
+        peopleError.textContent = "Number of people can't be zero";
+        peopleError.classList.add("show");
+        numberOfPeople = 0;
+    } else {
+        peopleInput.classList.remove("error");
+        peopleError.classList.remove("show");
+        numberOfPeople = value || 0;
+        // restore default message
+        peopleError.textContent = "Number of people can't be zero";
+    }
 
-  const tipTotal = bill * (tipPercent / 100);
-  const tipPerPerson = tipTotal / people;
-  const totalPerPerson = (bill / people) + tipPerPerson;
-
-  tipAmountEl.textContent = formatMoney(isFinite(tipPerPerson) ? tipPerPerson : 0);
-  totalAmountEl.textContent = formatMoney(isFinite(totalPerPerson) ? totalPerPerson : 0);
+    calculateTip();
+    toggleResetButton();
 }
 
-function clearSelection() {
-  tipButtons.forEach(btn => {
-    btn.classList.remove('bg-[#21d4b8]', 'text-teal-900');
-    btn.classList.add('bg-teal-900', 'text-white');
-  });
+
+function handleTipButtonClick(button) {
+    
+    tipButtons.forEach((btn) => btn.classList.remove("active"));
+
+    
+    button.classList.add("active");
+
+    
+    customTipInput.value = "";
+
+    
+    tipPercentage = parseFloat(button.dataset.tip);
+
+    calculateTip();
+    toggleResetButton();
 }
 
-tipButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    clearSelection();
-    btn.classList.remove('bg-teal-900', 'text-white');
-    btn.classList.add('bg-[#21d4b8]', 'text-teal-900');
-    selectedTip = Number(btn.getAttribute('data-percent')) || 0;
-    customTip.value = '';
-    compute();
-  });
-});
 
-customTip.addEventListener('input', () => {
-  clearSelection();
-  selectedTip = 0;
-  compute();
-});
+function handleCustomTipInput(e) {
+    
+    tipButtons.forEach((btn) => btn.classList.remove("active"));
 
-[billInput, peopleInput].forEach(el => {
-  el.addEventListener('input', compute);
-});
+    
+    const v = parseFloat(e.target.value);
+    if (e.target.value !== "" && v < 0) {
+        // negative tip not allowed
+        customTipInput.classList.add("error");
+        tipPercentage = 0;
+    } else {
+        customTipInput.classList.remove("error");
+        tipPercentage = parseFloat(e.target.value) || 0;
+    }
 
-resetBtn.addEventListener('click', () => {
-  billInput.value = '';
-  customTip.value = '';
-  peopleInput.value = 1;
-  selectedTip = 0;
-  clearSelection();
-  tipAmountEl.textContent = '$0.00';
-  totalAmountEl.textContent = '$0.00';
-  validatePeople();
-});
+    calculateTip();
+    toggleResetButton();
+}
 
-// initial compute to set defaults
-compute();
+
+function calculateTip() {
+    // Block calculation if any input has an error class or invalid values
+    if (billInput.classList.contains("error") || peopleInput.classList.contains("error") || customTipInput.classList.contains("error")) return;
+    if (billValue <= 0 || numberOfPeople <= 0 || tipPercentage < 0) {
+        return;
+    }
+
+    
+    const tipAmount = (billValue * (tipPercentage / 100)) / numberOfPeople;
+
+   
+    const totalAmount = billValue / numberOfPeople + tipAmount;
+
+   
+    tipAmountDisplay.textContent = `$${tipAmount.toFixed(2)}`;
+    totalAmountDisplay.textContent = `$${totalAmount.toFixed(2)}`;
+}
+
+
+function handleReset() {
+    
+    billValue = 0;
+    tipPercentage = 0;
+    numberOfPeople = 0;
+
+    
+    billInput.value = "";
+    peopleInput.value = "";
+    customTipInput.value = "";
+
+    
+    tipButtons.forEach((btn) => btn.classList.remove("active"));
+
+    
+    peopleInput.classList.remove("error");
+    peopleError.classList.remove("show");
+
+   
+    tipAmountDisplay.textContent = "$0.00";
+    totalAmountDisplay.textContent = "$0.00";
+
+    
+    resetBtn.disabled = true;
+}
+
+
+function toggleResetButton() {
+    if (billValue > 0 || numberOfPeople > 0 || tipPercentage > 0) {
+        resetBtn.disabled = false;
+    } else {
+        resetBtn.disabled = true;
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", init);

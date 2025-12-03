@@ -1,13 +1,343 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-@import "tailwindcss";
+/* Reset and Base Styles */
 
-
-
-@theme {
-  --font-sans: 'Space Mono', monospace;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Or apply it globally */
+:root {
+    /* Primary */
+    --green-400: hsl(172, 67%, 45%);
+    --green-hover: hsl(172, 67%, 55%);
+    /* Neutral */
+    --green-900: hsl(183, 100%, 15%);
+    --grey-500: hsl(186, 14%, 43%);
+    --grey-400: hsl(184, 14%, 56%);
+    --grey-200: hsl(185, 41%, 84%);
+    --grey-50: hsl(189, 47%, 97%);
+    --white: hsl(0, 100%, 100%);
+    --error: hsl(15, 85%, 60%);
+}
+
 body {
-  font-family: var(--font-sans);
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    background-color: var(--grey-200);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+}
+
+/* Container */
+
+.container {
+    width: 100%;
+    max-width: 920px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.logo {
+    margin-bottom: 2rem;
+}
+
+.logo img {
+    display: block;
+}
+
+/* Calculator Card */
+
+.calculator {
+    background-color: var(--white);
+    border-radius: 25px;
+    padding: 2rem;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Section */
+
+.input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+label {
+    color: var(--grey-500);
+    font-size: 0.875rem;
+    display: block;
+}
+
+.error-message {
+    color: var(--error);
+    font-size: 0.875rem;
+    display: none;
+}
+
+.error-message.show {
+    display: block;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1.25rem;
+    pointer-events: none;
+}
+
+input[type="number"] {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--green-900);
+    background-color: var(--grey-50);
+    border: 2px solid transparent;
+    border-radius: 5px;
+    padding: 0.5rem 1.25rem;
+    width: 100%;
+    text-align: right;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--green-400);
+}
+
+input[type="number"]:hover {
+    border-color: var(--green-400);
+}
+
+input[type="number"].error {
+    border-color: var(--error);
+}
+
+input[type="number"]::placeholder {
+    color: var(--grey-400);
+}
+
+/* Remove spinner arrows */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Tip Selection */
+
+.tip-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tip-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.tip-btn {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--white);
+    background-color: var(--green-900);
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tip-btn:hover {
+    background-color: var(--green-hover);
+    color: var(--green-900);
+}
+
+.tip-btn.active {
+    background-color: var(--green-400);
+    color: var(--green-900);
+}
+
+#custom-tip {
+    font-size: 24px;
+    padding: 0.5rem 1rem;
+}
+
+#custom-tip::placeholder {
+    color: var(--grey-400);
+    text-align: center;
+}
+
+/* Output Section */
+
+.output-section {
+    background-color: var(--green-900);
+    border-radius: 15px;
+    padding: 2.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.results {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.result-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.label-text {
+    color: var(--white);
+    font-size: 0.875rem;
+}
+
+.label-subtext {
+    color: var(--grey-500);
+    font-size: 0.75rem;
+}
+
+.result-value {
+    font-size: 3rem;
+    color: var(--green-400);
+    line-height: 1;
+}
+
+/* Reset Button */
+
+.reset-btn {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--green-900);
+    background-color: var(--green-400);
+    border: none;
+    border-radius: 5px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+    text-transform: uppercase;
+}
+
+.reset-btn:hover:not(:disabled) {
+    background-color: var(--green-hover);
+}
+
+.reset-btn:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+/* Attribution */
+
+.attribution {
+    font-size: 11px;
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--grey-500);
+}
+
+.attribution a {
+    color: var(--green-900);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.attribution a:hover {
+    color: var(--green-400);
+}
+
+/* Responsive Design */
+
+@media screen and (max-width: 768px) {
+    body {
+        padding: 0;
+        justify-content: flex-start;
+    }
+    .container {
+        gap: 2rem;
+    }
+    .logo {
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+    }
+    .calculator {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        border-radius: 25px 25px 0 0;
+        padding: 2rem 1.5rem;
+    }
+    .tip-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .result-value {
+        font-size: 2rem;
+    }
+    .output-section {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+    .reset-btn {
+        margin-top: 1.5rem;
+    }
+}
+
+@media screen and (max-width: 375px) {
+    .calculator {
+        padding: 2rem 1.25rem;
+    }
+    .result-value {
+        font-size: 1.75rem;
+    }
+    .tip-btn {
+        font-size: 1.25rem;
+    }
+    #custom-tip {
+        font-size: 1.25rem;
+    }
 }

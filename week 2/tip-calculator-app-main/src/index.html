@@ -4,70 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
-  <link rel="stylesheet" href="./output.css">
-  <title>Frontend Mentor | Tip calculator app</title>
+    <link rel="stylesheet" href="./input.css">
+  <title>Tip calculator app</title>
 
 </head>
-<body class="bg-[#cfecec] min-h-screen flex items-start justify-center">
+<body>
 
-  <main class="mt-24">
-    <h1 class="text-center text-2xl tracking-[0.4em] text-teal-800 mb-6 font-semibold">SPLI<br>TTER</h1>
 
-    <section class="text-xl bg-white rounded-2xl shadow-lg p-10 flex md:flex-row flex-col gap-6  ">
-     
-      <div class="w-full md:w-1/2">
-        <label class="block text-base font-semibold text-gray-500 mb-2">Bill</label>
-        <div class="flex items-center bg-gray-100 rounded-md mb-6">
-          <span class="px-3 text-gray-400 text-2xl">$</span>
-          <input id="bill-input" type="number" min="0" step="0.01" placeholder="0.00" class="text-2xl w-full bg-transparent py-3 pr-3 outline-none font-bold text-right text-teal-900" />
+    <main class="container">
+        <div class="logo">
+            <img src="./images/logo.svg" alt="SPLITTER" />
         </div>
 
-        <p class="text-base font-semibold text-gray-500 mb-2">Select Tip %</p>
-        <div id="tip-buttons" class="grid grid-cols-3 gap-3 mb-6">
-          <button class="tip-btn bg-teal-900 text-white py-2 rounded-md font-semibold" data-percent="5">5%</button>
-          <button class="tip-btn bg-teal-900 text-white py-2 rounded-md font-semibold" data-percent="10">10%</button>
-          <button class="tip-btn bg-teal-900 text-white py-2 rounded-md font-semibold" data-percent="15">15%</button>
-          <button class="tip-btn bg-teal-900 text-white py-2 rounded-md font-semibold" data-percent="25">25%</button>
-          <button class="tip-btn bg-teal-900 text-white py-2 rounded-md font-semibold" data-percent="50">50%</button>
-          <input id="custom-tip" type="number" min="0" placeholder="Custom" class="py-2 px-3 rounded-md border border-gray-200 text-right font-semibold" />
-        </div>
+        <div class="calculator">
+            <div class="input-section">
+                <!-- Bill Input -->
+                <div class="input-group">
+                    <label for="bill">Bill</label>
+                    <div class="input-wrapper">
+                        <img src="./images/icon-dollar.svg" alt="$" class="input-icon" />
+                        <input type="number" id="bill" placeholder="0" min="0" step="0.01" />
+                    </div>
+                </div>
 
-        <label class="block text-base font-semibold text-gray-500 mb-2">Number of People</label>
-        <div class="flex items-center bg-gray-100 rounded-md">
-          <span class="px-3 text-gray-200 text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="gray" viewBox="0 0 24 24" stroke-width="1.5" stroke="none" class="size-6">
-               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-            </svg>
+                <!-- Tip Selection -->
+                <div class="tip-group">
+                    <label>Select Tip %</label>
+                    <div class="tip-buttons">
+                        <button class="tip-btn" data-tip="5">5%</button>
+                        <button class="tip-btn" data-tip="10">10%</button>
+                        <button class="tip-btn" data-tip="15">15%</button>
+                        <button class="tip-btn" data-tip="25">25%</button>
+                        <button class="tip-btn" data-tip="50">50%</button>
+                        <input type="number" id="custom-tip" placeholder="Custom" min="0" step="1" />
+                    </div>
+                </div>
 
-          </span>
-          <input id="people-input" type="number" min="1" step="1" value="1" class="font-semibold w-full bg-transparent py-3 pr-3 outline-none text-right text-teal-900" />
-        </div>
-        <p id="people-error" class="text-xs text-red-600 mt-2 hidden">Number of people can't be zero</p>
-      </div>
-
-      <div class="w-full md:w-1/2 bg-teal-900 rounded-xl p-6 text-white flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <p class=" text-base font-semibold text-gray-300">Tip Amount</p>
-              <p class="text-sm text-gray-400">/ person</p>
+                <!-- Number of People -->
+                <div class="input-group">
+                    <div class="label-row">
+                        <label for="people">Number of People</label>
+                        <span class="error-message" id="people-error">Can't be zero</span>
+                    </div>
+                    <div class="input-wrapper">
+                        <img src="./images/icon-person.svg" alt="person" class="input-icon" />
+                        <input type="number" id="people" placeholder="0" min="1" step="1" />
+                    </div>
+                </div>
             </div>
-            <div id="tip-amount" class="text-4xl font-bold">$0.00</div>
-          </div>
 
-          <div class="flex items-center justify-between">
-            <div>
-              <p class=" text-base font-semibold text-gray-300">Total</p>
-              <p class="text-sm text-gray-400">/ person</p>
+            <!-- Output Section -->
+            <div class="output-section">
+                <div class="results">
+                    <div class="result-row">
+                        <div class="result-label">
+                            <span class="label-text">Tip Amount</span>
+                            <span class="label-subtext">/ person</span>
+                        </div>
+                        <div class="result-value" id="tip-amount">$0.00</div>
+                    </div>
+
+                    <div class="result-row">
+                        <div class="result-label">
+                            <span class="label-text">Total</span>
+                            <span class="label-subtext">/ person</span>
+                        </div>
+                        <div class="result-value" id="total-amount">$0.00</div>
+                    </div>
+                </div>
+
+                <button class="reset-btn" id="reset-btn" disabled>RESET</button>
             </div>
-            <div id="total-amount" class="text-4xl font-bold">$0.00</div>
-          </div>
         </div>
+    </main>
 
-        <button id="reset-btn" class="mt-6 bg-[#21d4b8] text-teal-900 font-bold py-3 rounded-md">RESET</button>
-      </div>
-    </section>
-  </main>
 
   <script src="./script.js"></script>
 </body>
