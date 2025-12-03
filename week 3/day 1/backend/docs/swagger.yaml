@@ -1,0 +1,236 @@
+openapi: 3.0.0
+info:
+  title: Task Manager API
+  description: A simple Task Manager REST API built with Express.js
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+servers:
+  - url: http://localhost:3000
+    description: Development server
+tags:
+  - name: Tasks
+    description: Task management operations
+  - name: Statistics
+    description: Task statistics operations
+paths:
+  /api/stats:
+    get:
+      tags: [Statistics]
+      summary: Get task statistics
+      responses:
+        200:
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Stats'
+                  message:
+                    type: string
+                    example: "Statistics retrieved successfully"
+  /api/tasks:
+    get:
+      tags: [Tasks]
+      summary: Get all tasks
+      parameters:
+        - name: title
+          in: query
+          description: Filter tasks by title
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of tasks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  message:
+                    type: string
+                    example: "Tasks retrieved successfully"
+    post:
+      tags: [Tasks]
+      summary: Create a new task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        201:
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Task'
+                  message:
+                    type: string
+                    example: "Task created successfully"
+        400:
+          description: Bad request - Validation failed
+  /api/tasks/{id}:
+    get:
+      tags: [Tasks]
+      summary: Get a task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Task retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Task'
+                  message:
+                    type: string
+                    example: "Task retrieved successfully"
+        404:
+          description: Task not found
+    put:
+      tags: [Tasks]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        200:
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Task'
+                  message:
+                    type: string
+                    example: "Task updated successfully"
+        404:
+          description: Task not found
+    delete:
+      tags: [Tasks]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Task deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Task'
+                  message:
+                    type: string
+                    example: "Task deleted successfully"
+        404:
+          description: Task not found
+components:
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - completed
+      properties:
+        id:
+          type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          example: "Learn Express.js"
+        completed:
+          type: boolean
+          example: false
+    TaskInput:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          example: "New Task"
+          minLength: 1
+        completed:
+          type: boolean
+          example: false
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Updated Task Title"
+          minLength: 1
+        completed:
+          type: boolean
+          example: true
+    Stats:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 10
+        completed:
+          type: integer
+          example: 3
+        pending:
+          type: integer
+          example: 7
+        completionRate:
+          type: string
+          example: "30.00"
