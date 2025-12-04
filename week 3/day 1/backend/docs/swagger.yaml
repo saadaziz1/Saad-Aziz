@@ -7,8 +7,8 @@ info:
     name: API Support
     email: support@example.com
 servers:
-  - url: http://localhost:3000
-    description: Development server
+  - url: /
+    description: Auto-detect server
 tags:
   - name: Tasks
     description: Task management operations
