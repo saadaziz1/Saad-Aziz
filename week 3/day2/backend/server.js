@@ -11,7 +11,11 @@ const swaggerSpec = require("./docs/swagger");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: "GET,POST,PUT,DELETE,OPTIONS",
+  allowedHeaders: "Content-Type,Authorization",
+}));
 app.use(express.json());
 
 // Connect to DB
@@ -31,15 +35,15 @@ app.get("/api-docs", (req, res) => {
   res.sendFile(path.join(__dirname, "docs", "swagger.html"));
 });
 
-// ---------------------------
+
 // API Routes
-// ---------------------------
+
 app.use("/api/users", require("./routes/authRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));
 
-// ---------------------------
+
 // Root route
-// ---------------------------
+
 app.get("/", (req, res) => {
   res.json({
     success: true,

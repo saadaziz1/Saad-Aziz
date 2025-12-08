@@ -1,3 +1,23 @@
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+const closeMenu = document.getElementById('closeMenu');
+const overlay = document.getElementById('overlay');
+const mobileNavLinks = mobileMenu.querySelectorAll('a');
+
+hamburger.addEventListener('click', () => {
+  mobileMenu.classList.remove('translate-x-full');
+  overlay.classList.remove('hidden');
+});
+
+const closeMenuFn = () => {
+  mobileMenu.classList.add('translate-x-full');
+  overlay.classList.add('hidden');
+};
+
+closeMenu.addEventListener('click', closeMenuFn);
+overlay.addEventListener('click', closeMenuFn);
+mobileNavLinks.forEach(link => link.addEventListener('click', closeMenuFn));
+
 const navItems = document.querySelectorAll(".nav-item");
 const underline = document.getElementById("nav-underline");
 
@@ -13,31 +33,4 @@ navItems.forEach(item => {
     underline.style.width = (rect.width+14.7031) + "px";
     underline.style.transform = `translateX(${rect.left - parentRect.left}px)`;
   });
-});
-
-
-const hamburger = document.getElementById('hamburger');
-const mobileMenu = document.getElementById('mobile-menu');
-let menuOpen = false;
-
-hamburger.addEventListener('click', () => {
-  menuOpen = !menuOpen;
-
-  if(menuOpen) {
-    // slide menu
-    mobileMenu.style.maxHeight = mobileMenu.scrollHeight + "px";
-
-    // transform hamburger into X
-    hamburger.children[0].style.transform = "rotate(45deg) translate(7px, 5px)";
-    hamburger.children[1].style.opacity = "0";
-    hamburger.children[2].style.transform = "rotate(-45deg) translate(7px, -5px)";
-  } else {
-    // collapse menu
-    mobileMenu.style.maxHeight = "0px";
-
-    // reset hamburger
-    hamburger.children[0].style.transform = "rotate(0deg) translate(0, 0)";
-    hamburger.children[1].style.opacity = "1";
-    hamburger.children[2].style.transform = "rotate(0deg) translate(0, 0)";
-  }
 });
