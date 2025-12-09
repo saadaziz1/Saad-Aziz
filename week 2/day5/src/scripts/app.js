@@ -223,9 +223,9 @@ class QuizApp {
   <div class="hidden md:flex gap-8 items-center">
     <nav>
       <ul class="flex gap-9 items-center font-medium text-sm">
-        <li><a href="#" onclick="app.navigateTo('landing')">Home</a></li>
-        ${this.currentUser ? '<li><a href="" onclick="app.navigateTo(\'quizzes\')">Quizzes</a></li>' : ''}
-        ${this.currentUser ? '<li><a href="" onclick="app.navigateTo(\'profile\')">Profile</a></li>' : ''}
+        <li><a href="javascript:void(0)" onclick="app.navigateTo('landing')">Home</a></li>
+        ${this.currentUser ? '<li><a href="javascript:void(0)" onclick="app.navigateTo(\'quizzes\')">Quizzes</a></li>' : ''}
+        ${this.currentUser ? '<li><a href="javascript:void(0)" onclick="app.navigateTo(\'profile\')">Profile</a></li>' : ''}
       </ul>
     </nav>
 
@@ -294,9 +294,9 @@ fill="#121417"
       
       <nav class="mb-8">
         <ul class="space-y-6">
-          <li><a href="#" onclick="app.navigateTo('landing')" class="text-lg font-medium">Home</a></li>
-          ${this.currentUser ? '<li><a href="#" onclick="app.navigateTo(\'quizzes\')" class="text-lg font-medium">Quizzes</a></li>' : ''}
-          ${this.currentUser ? '<li><a href="#" onclick="app.navigateTo(\'profile\')" class="text-lg font-medium">Profile</a></li>' : ''}
+          <li><a href="javascript:void(0)" onclick="app.navigateTo('landing')" class="text-lg font-medium">Home</a></li>
+          ${this.currentUser ? '<li><a href="javascript:void(0)" onclick="app.navigateTo(\'quizzes\')" class="text-lg font-medium">Quizzes</a></li>' : ''}
+          ${this.currentUser ? '<li><a href="javascript:void(0)" onclick="app.navigateTo(\'profile\')" class="text-lg font-medium">Profile</a></li>' : ''}
         </ul>
       </nav>
 

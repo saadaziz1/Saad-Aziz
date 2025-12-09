@@ -4,7 +4,7 @@ const QUIZ_DATA = [
     title: "HTML Quiz",
     category: "HTML",
     description: "Test HTML knowledge",
-    img: '../src/images/quiz/html.jpg',
+    img: './images/quiz/html.jpg',
     questions: [
       {
         question: "What does HTML stand for?",
@@ -63,7 +63,7 @@ const QUIZ_DATA = [
     title: "CSS Quiz",
     category: "CSS",
     description: "Test CSS knowledge",
-    img: '../src/images/quiz/css.webp',
+    img: './images/quiz/css.webp',
     questions: [
       {
         question: "What does CSS stand for?",
@@ -122,7 +122,7 @@ const QUIZ_DATA = [
     title: "JavaScript Quiz",
     category: "JavaScript",
     description: "Test JavaScript knowledge",
-    img: '../src/images/quiz/javascript.jpg',
+    img: './images/quiz/javascript.jpg',
     questions: [
       {
         question: "Inside which HTML element do we put JavaScript?",
@@ -181,7 +181,7 @@ const QUIZ_DATA = [
     title: "React Quiz",
     category: "React",
     description: "Test React knowledge",
-    img: '../src/images/quiz/react.jpg',
+    img: './images/quiz/react.jpg',
     questions: [
       {
         question: "What is React?",
@@ -240,7 +240,7 @@ const QUIZ_DATA = [
     title: "Node.js Quiz",
     category: "Node.js",
     description: "Test Node.js knowledge",
-    img: '../src/images/quiz/node.jpg',
+    img: './images/quiz/node.jpg',
     questions: [
       {
         question: "What is Node.js?",
@@ -302,6 +302,14 @@ const Storage = {
     const users = Storage.getUsers();
     users.push(user);
     localStorage.setItem('users', JSON.stringify(users));
+  },
+  updateUser: (updatedUser) => {
+    const users = Storage.getUsers();
+    const index = users.findIndex(u => u.id === updatedUser.id);
+    if (index !== -1) {
+      users[index] = updatedUser;
+      localStorage.setItem('users', JSON.stringify(users));
+    }
   },
   findUser: (email, password) => {
     const users = Storage.getUsers();

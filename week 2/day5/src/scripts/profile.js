@@ -56,6 +56,24 @@ QuizApp.prototype.switchTab = function(tab) {
   this.renderProfilePage();
 };
 
+QuizApp.prototype.toggleEditMode = function() {
+  if (this.editMode) {
+    const name = document.getElementById('editName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const bio = document.getElementById('editBio').value.trim();
+    
+    if (name && email) {
+      this.currentUser.name = name;
+      this.currentUser.email = email;
+      this.currentUser.bio = bio;
+      this.saveUser(this.currentUser);
+      Storage.updateUser(this.currentUser);
+    }
+  }
+  this.editMode = !this.editMode;
+  this.renderProfilePage();
+};
+
 QuizApp.prototype.getActivityTabContent = function(results) {
   const totalQuizzes = results.length;
   const totalScore = results.reduce((sum, r) => sum + r.score, 0);
@@ -125,34 +143,52 @@ QuizApp.prototype.getActivityTabContent = function(results) {
 
 QuizApp.prototype.getProfileTabContent = function() {
   const results = Storage.getUserResults(this.currentUser.id);
+  const bio = this.currentUser.bio || 'Avid quiz taker and trivia lover. Always up for a challenge!';
   
   return `
-    <h2 class="font-bold text-[1.375rem] tracking-normal leading-7 text-primary text-left mt-5 mb-3 mx-4">
-      Personal Information
-    </h2>
+    <div class="flex justify-between items-center mt-5 mb-3 mx-4">
+      <h2 class="font-bold text-[1.375rem] tracking-normal leading-7 text-primary text-left">
+        Personal Information
+      </h2>
+      <button onclick="app.toggleEditMode()" class="bg-[#0D78F2] text-white px-4 py-2 rounded-lg text-sm font-semibold">
+        ${this.editMode ? 'Save' : 'Edit Profile'}
+      </button>
+    </div>
 
     <div class="px-4">
       <div class="grid grid-cols-1 md:grid-cols-[186px_1fr] gap-6">
         <div class="border-t border-[#E5E8EB] py-5 md:w-46.5">
           <p class="text-[#61738A] text-sm leading-5 font-normal">Name</p>
-          <p class="text-primary text-sm leading-5 font-normal mt-1">
-            ${this.currentUser.name}
-          </p>
+          ${this.editMode ? `
+            <input type="text" id="editName" value="${this.currentUser.name}" class="text-primary text-sm leading-5 font-normal mt-1 border border-[#DBE0E5] rounded px-2 py-1 w-full" />
+          ` : `
+            <p class="text-primary text-sm leading-5 font-normal mt-1">
+              ${this.currentUser.name}
+            </p>
+          `}
         </div>
 
         <div class="border-t border-[#E5E8EB] py-5 w-full">
           <p class="text-[#61738A] text-sm leading-5 font-normal">Email</p>
-          <p class="text-primary text-sm leading-5 font-normal mt-1">
-            ${this.currentUser.email}
-          </p>
+          ${this.editMode ? `
+            <input type="email" id="editEmail" value="${this.currentUser.email}" class="text-primary text-sm leading-5 font-normal mt-1 border border-[#DBE0E5] rounded px-2 py-1 w-full" />
+          ` : `
+            <p class="text-primary text-sm leading-5 font-normal mt-1">
+              ${this.currentUser.email}
+            </p>
+          `}
         </div>
       </div>
 
-      <div class="border-t border-[#E5E8EB] py-5 mt-6 md:w-46.5">
+      <div class="border-t border-[#E5E8EB] py-5 mt-6">
         <p class="text-[#61738A] text-sm leading-5 font-normal">Bio</p>
-        <p class="text-primary text-sm leading-5 font-normal mt-1">
-          Avid quiz taker and trivia lover. Always up for a challenge!
-        </p>
+        ${this.editMode ? `
+          <textarea id="editBio" class="text-primary text-sm leading-5 font-normal mt-1 border border-[#DBE0E5] rounded px-2 py-1 w-full" rows="3">${bio}</textarea>
+        ` : `
+          <p class="text-primary text-sm leading-5 font-normal mt-1">
+            ${bio}
+          </p>
+        `}
       </div>
     </div>
 
