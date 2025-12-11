@@ -1,16 +1,19 @@
-import React, { useState, useRef } from "react";
-import { Box, Paper, Typography, TextField, Button, Stack, Chip, MenuItem } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { Box, Paper, Typography, TextField, Button, Stack, Chip, CircularProgress, MenuItem } from "@mui/material";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import { dialogFadeInScale } from "../../animations/dialogAnimations";
 import { showSuccessNotification } from "../../animations/notificationAnimations";
 import { useMembers } from "../../hooks/api/useMembers";
 import { MEMBER_ROLES } from "../../constants";
 
-export default function CreateMember() {
+export default function EditMember() {
   const navigate = useNavigate();
-  const { createMember } = useMembers();
+  const { id } = useParams();
+  const { getMemberById, editMember, loading } = useMembers();
   const paperRef = useRef();
+  const member = getMemberById(id);
+  
   const [formData, setFormData] = useState({
     name: "",
     role: "",
@@ -19,6 +22,18 @@ export default function CreateMember() {
     phone: ""
   });
 
+  useEffect(() => {
+    if (member) {
+      setFormData({
+        name: member.name || "",
+        role: member.role || "",
+        skills: member.skills?.join(', ') || "",
+        email: member.email || "",
+        phone: member.phone || ""
+      });
+    }
+  }, [member]);
+
   useGSAP(() => {
     dialogFadeInScale(paperRef.current, { duration: 0.6 });
   }, []);
@@ -26,20 +41,35 @@ export default function CreateMember() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createMember({
+      await editMember(id, {
         ...formData,
         skills: formData.skills.split(',').map(s => s.trim())
       });
-      showSuccessNotification('Member added successfully!');
-      setTimeout(() => {
-        navigate('/app/members');
-      }, 1000);
+      showSuccessNotification('Member updated successfully!');
+      setTimeout(() => navigate('/app/members'), 1000);
     } catch (error) {
-      console.error('Error creating member:', error);
+      console.error('Error updating member:', error);
     }
   };
 
   const skillsArray = formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(s => s) : [];
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!member) {
+    return (
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <Typography variant="h5">Member not found</Typography>
+        <Button onClick={() => navigate('/app/members')} sx={{ mt: 2 }}>Back to Members</Button>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: { xs: 2, sm: 4 }, backgroundColor: "background.default", minHeight: "100vh" }}>
@@ -54,10 +84,10 @@ export default function CreateMember() {
         }}
       >
         <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-          Add Team Member
+          Edit Team Member
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Add a new member to your team
+          Update member information
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit}>
@@ -93,7 +123,6 @@ export default function CreateMember() {
                 label="Skills (comma separated)"
                 value={formData.skills}
                 onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                placeholder="React, Node.js, MongoDB"
                 required
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
@@ -160,7 +189,7 @@ export default function CreateMember() {
                   }
                 }}
               >
-                Add Member
+                Update Member
               </Button>
             </Stack>
           </Stack>

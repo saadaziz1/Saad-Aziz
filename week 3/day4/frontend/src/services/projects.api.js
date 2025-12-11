@@ -1,10 +1,10 @@
-import axiosInstance from '../config/axios';
+import axiosInstance from './config/axios';
 
 export const projectsAPI = {
-  getAll: () => axiosInstance.get('/projects', { params: { _t: Date.now() } }),
-  getById: (id) => axiosInstance.get(`/projects/${id}`, { params: { _t: Date.now() } }),
-  create: (data) => axiosInstance.post('/projects', data),
-  update: (id, data) => axiosInstance.put(`/projects/${id}`, data),
-  delete: (id) => axiosInstance.delete(`/projects/${id}`),
-  getStats: () => axiosInstance.get('/projects/stats', { params: { _t: Date.now() } }),
+  getAll: () => axiosInstance.get('/api/projects'),
+  getById: (id) => axiosInstance.get(`/api/projects/${id}`),
+  create: (data) => axiosInstance.post('/api/projects', data),
+  update: (id, data) => axiosInstance.put(`/api/projects/${id}`, data),
+  delete: (id) => axiosInstance.delete(`/api/projects/${id}`),
+  getStats: () => axiosInstance.get('/api/stats'),
 };

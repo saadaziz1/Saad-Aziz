@@ -1,35 +1,42 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import Shell from './components/Layout/Shell';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/projects/Projects';
-import Members from './pages/member/Members';
-import ProtectedRoute from './components/ProtectedRoute';
-import { useAuthStore } from './stores/authStore';
 import CreateProject from './pages/projects/CreateProject';
 import ProjectDetails from './pages/projects/ProjectDetails';
+import Members from './pages/member/Members';
 import CreateMember from './pages/member/CreateMember';
+import EditMember from './pages/member/EditMember';
+import ThemeLayout from './components/Layout/ThemeLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 
 function App() {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
   return (
-    <BrowserRouter>
-      {isAuthenticated && <Navbar />}
+   <ThemeLayout>
+     <div style={{maxWidth: "1500px", margin: "0 auto"}}>
+     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Register />} />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-        <Route path="/projects/create" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
-        <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
-        <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
-        <Route path="/members/create" element={<ProtectedRoute><CreateMember /></ProtectedRoute>} />
+        <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         
+        <Route path="/*" element={<ProtectedRoute><Shell /></ProtectedRoute>}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="projects/create" element={<CreateProject />} />
+          <Route path="projects/:id" element={<ProjectDetails />} />
+          <Route path="members" element={<Members />} />
+          <Route path="members/create" element={<CreateMember />} />
+          <Route path="members/edit/:id" element={<EditMember />} />
+        </Route>
       </Routes>
     </BrowserRouter>
+    </div>
+   </ThemeLayout>
   );
 }
 

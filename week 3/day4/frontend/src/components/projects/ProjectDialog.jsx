@@ -1,99 +1,123 @@
-import React, { useState, useRef } from "react";
-import { Box, Paper, Typography, TextField, Button, Stack, MenuItem, Chip } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { useGSAP } from "@gsap/react";
-import { dialogFadeInScale } from "../../animations/dialogAnimations";
-import { useMembers } from "../../hooks/api/useMembers";
-import { useProjects } from "../../hooks/api/useProjects";
+import React, { useRef, useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Box, Chip, Stack, Typography } from '@mui/material';
+import { useGSAP } from '@gsap/react';
+import { dialogFadeInScale } from '../../animations/dialogAnimations';
+import { useMembers } from '../../hooks/api/useMembers';
 
-export default function CreateProject() {
-  const navigate = useNavigate();
-  const { members } = useMembers();
-  const { createProject } = useProjects();
-  const paperRef = useRef();
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    techStack: "",
-    status: "active",
+export default function ProjectDialog({ open, onClose, project, onSave }) {
+  const { members, fetchMembers } = useMembers();
+  const [formData, setFormData] = React.useState({
+    title: '',
+    description: '',
+    techStack: '',
+    status: 'active',
     assignedMembers: []
   });
+  const dialogRef = useRef();
+
+  useEffect(() => {
+    if (open && members.length === 0) {
+      fetchMembers();
+    }
+  }, [open, members.length, fetchMembers]);
+
+  useEffect(() => {
+    if (project) {
+      setFormData({
+        title: project.title || project.name || '',
+        description: project.description || '',
+        techStack: project.techStack?.join(', ') || '',
+        status: project.status || 'active',
+        assignedMembers: project.members ? project.members.map(m => typeof m === 'object' ? m._id : m) : []
+      });
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        techStack: '',
+        status: 'active',
+        assignedMembers: []
+      });
+    }
+  }, [project, open]);
 
   useGSAP(() => {
-    dialogFadeInScale(paperRef.current, { duration: 0.6 });
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await createProject({
-        title: formData.title,
-        description: formData.description,
-        techStack: formData.techStack.split(',').map(s => s.trim()).filter(s => s),
-        status: formData.status,
-        members: formData.assignedMembers
-      });
-      navigate('/app/projects');
-    } catch (error) {
-      console.error('Error creating project:', error);
+    if (open && dialogRef.current) {
+      dialogFadeInScale(dialogRef.current);
     }
+  }, [open]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      techStack: formData.techStack.split(',').map(s => s.trim()).filter(s => s),
+      status: formData.status,
+      members: formData.assignedMembers
+    };
+    console.log(payload)
+    onSave(payload);
+    onClose();
   };
 
-  return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, backgroundColor: "background.default", minHeight: "100vh" }}>
-      <Paper 
-        ref={paperRef}
-        sx={{ 
-          p: { xs: 3, md: 5 }, 
-          borderRadius: 4, 
-          maxWidth: 800, 
-          mx: "auto",
-          boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
-        }}
-      >
-        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-          Create New Project
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Add a new project to your portfolio
-        </Typography>
+  const selectedMembers = members.filter(member => 
+    formData.assignedMembers.includes(member._id)
+  );
 
-        <Box component="form" onSubmit={handleSubmit}>
-          <Stack spacing={3}>
+  return (
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        }
+      }}
+    >
+      <Box ref={dialogRef}>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
+          {project ? 'Edit Project' : 'Add New Project'}
+        </DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
             <TextField
               fullWidth
               label="Project Title"
+              margin="normal"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
-            
             <TextField
               fullWidth
               label="Description"
+              margin="normal"
               multiline
-              rows={4}
+              rows={3}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               required
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
-            
             <TextField
               fullWidth
               label="Tech Stack (comma separated)"
+              margin="normal"
               value={formData.techStack}
               onChange={(e) => setFormData({ ...formData, techStack: e.target.value })}
-              placeholder="React, Node.js, MongoDB"
               required
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
-            
             <TextField
               fullWidth
               select
               label="Status"
+              margin="normal"
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
@@ -105,7 +129,8 @@ export default function CreateProject() {
             <TextField
               fullWidth
               select
-              label="Assign Members (optional)"
+              label="Assign Members (Optional)"
+              margin="normal"
               
               SelectProps={{ 
                 multiple: true,
@@ -173,33 +198,29 @@ export default function CreateProject() {
               ))}
             </TextField>
 
-            <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 4 }}>
-              <Button 
-                variant="outlined" 
-                onClick={() => navigate('/app/projects')}
-                sx={{ borderRadius: 2, px: 4 }}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                variant="contained"
-                sx={{ 
-                  borderRadius: 2, 
-                  px: 4,
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
-                  }
-                }}
-              >
-                Create Project
-              </Button>
-            </Stack>
-          </Stack>
-        </Box>
-      </Paper>
-    </Box>
+
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 2 }}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            sx={{ 
+              borderRadius: 2,
+              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
+              }
+            }}
+          >
+            {project ? 'Update' : 'Create'} Project
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
   );
 }

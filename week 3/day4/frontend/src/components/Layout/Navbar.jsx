@@ -2,60 +2,109 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton,
-  InputBase,
+  Button,
   Box,
-  Badge,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import { styled, alpha } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
 
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: theme.spacing(2),
-  width: "100%",
-  maxWidth: 400,
-}));
+import DarkLightToggle from "../ui/DarkLightTheme";
+import { useState } from "react";
+import { NavLinks } from "../../constants";
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  width: "100%",
-  padding: theme.spacing(1, 2),
-}));
+export default function Navbar() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const theme = useTheme();
 
-export default function Navbar({ onHamburgerClick }) {
+  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  const navigate = useNavigate();
+
+  const toggleDrawer = (open) => {
+    setDrawerOpen(open);
+  };
+
+  const { isAuthenticated, logout } = useAuthStore();
+
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
-    <AppBar position="static" sx={{ width: "100%" }}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between", px: 3 }}>
-        {/* Left: Title */}
-        <Typography variant="h4" sx={{ fontWeight: 800 }}>
-          Project<span style={{ color: "#00C49A" }}>Hub</span>
-        </Typography>
+    <>
+      <AppBar position="sticky" color="primary">
+        <Toolbar>
+          <Typography
+            variant="h6"
+            sx={{ flexGrow: 1, cursor: "pointer" }}
+            onClick={() => navigate("/dashboard")}
+          >
+            Project <span style={{ color: "#00C49A" }}>Manager</span>
+          </Typography>
+          {!isAuthenticated && (
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </Button>
+          )}
 
-        {/* Right: Search + Icons */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Search>
-            <StyledInputBase placeholder="Search…" inputProps={{ "aria-label": "search" }} />
-          </Search>
+          {isAuthenticated && (
+            <Box sx={{ display: "flex" }}>
+              <DarkLightToggle />
+              {!isMobile && (
+                <Button color="error" variant="outlined" onClick={handleLogout}>
+                  Logout
+                </Button>
+              )}
 
-          <IconButton size="large" color="inherit">
-            <Badge badgeContent={3} color="error">
-              <NotificationsIcon sx={{ fontSize: 32 }} />
-            </Badge>
-          </IconButton>
+              {isMobile && (
+                <IconButton
+                  size="large"
+                  color="inherit"
+                  onClick={()=>toggleDrawer(true)}
+                >
+                  <MenuIcon sx={{ fontSize: 32 }} />
+                </IconButton>
+              )}
+            </Box>
+          )}
+        </Toolbar>
+      </AppBar>
 
-          <IconButton size="large" color="inherit" onClick={onHamburgerClick}>
-            <MenuIcon sx={{ fontSize: 32 }} />
-          </IconButton>
+      <Drawer anchor="right" open={drawerOpen} onClose={()=>toggleDrawer(false)}>
+        <Box
+          role="presentation"
+          sx={{ width: 200, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2 }}
+          onClick={()=>toggleDrawer(false)}
+        >
+          <List>
+            {NavLinks.map((link,index) => (
+              <ListItem key={index}>
+                <ListItemButton onClick={()=>navigate(link.LINK)} >
+                  <ListItemText primary={link.TEXT} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+            
+          </List>
+          <Button color="error" variant="outlined" onClick={handleLogout}>
+                  Logout
+                </Button>
         </Box>
-      </Toolbar>
-    </AppBar>
+      </Drawer>
+    </>
   );
 }

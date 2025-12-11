@@ -1,46 +1,53 @@
 // src/components/layout/Sidebar.jsx
 import React from "react";
-import { Drawer, Box, Typography, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Drawer, Box, Typography, List, ListItemButton, ListItemIcon, ListItemText, useTheme, useMediaQuery } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import GroupIcon from "@mui/icons-material/Group";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import { useNavigate } from "react-router-dom";
 
-export default function Sidebar({ open, onClose }) {
+export default function Sidebar() {
   const navigate = useNavigate();
+  const theme = useTheme()
+
+  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      PaperProps={{ sx: { width: 280, bgcolor: "white", border: "none", px: 2, py: 3 } }}
+    <>
+    {!isMobile && <Drawer
+     variant="permanent"
+      anchor="left"
+      sx={{
+        width: { lg: 240, xl: 280 },
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: { lg: 240, xl: 280 },
+          boxSizing: 'border-box',
+          position: 'relative',
+          backgroundColor: theme.palette.mode === 'light' ? '#f8fafc' : 'background.paper',
+          borderRight: `1px solid ${theme.palette.divider}`,
+        },
+      }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 5, px: 2, borderRadius: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 800 }}>
-          Project<span style={{ color: "#00C49A" }}>Hub</span>
-        </Typography>
-      </Box>
-
-      <List disablePadding>
-        <ListItemButton onClick={() => { navigate("/dashboard"); onClose(); }}>
+      <List sx={{ pt: 2 }}>
+        <ListItemButton onClick={() => { navigate("/dashboard"); }}>
           <ListItemIcon><DashboardIcon /></ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItemButton>
-        <ListItemButton onClick={() => { navigate("/projects"); onClose(); }}>
+        <ListItemButton onClick={() => { navigate("/projects");  }}>
           <ListItemIcon><FolderIcon /></ListItemIcon>
           <ListItemText primary="Projects" />
         </ListItemButton>
-        <ListItemButton onClick={() => { navigate("/projects/create"); onClose(); }}>
+        <ListItemButton onClick={() => { navigate("/projects/create");  }}>
           <ListItemIcon><AddBoxIcon /></ListItemIcon>
           <ListItemText primary="Create Project" />
         </ListItemButton>
-        <ListItemButton onClick={() => { navigate("/members"); onClose(); }}>
+        <ListItemButton onClick={() => { navigate("/members"); }}>
           <ListItemIcon><GroupIcon /></ListItemIcon>
           <ListItemText primary="Team Members" />
         </ListItemButton>
       </List>
-    </Drawer>
+    </Drawer>}</>
   );
 }

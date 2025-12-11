@@ -1,80 +1,90 @@
-import React, { useState, useRef } from "react";
-import { Box, Paper, Typography, TextField, Button, Stack, Chip, MenuItem } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { useGSAP } from "@gsap/react";
-import { dialogFadeInScale } from "../../animations/dialogAnimations";
-import { showSuccessNotification } from "../../animations/notificationAnimations";
-import { useMembers } from "../../hooks/api/useMembers";
-import { MEMBER_ROLES } from "../../constants";
+import React, { useRef, useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, Chip, Stack, Typography, MenuItem } from '@mui/material';
+import { useGSAP } from '@gsap/react';
+import { dialogFadeInScale } from '../../animations/dialogAnimations';
+import { MEMBER_ROLES } from '../../constants';
 
-export default function CreateMember() {
-  const navigate = useNavigate();
-  const { createMember } = useMembers();
-  const paperRef = useRef();
-  const [formData, setFormData] = useState({
-    name: "",
-    role: "",
-    skills: "",
-    email: "",
-    phone: ""
+export default function MemberDialog({ open, onClose, member, onSave }) {
+  const [formData, setFormData] = React.useState({
+    name: '',
+    role: '',
+    skills: '',
+    email: '',
+    phone: ''
   });
+  const dialogRef = useRef();
+
+  useEffect(() => {
+    if (member) {
+      setFormData({
+        name: member.name || '',
+        role: member.role || '',
+        skills: member.skills?.join(', ') || '',
+        email: member.email || '',
+        phone: member.phone || ''
+      });
+    } else {
+      setFormData({
+        name: '',
+        role: '',
+        skills: '',
+        email: '',
+        phone: ''
+      });
+    }
+  }, [member, open]);
 
   useGSAP(() => {
-    dialogFadeInScale(paperRef.current, { duration: 0.6 });
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await createMember({
-        ...formData,
-        skills: formData.skills.split(',').map(s => s.trim())
-      });
-      showSuccessNotification('Member added successfully!');
-      setTimeout(() => {
-        navigate('/app/members');
-      }, 1000);
-    } catch (error) {
-      console.error('Error creating member:', error);
+    if (open && dialogRef.current) {
+      dialogFadeInScale(dialogRef.current);
     }
+  }, [open]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const payload = {
+      ...formData,
+      skills: formData.skills.split(',').map(s => s.trim()).filter(s => s)
+    };
+    onSave(payload);
+    onClose();
   };
 
   const skillsArray = formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(s => s) : [];
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, backgroundColor: "background.default", minHeight: "100vh" }}>
-      <Paper 
-        ref={paperRef}
-        sx={{ 
-          p: { xs: 3, md: 5 }, 
-          borderRadius: 4, 
-          maxWidth: 800, 
-          mx: "auto",
-          boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
-        }}
-      >
-        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-          Add Team Member
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Add a new member to your team
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit}>
-          <Stack spacing={3}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        }
+      }}
+    >
+      <Box ref={dialogRef}>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
+          {member ? 'Edit Team Member' : 'Add New Member'}
+        </DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
             <TextField
               fullWidth
               label="Full Name"
+              margin="normal"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
-            
             <TextField
               fullWidth
               select
               label="Role / Title"
+              margin="normal"
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               required
@@ -86,14 +96,13 @@ export default function CreateMember() {
                 </MenuItem>
               ))}
             </TextField>
-            
             <Box>
               <TextField
                 fullWidth
                 label="Skills (comma separated)"
+                margin="normal"
                 value={formData.skills}
                 onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                placeholder="React, Node.js, MongoDB"
                 required
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
@@ -119,53 +128,47 @@ export default function CreateMember() {
                 </Box>
               )}
             </Box>
-            
             <TextField
               fullWidth
               label="Email"
               type="email"
+              margin="normal"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
-            
             <TextField
               fullWidth
               label="Phone"
+              margin="normal"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               required
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
-
-            <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 4 }}>
-              <Button 
-                variant="outlined" 
-                onClick={() => navigate('/app/members')}
-                sx={{ borderRadius: 2, px: 4 }}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                variant="contained"
-                sx={{ 
-                  borderRadius: 2, 
-                  px: 4,
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
-                  }
-                }}
-              >
-                Add Member
-              </Button>
-            </Stack>
-          </Stack>
-        </Box>
-      </Paper>
-    </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 2 }}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            sx={{ 
+              borderRadius: 2,
+              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
+              }
+            }}
+          >
+            {member ? 'Update' : 'Create'} Member
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
   );
 }

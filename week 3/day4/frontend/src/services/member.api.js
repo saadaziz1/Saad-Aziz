@@ -1,9 +1,9 @@
-import axiosInstance from '../config/axios';
+import axiosInstance from './config/axios';
 
 export const memberAPI = {
-  getAll: () => axiosInstance.get('/members', { params: { _t: Date.now() } }),
-  getById: (id) => axiosInstance.get(`/members/${id}`, { params: { _t: Date.now() } }),
-  create: (data) => axiosInstance.post('/members', data),
-  update: (id, data) => axiosInstance.put(`/members/${id}`, data),
-  delete: (id) => axiosInstance.delete(`/members/${id}`),
+  getAll: () => axiosInstance.get('/api/members'),
+  getById: (id) => axiosInstance.get(`/api/members/${id}`),
+  create: (data) => axiosInstance.post('/api/members', data),
+  update: (id, data) => axiosInstance.put(`/api/members/${id}`, data),
+  delete: (id) => axiosInstance.delete(`/api/members/${id}`),
 };
