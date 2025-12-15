@@ -37,12 +37,12 @@ import { useProducts } from "../../hooks/useProducts";
     const search = searchParams.get('search');
     if (search) params.search = search;
     
-    // Add categories
+    // Add categories (send as single value, not array)
     if (selectedFilters.categories.length > 0) {
-      params.category = selectedFilters.categories;
+      params.category = selectedFilters.categories[0]; // Backend expects single category
     }
     
-    // Add tags
+    // Add tags (send as array)
     if (selectedFilters.tags.length > 0) {
       params.tags = selectedFilters.tags;
     }
@@ -60,6 +60,8 @@ import { useProducts } from "../../hooks/useProducts";
     return params;
   }, [searchParams, selectedFilters, sortBy]);
 
+  console.log('Query params being sent:', queryParams);
+  console.log('Selected filters:', selectedFilters);
   const { data, isLoading, error } = useProducts(queryParams);
 
   const toggleFilter = (filterName) => {
@@ -70,6 +72,7 @@ import { useProducts } from "../../hooks/useProducts";
   };
 
   const handleFilterChange = (filterKey, value, checked) => {
+    console.log('Filter change:', { filterKey, value, checked });
     setSelectedFilters((prev) => {
       if (filterKey === 'organic') {
         return { ...prev, organic: checked };
@@ -77,15 +80,19 @@ import { useProducts } from "../../hooks/useProducts";
       
       const currentArray = prev[filterKey] || [];
       if (checked) {
-        return {
+        const newFilters = {
           ...prev,
           [filterKey]: [...currentArray, value],
         };
+        console.log('New filters after adding:', newFilters);
+        return newFilters;
       } else {
-        return {
+        const newFilters = {
           ...prev,
           [filterKey]: currentArray.filter((item) => item !== value),
         };
+        console.log('New filters after removing:', newFilters);
+        return newFilters;
       }
     });
     
@@ -139,7 +146,7 @@ import { useProducts } from "../../hooks/useProducts";
         name: product.name,
         price: `€${price}`,
         weight: firstVariant?.name || '50 g',
-        image: product.images?.[0] || '/LayoutImages/collection.jpg',
+        image: product.featuredImage || '/LayoutImages/collection.jpg',
         description: product.description,
         slug: product.slug,
       };
@@ -147,12 +154,12 @@ import { useProducts } from "../../hooks/useProducts";
   }, [data]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <HeroSection heroImg={HERO_IMAGE} />
+    <div className="min-h-screen flex flex-col">
+      <HeroSection heroImg={'./LayoutImages/products.jpg'} />
       <Breadcrumb />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-8">
+        <div className="flex flex-row gap-8 ">
           <FilterSidebar 
             filters={filters} 
             toggleFilter={toggleFilter}
@@ -160,11 +167,22 @@ import { useProducts } from "../../hooks/useProducts";
             onFilterChange={handleFilterChange}
           />
           
-          <div className="lg:w-3/4">
-            <SortDropdown sortBy={sortBy} setSortBy={handleSortChange} />
+          <div className="w-full lg:w-[840px] xl:w-[1200px]">
+           
+             <div className="flex justify-end ">
+              <SortDropdown 
+              sortBy={sortBy} 
+              setSortBy={handleSortChange}
+              filters={filters}
+              toggleFilter={toggleFilter}
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+            />
+             </div>
+           
             {isLoading && (
               <div className="text-center py-12">
-                <p className="text-gray-600">Loading products...</p>
+                <p className="">Loading products...</p>
               </div>
             )}
             {error && (

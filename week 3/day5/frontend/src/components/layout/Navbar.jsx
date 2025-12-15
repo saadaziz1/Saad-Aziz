@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { NAVLINKS } from "@/constants";
-import { MenuIcon, X } from "lucide-react";
+import { MenuIcon, Settings, X } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import LightDarkButton from "../common/LightDarkButton";
 import useAuthStore from "@/store/authStore";
@@ -14,6 +14,7 @@ const Navbar = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuthStore();
   const { data: cartData } = useCart();
@@ -129,19 +130,56 @@ const Navbar = () => {
           </div>
           {isAuthenticated() ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm">{user?.name}</span>
-              {(user?.role === 'admin' || user?.role === 'superadmin') && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => navigate('/admin')}
-                >
-                  Dashboard
-                </Button>
+              
+              {user && (
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 8C6.9 8 5.95833 7.60833 5.175 6.825C4.39167 6.04167 4 5.1 4 4C4 2.9 4.39167 1.95833 5.175 1.175C5.95833 0.391667 6.9 0 8 0C9.1 0 10.0417 0.391667 10.825 1.175C11.6083 1.95833 12 2.9 12 4C12 5.1 11.6083 6.04167 10.825 6.825C10.0417 7.60833 9.1 8 8 8ZM0 16V13.2C0 12.6333 0.146 12.1123 0.438 11.637C0.729334 11.1623 1.11667 10.8 1.6 10.55C2.63333 10.0333 3.68333 9.64567 4.75 9.387C5.81667 9.129 6.9 9 8 9C9.1 9 10.1833 9.129 11.25 9.387C12.3167 9.64567 13.3667 10.0333 14.4 10.55C14.8833 10.8 15.2707 11.1623 15.562 11.637C15.854 12.1123 16 12.6333 16 13.2V16H0ZM2 14H14V13.2C14 13.0167 13.9543 12.85 13.863 12.7C13.771 12.55 13.65 12.4333 13.5 12.35C12.6 11.9 11.6917 11.5623 10.775 11.337C9.85833 11.1123 8.93333 11 8 11C7.06667 11 6.14167 11.1123 5.225 11.337C4.30833 11.5623 3.4 11.9 2.5 12.35C2.35 12.4333 2.22933 12.55 2.138 12.7C2.046 12.85 2 13.0167 2 13.2V14ZM8 6C8.55 6 9.021 5.804 9.413 5.412C9.80433 5.02067 10 4.55 10 4C10 3.45 9.80433 2.97933 9.413 2.588C9.021 2.196 8.55 2 8 2C7.45 2 6.97933 2.196 6.588 2.588C6.196 2.97933 6 3.45 6 4C6 4.55 6.196 5.02067 6.588 5.412C6.97933 5.804 7.45 6 8 6Z" fill="currentColor"/>
+</svg>
+                  </Button>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 top-full mt-2 bg-white dark:bg-background border border-gray-300 rounded shadow-lg z-50 min-w-48">
+                      <div className="py-2">
+                        <button
+                          onClick={() => {
+                            navigate('/profile');
+                            setUserMenuOpen(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                        >
+                          Profile
+                        </button>
+                        {(user.role === 'admin' || user.role === 'superadmin') && (
+                          <button
+                            onClick={() => {
+                              navigate('/admin');
+                              setUserMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                          >
+                            Dashboard
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            logout();
+                            setUserMenuOpen(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 text-red-600"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
-              <Button variant="ghost" size="sm" onClick={logout}>
-                Logout
-              </Button>
+              
             </div>
           ) : (
             <Button
@@ -195,10 +233,10 @@ const Navbar = () => {
         <Button
           className="block lg:hidden"
           variant="ghost"
-          size="icon"
+          
           onClick={handleToggle}
         >
-          {!toggle ? <MenuIcon size={35} /> : <X />}
+          {!toggle ? <MenuIcon   /> : <X />}
         </Button>
       </div>
   </div>
@@ -218,26 +256,12 @@ const Navbar = () => {
 >
         <div className="p-6 flex flex-col gap-6">
           <div className="flex justify-end">
-            <Button variant="ghost" size="icon" onClick={handleToggle}>
-              <X />
+            <Button variant="ghost"  onClick={handleToggle}>
+              <X size={45} />
             </Button>
           </div>
-
-          <nav className="flex flex-col gap-4 font-montserrat text-sm font-medium">
-            {NAVLINKS.map((link, index) => (
-              <button
-                key={index}
-                onClick={() => handleNavClick(link.LINK)}
-                className="text-left hover:text-muted-foreground transition-colors"
-              >
-                {link.TEXT}
-              </button>
-            ))}
-            
-          </nav>
-
-          <div className="flex  gap-3 mt-6 ">
-            <div className="relative">
+<div className="flex  gap-3 mt-6 ">
+            <div className="flex border">
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -256,41 +280,35 @@ const Navbar = () => {
                   />
                 </svg>
               </Button>
-              {searchOpen && (
-                <div className="absolute right-0 top-full mt-2 bg-white border border-gray-300 rounded shadow-lg z-50">
+              
+                
                   <form onSubmit={handleSearch} className="flex items-center p-2">
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-600 w-64"
+                      className="   focus:outline-none focus:border-gray-600 "
                       autoFocus
                     />
-                    <button
-                      type="submit"
-                      className="ml-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
-                    >
-                      Search
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchOpen(false);
-                        setSearchQuery('');
-                      }}
-                      className="ml-2 px-2 py-2 text-gray-600 hover:text-gray-800"
-                    >
-                      ✕
-                    </button>
+                    
                   </form>
-                </div>
-              )}
+                
+            
+              
+
             </div>
-          {isAuthenticated() ? (
+
+
+         
+          </div>
+          
+          <div className="pb-6 flex flex-col border-b gap-2 justify-start items-start font-montserrat text-lg font-bold">
+ {isAuthenticated() ? (
             <div className="flex flex-col gap-2">
-              <span className="text-sm">{user?.name}</span>
-              {(user?.role === 'admin' || user?.role === 'superadmin') && (
+              
+              {(user?.role === 'admin' || user?.role === 'superadmin') ? (
+                <div className="flex flex-col gap-2 justify-start items-start">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -299,12 +317,52 @@ const Navbar = () => {
                     navigate('/admin');
                   }}
                 >
-                  Dashboard
+                 <Settings />
+<div className="flex flex-col ml-2 items-start justify-start">
+  <span  >Dashboard</span>
+  <span className="font-normal text-sm text-gray-400 dark:text-foreground"> welcome to the dashboard</span>
+</div>
+
+
                 </Button>
-              )}
-              <Button variant="ghost" size="sm" onClick={logout}>
-                Logout
-              </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    handleToggle();
+                    navigate('/profile');
+                  }}
+                >
+                 <svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 8C6.9 8 5.95833 7.60833 5.175 6.825C4.39167 6.04167 4 5.1 4 4C4 2.9 4.39167 1.95833 5.175 1.175C5.95833 0.391667 6.9 0 8 0C9.1 0 10.0417 0.391667 10.825 1.175C11.6083 1.95833 12 2.9 12 4C12 5.1 11.6083 6.04167 10.825 6.825C10.0417 7.60833 9.1 8 8 8ZM0 16V13.2C0 12.6333 0.146 12.1123 0.438 11.637C0.729334 11.1623 1.11667 10.8 1.6 10.55C2.63333 10.0333 3.68333 9.64567 4.75 9.387C5.81667 9.129 6.9 9 8 9C9.1 9 10.1833 9.129 11.25 9.387C12.3167 9.64567 13.3667 10.0333 14.4 10.55C14.8833 10.8 15.2707 11.1623 15.562 11.637C15.854 12.1123 16 12.6333 16 13.2V16H0ZM2 14H14V13.2C14 13.0167 13.9543 12.85 13.863 12.7C13.771 12.55 13.65 12.4333 13.5 12.35C12.6 11.9 11.6917 11.5623 10.775 11.337C9.85833 11.1123 8.93333 11 8 11C7.06667 11 6.14167 11.1123 5.225 11.337C4.30833 11.5623 3.4 11.9 2.5 12.35C2.35 12.4333 2.22933 12.55 2.138 12.7C2.046 12.85 2 13.0167 2 13.2V14ZM8 6C8.55 6 9.021 5.804 9.413 5.412C9.80433 5.02067 10 4.55 10 4C10 3.45 9.80433 2.97933 9.413 2.588C9.021 2.196 8.55 2 8 2C7.45 2 6.97933 2.196 6.588 2.588C6.196 2.97933 6 3.45 6 4C6 4.55 6.196 5.02067 6.588 5.412C6.97933 5.804 7.45 6 8 6Z" fill="black"/>
+</svg>
+<div className="flex flex-col ml-2 items-start justify-start">
+  <span  >Profile</span>
+  <span className="font-normal text-sm text-gray-400 dark:text-foreground"> We Know You as {user.role}</span>
+</div>
+
+
+                </Button></div>)
+                : <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    handleToggle();
+                    navigate('/profile');
+                  }}
+                >
+                 <svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 8C6.9 8 5.95833 7.60833 5.175 6.825C4.39167 6.04167 4 5.1 4 4C4 2.9 4.39167 1.95833 5.175 1.175C5.95833 0.391667 6.9 0 8 0C9.1 0 10.0417 0.391667 10.825 1.175C11.6083 1.95833 12 2.9 12 4C12 5.1 11.6083 6.04167 10.825 6.825C10.0417 7.60833 9.1 8 8 8ZM0 16V13.2C0 12.6333 0.146 12.1123 0.438 11.637C0.729334 11.1623 1.11667 10.8 1.6 10.55C2.63333 10.0333 3.68333 9.64567 4.75 9.387C5.81667 9.129 6.9 9 8 9C9.1 9 10.1833 9.129 11.25 9.387C12.3167 9.64567 13.3667 10.0333 14.4 10.55C14.8833 10.8 15.2707 11.1623 15.562 11.637C15.854 12.1123 16 12.6333 16 13.2V16H0ZM2 14H14V13.2C14 13.0167 13.9543 12.85 13.863 12.7C13.771 12.55 13.65 12.4333 13.5 12.35C12.6 11.9 11.6917 11.5623 10.775 11.337C9.85833 11.1123 8.93333 11 8 11C7.06667 11 6.14167 11.1123 5.225 11.337C4.30833 11.5623 3.4 11.9 2.5 12.35C2.35 12.4333 2.22933 12.55 2.138 12.7C2.046 12.85 2 13.0167 2 13.2V14ZM8 6C8.55 6 9.021 5.804 9.413 5.412C9.80433 5.02067 10 4.55 10 4C10 3.45 9.80433 2.97933 9.413 2.588C9.021 2.196 8.55 2 8 2C7.45 2 6.97933 2.196 6.588 2.588C6.196 2.97933 6 3.45 6 4C6 4.55 6.196 5.02067 6.588 5.412C6.97933 5.804 7.45 6 8 6Z" fill="black"/>
+</svg>
+<div className="flex flex-col ml-2 items-start justify-start">
+  <span  >Profile</span>
+  <span className="font-normal text-sm text-gray-400 dark:text-foreground"> We Know You as {user.role}</span>
+</div>
+
+
+                </Button>
+              }
+              
             </div>
           ) : (
             <Button
@@ -315,9 +373,10 @@ const Navbar = () => {
               Sign In
             </Button>
           )}
-          <Button 
+          <div className="flex items-start justify-start">
+<Button 
             variant="ghost" 
-            size="icon"
+            size="sm"
             onClick={() => {
               handleToggle();
               if (isAuthenticated()) {
@@ -340,13 +399,34 @@ const Navbar = () => {
                 fill="currentColor"
               />
             </svg>
-            {isAuthenticated() && cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {cartItemCount}
-              </span>
+            <div className="flex flex-col ml-2 items-start justify-start">
+  <span  >Your Bag</span>
+  {isAuthenticated() && cartItemCount > 0 && (
+  <span className="font-normal text-sm text-gray-400 dark:text-foreground"> <span className="text-yellow-800">{cartItemCount}</span> products added in your bag</span>
+              
             )}
+</div>
+          
+            
           </Button>
           </div>
+          
+          </div>
+
+          <nav className="flex flex-col gap-4 font-montserrat text-sm font-medium">
+            {NAVLINKS.map((link, index) => (
+              <button
+                key={index}
+                onClick={() => handleNavClick('/products')}
+                className="text-left hover:text-muted-foreground transition-colors"
+              >
+                {link.TEXT}
+              </button>
+            ))}
+            
+          </nav>
+
+          
         </div>
       </div>
     </header>

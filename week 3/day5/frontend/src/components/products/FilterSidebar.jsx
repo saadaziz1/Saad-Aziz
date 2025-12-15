@@ -38,44 +38,15 @@ const FilterSidebar = ({ filters, toggleFilter, selectedFilters, onFilterChange 
 
   return (
     <>
-      <style>
-        {`
-          input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            width: 16px;
-            height: 16px;
-            border: 1px solid #282828;
-            border-radius: 2px;
-            background-color: transparent;
-            position: relative;
-            cursor: pointer;
-          }
-          input[type="checkbox"]:checked {
-            background-color: transparent;
-            border-color: #282828;
-          }
-          input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #282828;
-            font-size: 12px;
-            font-weight: bold;
-          }
-        `}
-      </style>
-      <div className="lg:w-1/4">
-        <div className="space-y-6">
+      
+      <div className="w-full max-w-54 hidden lg:block ">
+        <div className="  space-y-6   dark:bg-background text-[#282828] dark:text-foreground font-montserrat">
           {Object.entries(filterData).map(([key, data]) => (
             <div key={key}>
               <button
                 onClick={() => toggleFilter(key)}
                 className="flex items-center justify-between w-full text-left font-medium pb-2"
-                style={{color: '#282828'}}
+                
               >
                 {data.title}
                 <span className="text-2xl">
@@ -88,7 +59,7 @@ const FilterSidebar = ({ filters, toggleFilter, selectedFilters, onFilterChange 
                     const filterKey = data.type === 'category' ? 'categories' : 'tags';
                     const isChecked = selectedFilters[filterKey]?.includes(option) || false;
                     return (
-                      <label key={index} className="flex items-center text-sm" style={{color: '#282828'}}>
+                      <label key={index} className="flex items-center text-sm" >
                         <input 
                           type="checkbox" 
                           className="mr-2"
@@ -107,7 +78,7 @@ const FilterSidebar = ({ filters, toggleFilter, selectedFilters, onFilterChange 
 
           {/* Organic Filter */}
           <div className="flex items-center">
-            <span className="font-medium mr-6" style={{color: '#282828'}}>ORGANIC</span>
+            <span className="font-medium mr-6" >ORGANIC</span>
             <button
               onClick={() => {
                 toggleFilter("organic");

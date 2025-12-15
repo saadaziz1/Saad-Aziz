@@ -75,11 +75,7 @@ app.get("/", (req, res) => {
 });
 
 
-console.log('=== ENVIRONMENT VARIABLES ===');
-console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME || 'MISSING');
-console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'SET' : 'MISSING');
-console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'SET' : 'MISSING');
-console.log('=============================');
+
 // 404 handler for unknown routes
 app.use(notFound);
 

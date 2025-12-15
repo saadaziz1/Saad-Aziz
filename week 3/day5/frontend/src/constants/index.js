@@ -20,52 +20,44 @@ export const    NAVLINKS = [
 ]
 
 export const COLLECTIONS = [
-    {
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },
-    {
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    }, {
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },
-    {
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    },{
-        img: './LayoutImages/collection.jpg',
-        title: 'Black Tea'
-    }
-]
+  {
+    img: "./collections/img1.jpg",
+    title: "Black teas",
+  },
+  {
+    img: "./collections/img2.jpg",
+    title: "Green teas",
+  },
+  {
+    img: "./collections/img3.jpg",
+    title: "White teas",
+  },
+  {
+    img: "./collections/img4.jpg",
+    title: "Chai",
+  },
+  {
+    img: "./collections/img5.jpg",
+    title: "Matcha",
+  },
+  {
+    img: "./collections/img6.jpg",
+    title: "Herbal teas",
+  },
+  {
+    img: "./collections/img7.jpg",
+    title: "Oolong",
+  },
+  {
+    img: "./collections/img8.jpg",
+    title: "Rooibos",
+  },
+  {
+    img: "./collections/img9.jpg",
+    title: "Teaware",
+  },
+];
+
 
 export const HERO_IMAGE = '/LayoutImages/collection.jpg';
 

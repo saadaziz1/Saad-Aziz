@@ -37,12 +37,18 @@ const asyncHandler = require('express-async-handler');
  *         name: category
  *         schema:
  *           type: string
- *         description: Filter by category
+ *           enum: ["Black teas", "Green teas", "White teas", "Chai", "Matcha", "Herbal teas", "Oolong", "Rooibos", "Teaware"]
+ *         description: Filter by tea category
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
  *         description: Search in name, description, tags
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: string
+ *         description: Filter by tags (comma-separated)
  *       - in: query
  *         name: minPrice
  *         schema:
@@ -62,7 +68,7 @@ const asyncHandler = require('express-async-handler');
  *         description: Sort order
  *     responses:
  *       200:
- *         description: List of products
+ *         description: List of products with frontend-compatible structure
  *         content:
  *           application/json:
  *             schema:
@@ -81,6 +87,9 @@ const asyncHandler = require('express-async-handler');
  *                   type: integer
  *                 currentPage:
  *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                   description: Total count for admin pages
  */
 router.get('/', productController.list);
 
@@ -136,13 +145,14 @@ router.get('/:id', productController.get);
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Premium Saffron"
+ *                 example: "Premium Earl Grey"
  *               description:
  *                 type: string
- *                 example: "Finest quality saffron from Iran"
+ *                 example: "A classic blend of Ceylon black tea with bergamot oil"
  *               category:
  *                 type: string
- *                 example: "Saffron"
+ *                 enum: ["Black teas", "Green teas", "White teas", "Chai", "Matcha", "Herbal teas", "Oolong", "Rooibos", "Teaware"]
+ *                 example: "Black teas"
  *               basePrice:
  *                 type: number
  *                 example: 59.99
@@ -154,8 +164,8 @@ router.get('/:id', productController.get);
  *                 example: "premium-saffron"
  *               variants:
  *                 type: string
- *                 description: JSON array of variants
- *                 example: '[{"name":"1g","stock":100},{"name":"5g","stock":50}]'
+ *                 description: JSON array of variants with required fields
+ *                 example: '[{"name":"50g","priceDiff":0,"stock":100,"sku":"TEA-50G-001","isActive":true},{"name":"100g","priceDiff":5,"stock":50,"sku":"TEA-100G-001","isActive":true}]'
  *               image:
  *                 type: string
  *                 format: binary
@@ -335,31 +345,52 @@ router.post(
  *           description: MongoDB ID
  *         name:
  *           type: string
+ *           example: "Premium Earl Grey"
  *         slug:
  *           type: string
+ *           example: "premium-earl-grey"
  *         description:
  *           type: string
+ *           example: "A classic blend of Ceylon black tea with bergamot oil"
  *         category:
  *           type: string
+ *           enum: ["Black teas", "Green teas", "White teas", "Chai", "Matcha", "Herbal teas", "Oolong", "Rooibos", "Teaware"]
+ *           example: "Black teas"
  *         tags:
  *           type: array
  *           items:
  *             type: string
+ *           example: ["organic", "premium", "bergamot"]
  *         basePrice:
  *           type: number
+ *           example: 24.99
+ *           description: Base price before variant adjustments
  *         featuredImage:
  *           type: string
  *           description: Cloudinary image URL
+ *           example: "https://res.cloudinary.com/example/image/upload/v123/tea.jpg"
  *         rating:
  *           type: number
  *           minimum: 0
  *           maximum: 5
+ *           example: 4.5
  *         totalRatingsCount:
  *           type: number
+ *           example: 127
  *         variants:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/Variant'
+ *           description: Available product variants with stock and pricing
+ *         flavor:
+ *           type: string
+ *           example: "Citrusy"
+ *         origin:
+ *           type: string
+ *           example: "Sri Lanka"
+ *         caffeine:
+ *           type: string
+ *           example: "Medium"
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -369,21 +400,32 @@ router.post(
  *     Variant:
  *       type: object
  *       properties:
+ *         _id:
+ *           type: string
+ *           description: Variant ID
  *         name:
  *           type: string
- *           example: "1g"
+ *           enum: ["50g", "100g", "170g", "250g", "1kg", "sampler"]
+ *           example: "100g"
+ *         label:
+ *           type: string
+ *           example: "100g"
+ *           description: Display label for frontend
  *         priceDiff:
  *           type: number
- *           example: 0
+ *           example: 5.00
+ *           description: Price difference from base price
  *         stock:
  *           type: number
- *           example: 100
+ *           example: 50
+ *           minimum: 0
  *         sku:
  *           type: string
- *           example: "PRE-1G-1234"
+ *           example: "EARL-100G-001"
  *         isActive:
  *           type: boolean
  *           default: true
+ *           description: Whether variant is available for purchase
  */
 
 module.exports = router;

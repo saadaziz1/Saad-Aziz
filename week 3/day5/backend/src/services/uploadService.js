@@ -1,153 +1,88 @@
 // services/uploadService.js
-const { cloudinaryHelpers } = require('../middlewares/upload');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
+});
+
+console.log('📋 Cloudinary config in uploadService:', {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? 'SET' : 'MISSING',
+  api_key: process.env.CLOUDINARY_API_KEY ? 'SET' : 'MISSING',
+  api_secret: process.env.CLOUDINARY_API_SECRET ? 'SET' : 'MISSING'
+});
 
 class UploadService {
-  async processProductImages(files, existingProduct = null) {
-    const images = {
-      featuredImage: existingProduct?.featuredImage || '',
-      images: existingProduct?.images || [],
-      variantImages: {}
-    };
-
+  // Single image upload for product featured image
+  async processProductImages(buffer) {
     try {
-      // Handle featured image
-      if (files.featuredImage && files.featuredImage[0] && files.featuredImage[0].buffer) {
-        console.log('Processing featured image...');
-        
-        // Delete old featured image if exists
-        if (existingProduct?.featuredImage) {
-          try {
-            const oldPublicId = cloudinaryHelpers.getPublicIdFromUrl(existingProduct.featuredImage);
-            if (oldPublicId) {
-              await cloudinaryHelpers.deleteImage(oldPublicId);
-            }
-          } catch (deleteError) {
-            console.warn('Could not delete old featured image:', deleteError.message);
-          }
-        }
-        
-        // Upload new featured image
-        try {
-          const result = await cloudinaryHelpers.uploadImage(files.featuredImage[0].buffer);
-          images.featuredImage = result.secure_url;
-          console.log('Featured image uploaded:', images.featuredImage);
-        } catch (uploadError) {
-          console.error('Featured image upload failed:', uploadError.message);
-          // Use placeholder if upload fails
-          images.featuredImage = 'https://via.placeholder.com/600x400';
-        }
-      } else if (!images.featuredImage) {
-        // Default placeholder if no image
-        images.featuredImage = 'https://via.placeholder.com/600x400';
-      }
-
-      // Handle gallery images
-      if (files.images && files.images.length > 0) {
-        console.log(`Processing ${files.images.length} gallery images...`);
-        
-        for (const file of files.images) {
-          if (file.buffer) {
-            try {
-              const result = await cloudinaryHelpers.uploadImage(file.buffer);
-              images.images.push(result.secure_url);
-            } catch (uploadError) {
-              console.error('Gallery image upload failed:', uploadError.message);
-              images.images.push('https://via.placeholder.com/400x300');
-            }
-          }
-        }
-        
-        // Keep existing images
-        if (existingProduct?.images) {
-          images.images = [...existingProduct.images, ...images.images];
-        }
-      } else if (images.images.length === 0) {
-        // Default gallery image
-        images.images = ['https://via.placeholder.com/400x300'];
-      }
-
-      // Handle variant images
-      if (files.variantImages) {
-        const variantKeys = Object.keys(files.variantImages);
-        console.log(`Processing ${variantKeys.length} variant images...`);
-        
-        for (const variantKey of variantKeys) {
-          const fileArray = files.variantImages[variantKey];
-          if (fileArray && fileArray[0] && fileArray[0].buffer) {
-            try {
-              const result = await cloudinaryHelpers.uploadImage(fileArray[0].buffer);
-              images.variantImages[variantKey] = result.secure_url;
-            } catch (uploadError) {
-              console.error(`Variant image ${variantKey} upload failed:`, uploadError.message);
-              images.variantImages[variantKey] = 'https://via.placeholder.com/300x200';
-            }
-          }
-        }
-      }
-
-      return images;
+      console.log('📤 Processing single product image...');
+      const result = await this.uploadToCloudinary(buffer);
+      console.log('✅ Image uploaded successfully:', result.secure_url);
+      return result;
     } catch (error) {
-      console.error('Image processing error:', error);
-      throw new Error(`Image processing failed: ${error.message}`);
+      console.error('❌ Image upload failed:', error);
+      throw new Error(`Image upload failed: ${error.message}`);
     }
   }
 
-  async deleteProductImages(product) {
-    try {
-      // Delete featured image
-      if (product.featuredImage) {
-        const publicId = cloudinaryHelpers.getPublicIdFromUrl(product.featuredImage);
-        if (publicId) {
-          await cloudinaryHelpers.deleteImage(publicId);
-        }
-      }
-
-      // Delete gallery images
-      if (product.images && product.images.length > 0) {
-        for (const imageUrl of product.images) {
-          const publicId = cloudinaryHelpers.getPublicIdFromUrl(imageUrl);
-          if (publicId) {
-            await cloudinaryHelpers.deleteImage(publicId);
+  // Upload to Cloudinary (direct method)
+  async uploadToCloudinary(buffer) {
+    return new Promise((resolve, reject) => {
+      console.log('📤 Uploading to Cloudinary via service...');
+      
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'saffron-products',
+          transformation: [{ width: 800, height: 800, crop: 'limit' }]
+        },
+        (error, result) => {
+          if (error) {
+            console.error('❌ Cloudinary upload error:', error);
+            reject(error);
+          } else {
+            console.log('✅ Cloudinary upload success:', result.secure_url);
+            resolve(result);
           }
         }
-      }
-
-      // Delete variant images
-      if (product.variants && product.variants.length > 0) {
-        for (const variant of product.variants) {
-          if (variant.image) {
-            const publicId = cloudinaryHelpers.getPublicIdFromUrl(variant.image);
-            if (publicId) {
-              await cloudinaryHelpers.deleteImage(publicId);
-            }
-          }
-          if (variant.additionalImages && variant.additionalImages.length > 0) {
-            for (const imageUrl of variant.additionalImages) {
-              const publicId = cloudinaryHelpers.getPublicIdFromUrl(imageUrl);
-              if (publicId) {
-                await cloudinaryHelpers.deleteImage(publicId);
-              }
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error deleting product images:', error);
-      throw error;
-    }
+      ).end(buffer);
+    });
   }
 
-  async deleteImageFromCloudinary(imageUrl) {
+  // Delete image from Cloudinary
+  async deleteFromCloudinary(imageUrl) {
     try {
-      const publicId = cloudinaryHelpers.getPublicIdFromUrl(imageUrl);
+      if (!imageUrl || imageUrl.includes('unsplash.com') || imageUrl.includes('placeholder')) {
+        return false;
+      }
+
+      const publicId = this.getPublicIdFromUrl(imageUrl);
       if (publicId) {
-        await cloudinaryHelpers.deleteImage(publicId);
-        return true;
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log('🗑️ Image deleted from Cloudinary:', publicId);
+        return result.result === 'ok';
       }
       return false;
     } catch (error) {
-      console.error('Error deleting image:', error);
+      console.error('❌ Error deleting image:', error);
       throw error;
+    }
+  }
+
+  // Extract public ID from Cloudinary URL
+  getPublicIdFromUrl(url) {
+    try {
+      if (!url || typeof url !== 'string') return null;
+      
+      // Extract public ID from Cloudinary URL
+      const matches = url.match(/\/v\d+\/(.+)\.(jpg|jpeg|png|gif|webp)$/i);
+      return matches ? matches[1] : null;
+    } catch (error) {
+      console.error('Error extracting public ID:', error);
+      return null;
     }
   }
 

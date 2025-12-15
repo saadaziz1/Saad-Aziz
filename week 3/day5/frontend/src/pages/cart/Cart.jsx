@@ -14,7 +14,11 @@ export const Cart = ({ isOpen, onClose }) => {
     
     return data.cart.items.map((item) => {
       const product = item.productId;
-      const variant = product?.variants?.find(v => v.variantId === item.variantId);
+      // Find variant by matching _id or variantId
+      const variant = product?.variants?.find(v => 
+        v._id?.toString() === item.variantId.toString() || 
+        v.variantId?.toString() === item.variantId.toString()
+      );
       
       return {
         id: item._id,
@@ -23,7 +27,7 @@ export const Cart = ({ isOpen, onClose }) => {
         variant: variant?.name || 'Default',
         price: item.priceAtAddTime,
         quantity: item.quantity,
-        image: product?.images?.[0] || '/LayoutImages/collection.jpg',
+        image: product?.featuredImage || '/LayoutImages/collection.jpg',
       };
     });
   }, [data]);
@@ -53,25 +57,25 @@ export const Cart = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/40" onClick={onClose}></div>
-      <div className="absolute right-0 top-0 h-[80vh] w-[480px] bg-white shadow-lg">
+      <div className="absolute right-0 top-0  w-[480px] bg-background shadow-lg">
         <div className="p-6 h-full flex flex-col">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-medium" style={{color: '#282828'}}>My Bag</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <h2 className="text-xl font-medium text-foreground">My Bag</h2>
+            <button onClick={onClose} className="text-gray-500 dark:text-foreground hover:text-gray-700">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto text-[#282828] dark:text-foreground">
             {isLoading ? (
               <div className="text-center py-8">
-                <p className="text-gray-600">Loading cart...</p>
+                <p className="text-gray-600 dark:text-foreground">Loading cart...</p>
               </div>
             ) : cartItems.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-600">Your cart is empty</p>
+                <p className="text-gray-600 dark:text-foreground">Your cart is empty</p>
               </div>
             ) : (
               cartItems.map((item) => (
@@ -82,12 +86,12 @@ export const Cart = ({ isOpen, onClose }) => {
                     className="w-16 h-16 object-cover rounded"
                   />
                   <div className="flex-1">
-                    <h3 className="text-sm font-light" style={{color: '#282828'}}>
+                    <h3 className="text-sm font-light" >
                       {item.name} - {item.variant}
                     </h3>
                     <button 
                       onClick={() => removeItem(item.itemId)}
-                      className="text-xs text-gray-500 hover:text-red-500 mt-1"
+                      className="text-xs text-gray-500 dark:text-foreground hover:text-red-500 mt-1"
                       disabled={removeItemMutation.isPending}
                     >
                       REMOVE
@@ -111,7 +115,7 @@ export const Cart = ({ isOpen, onClose }) => {
                         +
                       </button>
                     </div>
-                    <div className="text-sm font-medium" style={{color: '#282828'}}>
+                    <div className="text-sm font-medium" >
                       €{(item.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
@@ -129,7 +133,7 @@ export const Cart = ({ isOpen, onClose }) => {
               <span>Delivery</span>
               <span>€{delivery.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-lg font-medium mb-6" style={{color: '#282828'}}>
+            <div className="flex justify-between text-lg font-medium mb-6" >
               <span>Total</span>
               <span>€{total.toFixed(2)}</span>
             </div>

@@ -1,22 +1,28 @@
 import { useNavigate } from 'react-router-dom';
 import { useDashboardAnalytics } from '../../hooks/useDashboard';
+import useAuthStore from '../../store/authStore';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
+import { Users, ShoppingCart, DollarSign, Package, TrendingDown, TrendingUp } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useDashboardAnalytics();
+  const { user } = useAuthStore();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-600">Loading dashboard...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading dashboard...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-red-600">Error loading dashboard data</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-destructive">Error loading dashboard data</p>
       </div>
     );
   }
@@ -24,110 +30,123 @@ const Dashboard = () => {
   const analytics = data?.analytics || {};
 
   return (
-    <div className="min-h-screen bg-white p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold" style={{color: '#282828'}}>Admin Dashboard</h1>
-        <div className="flex gap-4">
-          <button
-            onClick={() => navigate('/admin/products')}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Manage Products
-          </button>
-          <button
-            onClick={() => navigate('/admin/orders')}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Manage Orders
-          </button>
-        </div>
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">Welcome back, {user?.name}! Here's your business overview.</p>
       </div>
       
       {/* Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gray-50 p-6 rounded border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Total Users</h3>
-          <p className="text-3xl font-bold" style={{color: '#282828'}}>
-            {analytics.totalUsers || 0}
-          </p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{analytics.totalUsers || 0}</div>
+            <p className="text-xs text-muted-foreground">Registered customers</p>
+          </CardContent>
+        </Card>
         
-        <div className="bg-gray-50 p-6 rounded border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Total Orders</h3>
-          <p className="text-3xl font-bold" style={{color: '#282828'}}>
-            {analytics.totalOrders || 0}
-          </p>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{analytics.totalOrders || 0}</div>
+            <p className="text-xs text-muted-foreground">Orders processed</p>
+          </CardContent>
+        </Card>
         
-        <div className="bg-gray-50 p-6 rounded border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Total Revenue</h3>
-          <p className="text-3xl font-bold" style={{color: '#282828'}}>
-            €{analytics.revenue?.toFixed(2) || '0.00'}
-          </p>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">€{analytics.revenue?.toFixed(2) || '0.00'}</div>
+            <p className="text-xs text-muted-foreground">Total earnings</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Low Stock Products */}
-      {analytics.lowStockProducts && analytics.lowStockProducts.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4" style={{color: '#282828'}}>Low Stock Products</h2>
-          <div className="bg-gray-50 rounded border border-gray-200 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Product</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Variant</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Stock</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {analytics.lowStockProducts.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 text-sm" style={{color: '#282828'}}>
-                      {item.name}
-                    </td>
-                    <td className="px-6 py-4 text-sm" style={{color: '#282828'}}>
-                      {item.variants?.name || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-red-600 font-medium">
-                      {item.variants?.stock || 0}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        {/* Low Stock Products */}
+        {analytics.lowStockProducts && analytics.lowStockProducts.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingDown className="h-5 w-5 text-destructive" />
+                Low Stock Alert
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Variant</TableHead>
+                      <TableHead>Stock</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {analytics.lowStockProducts.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell>{item.variants?.name || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Badge variant="destructive">
+                            {item.variants?.stock || 0}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Top Selling Products */}
-      {analytics.topSellingProducts && analytics.topSellingProducts.length > 0 && (
-        <div>
-          <h2 className="text-xl font-bold mb-4" style={{color: '#282828'}}>Top Selling Products</h2>
-          <div className="bg-gray-50 rounded border border-gray-200 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Product</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Total Sold</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {analytics.topSellingProducts.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 text-sm" style={{color: '#282828'}}>
-                      {item.name}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium" style={{color: '#282828'}}>
-                      {item.totalSold || 0}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        {/* Top Selling Products */}
+        {analytics.topSellingProducts && analytics.topSellingProducts.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-success" />
+                Top Selling Products
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Total Sold</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {analytics.topSellingProducts.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell>
+                          <Badge variant="success">
+                            {item.totalSold || 0}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

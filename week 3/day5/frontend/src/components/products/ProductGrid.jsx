@@ -1,6 +1,6 @@
 const ProductGrid = ({ products, onProductClick }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 ">
       {products.map((product) => (
         <div 
           key={product.id} 
@@ -14,10 +14,10 @@ const ProductGrid = ({ products, onProductClick }) => {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </div>
-          <h3 className="text-sm mb-2 leading-tight" style={{color: '#282828'}}>
+          <h3 className="text-sm mb-2 leading-tight text-[#282828] dark:text-foreground" >
             {product.name}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-foreground">
             <span className="font-semibold">{product.price}</span> / {product.weight}
           </p>
         </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import AdminLayout from './components/layout/AdminLayout';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -16,6 +17,9 @@ import CheckoutPage from './pages/cart/CheckoutPage';
 import Dashboard from './pages/admin/Dashboard';
 import Products from './pages/admin/Products';
 import Orders from './pages/admin/Orders';
+import Users from './pages/admin/Users';
+import ProductForm from './pages/admin/ProductForm';
+import Profile from './pages/Profile';
 
 const App = () => {
   return (
@@ -38,28 +42,40 @@ const App = () => {
           } />
           <Route path="/profile" element={
             <ProtectedRoute>
-              <div>Profile Page</div>
+              <Profile />
             </ProtectedRoute>
           } />
           
           {/* Admin Routes */}
           <Route path="/admin" element={
-            // <ProtectedRoute requiredRole="admin">
-            // </ProtectedRoute>
-            <Dashboard />
-
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout pageTitle="Dashboard"><Dashboard /></AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/products" element={
-            // <ProtectedRoute requiredRole="admin">
-              
-            // </ProtectedRoute>
-            <Products />
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout pageTitle="Products"><Products /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/products/new" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout pageTitle="Add Product"><ProductForm /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/products/edit/:id" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout pageTitle="Edit Product"><ProductForm /></AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/orders" element={
-            // <ProtectedRoute requiredRole="admin">
-              
-            // </ProtectedRoute>
-            <Orders />
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout pageTitle="Orders"><Orders /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute requiredRole="superadmin">
+              <AdminLayout pageTitle="Users"><Users /></AdminLayout>
+            </ProtectedRoute>
           } />
         </Routes>
       </main>

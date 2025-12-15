@@ -69,11 +69,38 @@ const uploadToCloudinary = async (buffer) => {
   });
 };
 
+// Helper functions for Cloudinary operations
+const cloudinaryHelpers = {
+  uploadImage: uploadToCloudinary,
+  
+  deleteImage: async (publicId) => {
+    try {
+      const result = await cloudinary.uploader.destroy(publicId);
+      console.log('Image deleted:', publicId, result.result);
+      return result;
+    } catch (error) {
+      console.error('Delete error:', error);
+      throw error;
+    }
+  },
+  
+  getPublicIdFromUrl: (url) => {
+    try {
+      if (!url || typeof url !== 'string') return null;
+      const matches = url.match(/\/v\d+\/(.+)\.(jpg|jpeg|png|gif|webp)$/i);
+      return matches ? matches[1] : null;
+    } catch (error) {
+      return null;
+    }
+  }
+};
+
 // Single image upload middleware
 const uploadSingleImage = upload.single('image');
 
 module.exports = {
   upload,
   uploadSingleImage,
-  uploadToCloudinary
+  uploadToCloudinary,
+  cloudinaryHelpers
 };

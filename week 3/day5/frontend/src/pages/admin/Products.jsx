@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsAPI } from '../../api/products';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
+import { Package, Plus, Edit, Eye, Trash2 } from 'lucide-react';
 
 const Products = () => {
   const [page, setPage] = useState(1);
@@ -28,16 +33,16 @@ const Products = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-8">
-        <p className="text-gray-600">Loading products...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 md:p-8">
+        <p className="text-muted-foreground">Loading products...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-8">
-        <p className="text-red-600">Error loading products</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 md:p-8">
+        <p className="text-destructive">Error loading products</p>
       </div>
     );
   }
@@ -47,93 +52,136 @@ const Products = () => {
   const currentPage = data?.currentPage || 1;
 
   return (
-    <div className="min-h-screen bg-white p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold" style={{color: '#282828'}}>Product Management</h1>
-        <button
-          onClick={() => navigate('/admin/products/new')}
-          className="px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
-        >
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Product Management</h1>
+          <p className="text-muted-foreground mt-2">Manage your product catalog</p>
+        </div>
+        <Button onClick={() => navigate('/admin/products/new')} className="w-full sm:w-auto">
+          <Plus className="h-4 w-4 mr-2" />
           Add New Product
-        </button>
+        </Button>
       </div>
       
-      <div className="bg-gray-50 rounded border border-gray-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Variants</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {products.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                  No products found
-                </td>
-              </tr>
-            ) : (
-              products.map((product) => (
-                <tr key={product._id}>
-                  <td className="px-6 py-4 text-sm" style={{color: '#282828'}}>
-                    {product.name}
-                  </td>
-                  <td className="px-6 py-4 text-sm" style={{color: '#282828'}}>
-                    {product.category}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium" style={{color: '#282828'}}>
-                    €{product.basePrice?.toFixed(2) || '0.00'}
-                  </td>
-                  <td className="px-6 py-4 text-sm" style={{color: '#282828'}}>
-                    {product.variants?.length || 0} variants
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => navigate(`/admin/products/${product._id}/edit`)}
-                        className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product._id)}
-                        disabled={deleteMutation.isPending}
-                        className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 disabled:opacity-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Products ({data?.total || products.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="hidden md:table-cell">Category</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead className="hidden sm:table-cell">Variants</TableHead>
+                  <TableHead className="w-[200px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan="5" className="text-center py-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <Package className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-muted-foreground">No products found</p>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate('/admin/products/new')}
+                          className="mt-2"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add First Product
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  products.map((product) => (
+                    <TableRow key={product._id}>
+                      <TableCell className="font-medium">
+                        <div className="min-w-0">
+                          <p className="truncate">{product.name}</p>
+                          <p className="text-sm text-muted-foreground md:hidden">
+                            {product.category}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge variant="secondary">{product.category}</Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        €{product.basePrice?.toFixed(2) || '0.00'}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant="outline">
+                          {product.variants?.length || 0} variants
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/admin/products/edit/${product._id}`)}
+                          >
+                            <Edit className="h-3 w-3" />
+                            <span className="hidden sm:inline ml-1">Edit</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/product/${product._id}`)}
+                          >
+                            <Eye className="h-3 w-3" />
+                            <span className="hidden sm:inline ml-1">View</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDelete(product._id)}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            <span className="hidden sm:inline ml-1">Delete</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-8">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Next
-          </button>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground px-4">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
     </div>

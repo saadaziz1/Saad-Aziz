@@ -30,15 +30,87 @@ router.use(roleMiddleware('admin', 'superadmin'));
  *                   properties:
  *                     totalUsers:
  *                       type: integer
+ *                       example: 1250
+ *                       description: Total registered users
  *                     totalOrders:
  *                       type: integer
+ *                       example: 342
+ *                       description: Total orders placed
  *                     revenue:
  *                       type: number
+ *                       example: 15420.50
+ *                       description: Total revenue in euros
  *                     lowStockProducts:
  *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                           variants:
+ *                             type: object
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                               stock:
+ *                                 type: number
+ *                       description: Products with low stock (≤5 items)
  *                     topSellingProducts:
  *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                           totalSold:
+ *                             type: number
+ *                       description: Best selling products by quantity
  */
 router.get('/analytics', dashboardController.getAnalytics);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     DashboardAnalytics:
+ *       type: object
+ *       properties:
+ *         totalUsers:
+ *           type: integer
+ *           description: Count of all registered users
+ *         totalOrders:
+ *           type: integer
+ *           description: Count of all orders
+ *         revenue:
+ *           type: number
+ *           description: Total revenue from all orders
+ *         lowStockProducts:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               variants:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   stock:
+ *                     type: number
+ *         topSellingProducts:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               totalSold:
+ *                 type: number
+ */
 
 module.exports = router;

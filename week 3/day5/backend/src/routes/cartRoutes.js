@@ -101,4 +101,58 @@ router.put('/items/:itemId', cartController.updateItem);
  */
 router.delete('/items/:itemId', cartController.removeItem);
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Cart:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         userId:
+ *           type: string
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/CartItem'
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     CartItem:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Cart item ID
+ *         productId:
+ *           type: object
+ *           description: Populated product data
+ *           properties:
+ *             _id:
+ *               type: string
+ *             name:
+ *               type: string
+ *             featuredImage:
+ *               type: string
+ *             basePrice:
+ *               type: number
+ *             variants:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Variant'
+ *         variantId:
+ *           type: string
+ *           description: Selected variant ID
+ *         quantity:
+ *           type: number
+ *           minimum: 1
+ *         addedAt:
+ *           type: string
+ *           format: date-time
+ */
+
 module.exports = router;

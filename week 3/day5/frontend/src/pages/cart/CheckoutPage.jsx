@@ -28,7 +28,11 @@ const CheckoutPage = () => {
     
     return cartData.cart.items.map((item) => {
       const product = item.productId;
-      const variant = product?.variants?.find(v => v.variantId === item.variantId);
+      // Find variant by matching _id or variantId
+      const variant = product?.variants?.find(v => 
+        v._id?.toString() === item.variantId.toString() || 
+        v.variantId?.toString() === item.variantId.toString()
+      );
       
       return {
         id: item._id,
@@ -37,7 +41,7 @@ const CheckoutPage = () => {
         variant: variant?.name || 'Default',
         price: item.priceAtAddTime,
         quantity: item.quantity,
-        image: product?.images?.[0] || '/LayoutImages/collection.jpg',
+        image: product?.featuredImage || '/LayoutImages/collection.jpg',
       };
     });
   }, [cartData]);
@@ -88,7 +92,7 @@ const CheckoutPage = () => {
           shippingAddress,
           paymentMethod,
         });
-        navigate('/orders');
+        navigate('/');
       } catch (error) {
         console.error('Error placing order:', error);
         alert('Failed to place order. Please try again.');
@@ -117,82 +121,43 @@ const CheckoutPage = () => {
   }, [productsData]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span className="text-lg font-medium">Brand Name</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-600">TEA COLLECTIONS</span>
-            <span className="text-sm text-gray-600">ACCESSORIES</span>
-            <span className="text-sm text-gray-600">BLOG</span>
-            <span className="text-sm text-gray-600">CONTACT US</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/products')}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-                <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </button>
-            <button onClick={() => navigate('/')}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M20 21V19A4 4 0 0 0 16 15H8A4 4 0 0 0 4 19V21" stroke="currentColor" strokeWidth="2"/>
-                <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </button>
-            <button onClick={() => navigate('/products')}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M6 2L3 6V20A2 2 0 0 0 5 22H19A2 2 0 0 0 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2"/>
-                <polyline points="3,6 21,6" stroke="currentColor" strokeWidth="2"/>
-                <path d="M16 10A4 4 0 0 1 8 10" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background">
+      
 
       {/* Progress Steps */}
       <div className="px-6 py-6 border-b border-gray-200">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
-            <span className={`text-sm font-medium ${step >= 1 ? 'text-black' : 'text-gray-400'}`}>
+            <span className={`text-sm font-medium ${step >= 1 ? 'text-blue-500' : 'text-foreground'}`}>
               1. MY BAG
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-sm ${step >= 2 ? 'font-medium text-black' : 'text-gray-400'}`}>
+            <span className={`text-sm ${step >= 2 ? 'font-medium text-blue-500' : 'text-foreground'}`}>
               2. DELIVERY
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-sm ${step >= 3 ? 'font-medium text-black' : 'text-gray-400'}`}>
+            <span className={`text-sm ${step >= 3 ? 'font-medium text-blue-500' : 'text-foreground'}`}>
               3. REVIEW & PAYMENT
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex">
+      <div className="flex flex-col md:flex-row items-center justify-center">
         {/* Left Side - Content */}
-        <div className="flex-1 px-6 py-6">
+        <div className="flex-1 px-6 py-6 text-foreground">
           {step === 1 && (
             <>
               <div className="space-y-4">
                 {cartLoading ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-600">Loading cart...</p>
+                    <p className="text-gray-600 dark:text-foreground">Loading cart...</p>
                   </div>
                 ) : cartItems.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-600">Your cart is empty</p>
+                    <p className="text-gray-600 dark:text-foreground">Your cart is empty</p>
                     <button
                       onClick={() => navigate('/products')}
                       className="mt-4 px-6 py-2 border border-gray-300 text-sm font-medium hover:bg-gray-50"
@@ -209,12 +174,12 @@ const CheckoutPage = () => {
                         className="w-16 h-16 object-cover rounded"
                       />
                       <div className="flex-1">
-                        <h3 className="text-sm font-light" style={{color: '#282828'}}>
+                        <h3 className="text-sm font-light text-[#282828] dark:text-foreground" >
                           {item.name} - {item.variant}
                         </h3>
                         <button 
                           onClick={() => removeItem(item.itemId)}
-                          className="text-xs text-gray-500 hover:text-red-500 mt-1"
+                          className="text-xs text-gray-500 dark:text-foreground hover:text-red-500 mt-1"
                           disabled={removeItemMutation.isPending}
                         >
                           REMOVE
@@ -237,7 +202,7 @@ const CheckoutPage = () => {
                           +
                         </button>
                       </div>
-                      <div className="text-sm font-medium" style={{color: '#282828'}}>
+                      <div className="text-sm font-medium text-[#282828] dark:text-foreground">
                         €{(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
@@ -262,36 +227,39 @@ const CheckoutPage = () => {
           )}
 
           {step === 2 && (
-            <div className="max-w-2xl">
-              <h2 className="text-2xl font-medium mb-6" style={{color: '#282828'}}>Shipping Address</h2>
+            <div className="max-w-2xl text-[#282828] dark:text-foreground">
+              <h2 className="text-2xl font-medium mb-6" >Shipping Address</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{color: '#282828'}}>Street Address</label>
+                  <label className="block text-sm font-medium mb-2" >Street Address *</label>
                   <input
                     type="text"
                     value={shippingAddress.street}
                     onChange={(e) => setShippingAddress({...shippingAddress, street: e.target.value})}
+                    placeholder="123 Main Street, Apt 4B"
                     className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-600"
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#282828'}}>City</label>
+                    <label className="block text-sm font-medium mb-2">City *</label>
                     <input
                       type="text"
                       value={shippingAddress.city}
                       onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}
+                      placeholder="New York"
                       className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-600"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#282828'}}>State</label>
+                    <label className="block text-sm font-medium mb-2" >State *</label>
                     <input
                       type="text"
                       value={shippingAddress.state}
                       onChange={(e) => setShippingAddress({...shippingAddress, state: e.target.value})}
+                      placeholder="NY"
                       className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-600"
                       required
                     />
@@ -299,21 +267,23 @@ const CheckoutPage = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#282828'}}>Zip Code</label>
+                    <label className="block text-sm font-medium mb-2">Zip Code *</label>
                     <input
                       type="text"
                       value={shippingAddress.zipCode}
                       onChange={(e) => setShippingAddress({...shippingAddress, zipCode: e.target.value})}
+                      placeholder="10001"
                       className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-600"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#282828'}}>Country</label>
+                    <label className="block text-sm font-medium mb-2" >Country *</label>
                     <input
                       type="text"
                       value={shippingAddress.country}
                       onChange={(e) => setShippingAddress({...shippingAddress, country: e.target.value})}
+                      placeholder="United States"
                       className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-600"
                       required
                     />
@@ -325,10 +295,10 @@ const CheckoutPage = () => {
 
           {step === 3 && (
             <div className="max-w-2xl">
-              <h2 className="text-2xl font-medium mb-6" style={{color: '#282828'}}>Review & Payment</h2>
+              <h2 className="text-2xl font-medium mb-6" >Review & Payment</h2>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-2" style={{color: '#282828'}}>Shipping Address</h3>
+                  <h3 className="text-lg font-medium mb-2" >Shipping Address</h3>
                   <p className="text-sm text-gray-600">
                     {shippingAddress.street}<br />
                     {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}<br />
@@ -336,7 +306,7 @@ const CheckoutPage = () => {
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium mb-4" style={{color: '#282828'}}>Payment Method</h3>
+                  <h3 className="text-lg font-medium mb-4" >Payment Method</h3>
                   <div className="space-y-2">
                     {['card', 'cash', 'bank_transfer'].map((method) => (
                       <label key={method} className="flex items-center gap-2 cursor-pointer">
@@ -359,8 +329,8 @@ const CheckoutPage = () => {
         </div>
 
         {/* Right Side - Order Summary */}
-        <div className="w-96 bg-gray-50 px-6 py-6">
-          <div className="bg-white p-6 rounded">
+        <div className="w-96 bg-backgound px-6 py-6">
+          <div className="bg-background  p-6 rounded">
             <h3 className="text-lg font-medium mb-4">Order summary</h3>
             
             <div className="space-y-2 mb-4">
@@ -432,64 +402,21 @@ const CheckoutPage = () => {
 
       {/* Popular this season */}
       {step === 1 && popularProducts.length > 0 && (
-        <div className="px-6 py-12 bg-gray-50">
+        <div className="px-6 py-12 bg-d">
           <h2 className="text-2xl font-medium text-center mb-8">Popular this season</h2>
-          <div className="flex justify-center gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 justify-center items-center mx-auto gap-8 max-w-lg">
             {popularProducts.map((product) => (
               <div key={product.id} className="text-center">
                 <img src={product.image} alt={product.name} className="w-32 h-32 object-cover rounded mb-4"/>
                 <h3 className="text-sm font-medium">{product.name}</h3>
-                <p className="text-sm text-gray-600">{product.price} / {product.weight}</p>
+                <p className="text-sm text-gray-600 dark:text-foreground">{product.price} / {product.weight}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Footer */}
-      <div className="bg-gray-100 px-6 py-8">
-        <div className="grid grid-cols-4 gap-8">
-          <div>
-            <h4 className="font-medium mb-4">COLLECTIONS</h4>
-            <div className="space-y-2 text-sm text-gray-600">
-              <div>Black teas</div>
-              <div>Green teas</div>
-              <div>White teas</div>
-              <div>Herbal teas</div>
-              <div>Matcha</div>
-              <div>Chai</div>
-              <div>Oolong</div>
-              <div>Rooibos</div>
-              <div>Teaware</div>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-medium mb-4">LEARN</h4>
-            <div className="space-y-2 text-sm text-gray-600">
-              <div>About us</div>
-              <div>About our teas</div>
-              <div>Tea academy</div>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-medium mb-4">CUSTOMER SERVICE</h4>
-            <div className="space-y-2 text-sm text-gray-600">
-              <div>Ordering and payment</div>
-              <div>Delivery</div>
-              <div>Privacy and policy</div>
-              <div>Terms & Conditions</div>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-medium mb-4">CONTACT US</h4>
-            <div className="space-y-2 text-sm text-gray-600">
-              <div>3 Falahi, Falahi St, Pasdaran Ave, Shiraz, Fars Provience Iran</div>
-              <div>Email: amoospur@gmail.com</div>
-              <div>Tel: +98 9173038406</div>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
