@@ -3,15 +3,15 @@ import { Button } from "../ui/button";
 
 const HeroSection = () => {
   return (
-    <div className="lg:w-301 w-full flex lg:justify-between justify-center items-center 2xl:mx-auto mx-0 font-montserrat">
-      <div className="w-1/2 hidden lg:block ">
+    <div className="lg:w-301 w-full flex flex-col lg:flex-row lg:justify-between justify-center items-center 2xl:mx-auto mx-0 font-montserrat">
+      <div className="lg:w-1/2 w-full block ">
         <img
           src="./LayoutImages/Landing Main Image.png"
           alt="main"
           className="w-full h-full"
         />
       </div>
-      <div className='lg:max-w-114 w-full m-30 lg:m-0 lg:bg-none bg-center bg-cover  bg-[url("./LayoutImages/Landing Main Image.png")] '>
+      <div className='lg:max-w-114 w-full mx-5 mt-10 px-5  lg:m-0 '>
         <h1 className="font-prosto-one font-normal text-4xl ">
           Every day is unique, just like our tea
         </h1>

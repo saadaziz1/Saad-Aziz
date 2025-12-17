@@ -80,7 +80,7 @@ export default function ProjectDetails() {
   }
 
   return (
-    <Box ref={containerRef} sx={{ p: { xs: 2, sm: 4 }, backgroundColor: "background.default", minHeight: "100vh" }}>
+    <Box ref={containerRef} sx={{ p: { xs: 2, sm: 4 }, backgroundColor: "background.default", minHeight: "100vh", maxWidth: '100vw', overflow: 'hidden' }}>
       <Button
         ref={(el) => (elementsRef.current[0] = el)}
         startIcon={<ArrowBack />}

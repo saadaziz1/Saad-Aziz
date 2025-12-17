@@ -95,7 +95,7 @@ const ProductDetails = ({
   };
 
   return (
-    <div className="lg:w-1/2">
+    <div className="lg:w-1/2 min-w-0">
       <h1 className="text-4xl font-medium mb-4 font-prosto-one" >
         {title}
       </h1>
@@ -132,42 +132,46 @@ const ProductDetails = ({
       </div>
 
       {/* Variants */}
+      {/* Variants */}
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-4 text-[#282828] dark:text-foreground">Variants</h3>
-        <div className="flex justify-between w-full">
-          {variants.map((variant, index) => {
-            const variantOutOfStock = variant.stock <= 0;
-            const isSelected = selectedVariant === (variant._id || variant.id);
-            return (
-              <button
-                key={variant._id || variant.id}
-                onClick={() => setSelectedVariant(variant._id || variant.id)}
-                className={`flex flex-col items-center p-2 text-center transition-colors flex-1 relative ${
-                  isSelected ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20 rounded' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                } ${variantOutOfStock ? 'opacity-50' : ''}`}
-                disabled={variantOutOfStock}
-              >
-                <div className="w-20 h-20 flex justify-center">{getVariantIcon(index)}</div>
-                <div className={`text-xs font-medium mt-1 text-center ${
-                  isSelected ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-[#282828] dark:text-foreground'
-                }`}>
-                  {variant.label || variant.name}
-                </div>
-                {variantOutOfStock && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 rounded">
-                    <span className="text-xs font-medium text-red-600">Out of Stock</span>
+        <div className="-mx-4 px-4 overflow-x-auto">
+          <div className="flex gap-2 pb-2" style={{width: 'max-content'}}>
+            {variants.map((variant, index) => {
+              const variantOutOfStock = variant.stock <= 0;
+              const isSelected = selectedVariant === (variant._id || variant.id);
+              return (
+                <button
+                  key={variant._id || variant.id}
+                  onClick={() => setSelectedVariant(variant._id || variant.id)}
+                  className={`flex flex-col items-center p-2 text-center transition-colors w-20 relative flex-shrink-0 ${
+                    isSelected ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20 rounded' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                  } ${variantOutOfStock ? 'opacity-50' : ''}`}
+                  disabled={variantOutOfStock}
+                >
+                  <div className="w-16 h-16 flex justify-center">{getVariantIcon(index)}</div>
+                  <div className={`text-xs font-medium mt-1 text-center ${
+                    isSelected ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-[#282828] dark:text-foreground'
+                  }`}>
+                    {variant.label || variant.name}
                   </div>
-                )}
-                {variant.stock > 0 && variant.stock <= 5 && (
-                  <div className="text-xs text-orange-600 mt-1">
-                    Only {variant.stock} left
-                  </div>
-                )}
-              </button>
-            );
-          })}
+                  {variantOutOfStock && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 rounded">
+                      <span className="text-xs font-medium text-red-600">Out of Stock</span>
+                    </div>
+                  )}
+                  {variant.stock > 0 && variant.stock <= 5 && (
+                    <div className="text-xs text-orange-600 mt-1">
+                      Only {variant.stock} left
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
+
 
       {/* Stock Info */}
       {selectedVariantData && (

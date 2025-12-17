@@ -36,7 +36,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="border-b border-border top-0 bg-background z-50 relative">
+    <header className="border-b border-border top-0 bg-background z-30 relative ">
       <div className="container mx-auto px-0 py-4 flex items-center justify-between">
         
         <button
@@ -240,6 +240,7 @@ const Navbar = () => {
         </Button>
       </div>
   </div>
+  
       {/* BACKDROP */}
       {toggle && (
         <div

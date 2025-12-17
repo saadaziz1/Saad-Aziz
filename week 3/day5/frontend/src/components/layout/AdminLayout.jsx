@@ -6,10 +6,10 @@ const AdminLayout = ({ children, pageTitle }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen border-r">
+    <div className="flex min-h-screen min-w-screen">
       <AdminNav isOpen={isNavOpen} setIsOpen={setIsNavOpen} />
-      <div className="flex-1 lg:ml-0">
-        <div className="lg:hidden flex justify-between items-center p-4 ">
+      <main className="flex-1 w-full lg:w-[840px] xl:w-[1090px] ">
+        <div className="lg:hidden flex justify-between items-center p-4 border-b">
           <span></span>
           <button
             onClick={() => setIsNavOpen(!isNavOpen)}
@@ -18,8 +18,10 @@ const AdminLayout = ({ children, pageTitle }) => {
             {isNavOpen ? <X size={20} /> : <MenuIcon size={20} />}
           </button>
         </div>
-        {children}
-      </div>
+        <div className="w-full">
+          {children}
+        </div>
+      </main>
     </div>
   );
 };

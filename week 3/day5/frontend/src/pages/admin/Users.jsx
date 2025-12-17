@@ -14,7 +14,7 @@ const Users = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-users', page],
-    queryFn: () => usersAPI.list({ page, limit: 20 }).then(res => res.data),
+    queryFn: () => usersAPI.list({ page, limit: 10 }).then(res => res.data),
   });
 
   const blockMutation = useMutation({
@@ -110,11 +110,12 @@ const Users = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">User Management</h1>
-        <p className="text-muted-foreground mt-2">Manage user accounts and permissions</p>
-      </div>
+    <div className="w-full min-h-screen bg-background overflow-x-hidden max-w-screen">
+      <div className="max-w-400 mx-auto p-4 md:p-8">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">User Management</h1>
+          <p className="text-muted-foreground mt-2">Manage user accounts and permissions</p>
+        </div>
       
       <Card>
         <CardHeader>
@@ -124,15 +125,16 @@ const Users = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="overflow-x-auto -mx-6">
+            <div className="px-6 min-w-[700px]">
+              <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead className="hidden md:table-cell">Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[200px]">Actions</TableHead>
+                  <TableHead className="w-[25%] min-w-[120px]">User</TableHead>
+                  <TableHead className="hidden md:table-cell w-[25%] min-w-[150px]">Email</TableHead>
+                  <TableHead className="w-[15%] min-w-[80px]">Role</TableHead>
+                  <TableHead className="w-[15%] min-w-[80px]">Status</TableHead>
+                  <TableHead className="w-[20%] min-w-[180px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -150,14 +152,14 @@ const Users = () => {
                     <TableRow key={user._id}>
                       <TableCell>
                         <div className="min-w-0">
-                          <p className="font-medium truncate">{user.name}</p>
-                          <p className="text-sm text-muted-foreground md:hidden truncate">
+                          <p className="font-medium truncate max-w-[120px]">{user.name}</p>
+                          <p className="text-sm text-muted-foreground md:hidden truncate max-w-[120px]">
                             {user.email}
                           </p>
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        <span className="text-sm">{user.email}</span>
+                        <span className="text-sm truncate max-w-[150px] block">{user.email}</span>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getRoleBadgeVariant(user.role)} className="capitalize">
@@ -258,8 +260,9 @@ const Users = () => {
                     </TableRow>
                   ))
                 )}
-              </TableBody>
-            </Table>
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -285,8 +288,9 @@ const Users = () => {
               Next
             </Button>
           </div>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

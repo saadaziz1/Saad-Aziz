@@ -81,7 +81,7 @@ export default function Members() {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, backgroundColor: "background.default", minHeight: "100vh" }}>
+    <Box sx={{ p: { xs: 2, sm: 4 }, backgroundColor: "background.default", minHeight: "100vh",maxWidth: '100vw', overflow: 'hidden' }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Person sx={{ fontSize: 32, color: 'primary.main' }} />
@@ -112,7 +112,7 @@ export default function Members() {
         sx={{ 
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-          overflow: 'hidden'
+           overflowX: { xs: 'auto', sm: 'hidden' }
         }}
       >
         <Table>

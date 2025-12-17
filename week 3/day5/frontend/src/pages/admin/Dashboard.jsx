@@ -30,11 +30,12 @@ const Dashboard = () => {
   const analytics = data?.analytics || {};
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Welcome back, {user?.name}! Here's your business overview.</p>
-      </div>
+    <div className="w-full min-h-screen bg-background">
+      <div className="max-w-400 mx-auto p-4 md:p-8">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-2">Welcome back, {user?.name}! Here's your business overview.</p>
+        </div>
       
       {/* Analytics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
@@ -83,29 +84,35 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Variant</TableHead>
-                      <TableHead>Stock</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {analytics.lowStockProducts.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell>{item.variants?.name || 'N/A'}</TableCell>
-                        <TableCell>
-                          <Badge variant="destructive">
-                            {item.variants?.stock || 0}
-                          </Badge>
-                        </TableCell>
+              <div className="overflow-x-auto -mx-6">
+                <div className="px-6 min-w-[300px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Variant</TableHead>
+                        <TableHead>Stock</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {analytics.lowStockProducts.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            <div className="truncate">{item.name}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="truncate">{item.variants?.name || 'N/A'}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="destructive">
+                              {item.variants?.stock || 0}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -121,31 +128,36 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Total Sold</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {analytics.topSellingProducts.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="success">
-                            {item.totalSold || 0}
-                          </Badge>
-                        </TableCell>
+              <div className="overflow-x-auto -mx-6">
+                <div className="px-6 min-w-[250px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Total Sold</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {analytics.topSellingProducts.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            <div className="truncate">{item.name}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="success">
+                              {item.totalSold || 0}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );

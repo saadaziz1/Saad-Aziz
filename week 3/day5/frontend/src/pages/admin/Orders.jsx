@@ -66,11 +66,12 @@ const Orders = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Order Management</h1>
-        <p className="text-muted-foreground mt-2">Manage and track all customer orders</p>
-      </div>
+    <div className="w-full min-h-screen bg-background">
+      <div className="max-w-400 mx-auto p-4 md:p-8">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Order Management</h1>
+          <p className="text-muted-foreground mt-2">Manage and track all customer orders</p>
+        </div>
       
       <Card>
         <CardHeader>
@@ -252,8 +253,9 @@ const Orders = () => {
               Next
             </Button>
           </div>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

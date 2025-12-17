@@ -151,27 +151,31 @@ export const ProductPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col max-w-400 mx-auto w-full lg:w-[840px] xl:w-[1112px]">
       <Breadcrumb path={`HOME/COLLECTIONS/${product.name.toUpperCase()}`} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-12">
-          <ProductImage 
-            image={product.featuredImage || '/LayoutImages/collection.jpg'} 
-            alt={product.name} 
-          />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-screen overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-12 ">
+          
+            <ProductImage 
+              image={product.featuredImage || '/LayoutImages/collection.jpg'} 
+              alt={product.name} 
+            />
+          
 
-          <ProductDetails 
-            title={product.name}
-            description={product.description}
-            price={product.variants.find(v => v.id === currentSelectedVariantId)?.price || product.price}
-            variants={product.variants}
-            selectedVariant={currentSelectedVariantId}
-            setSelectedVariant={setSelectedVariantId}
-            quantity={quantity}
-            onQuantityChange={handleQuantityChange}
-            onAddToBag={handleAddToBag}
-          />
+          
+            <ProductDetails 
+              title={product.name}
+              description={product.description}
+              price={product.variants.find(v => v.id === currentSelectedVariantId)?.price || product.price}
+              variants={product.variants}
+              selectedVariant={currentSelectedVariantId}
+              setSelectedVariant={setSelectedVariantId}
+              quantity={quantity}
+              onQuantityChange={handleQuantityChange}
+              onAddToBag={handleAddToBag}
+            />
+          
         </div>
 
         <ProductInfo product={product} />

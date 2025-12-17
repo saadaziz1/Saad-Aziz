@@ -158,7 +158,7 @@ import { useProducts } from "../../hooks/useProducts";
       <HeroSection heroImg={'./LayoutImages/products.jpg'} />
       <Breadcrumb />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-8">
+      <div className="max-w-400 mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-8">
         <div className="flex flex-row gap-8 ">
           <FilterSidebar 
             filters={filters} 
@@ -167,7 +167,7 @@ import { useProducts } from "../../hooks/useProducts";
             onFilterChange={handleFilterChange}
           />
           
-          <div className="w-full lg:w-[840px] xl:w-[1200px]">
+          <div className="w-full lg:w-[840px] xl:w-[1112px]">
            
              <div className="flex justify-end ">
               <SortDropdown 
