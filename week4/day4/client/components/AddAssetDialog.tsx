@@ -6,7 +6,8 @@ import { Plus, Search } from 'lucide-react';
 import { useSocket } from '../hooks/useSocket';
 
 interface Transaction {
-  symbol: string;
+  coinId: string;
+  coinName: string;
   amount: number;
   price: number;
 }
@@ -17,7 +18,7 @@ interface AddAssetDialogProps {
 
 export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
   const [open, setOpen] = useState(false);
-  const [symbol, setSymbol] = useState('');
+  const [selectedCoin, setSelectedCoin] = useState<{id: string, name: string} | null>(null);
   const [amount, setAmount] = useState('');
   const [avgPrice, setAvgPrice] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,14 +27,13 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
   const { allCoins } = useSocket();
 
   const filteredCoins = searchTerm.length >= 2 ? allCoins.filter(coin => {
-    const coinName = coin.replace('USDT', '').toLowerCase();
     const search = searchTerm.toLowerCase();
-    return coinName.includes(search) || coin.toLowerCase().includes(search);
+    return coin.name.toLowerCase().includes(search) || coin.symbol.toLowerCase().includes(search);
   }).slice(0, 50) : [];
 
-  const handleCoinSelect = (coin: string) => {
-    setSymbol(coin);
-    setSearchTerm(coin.replace('USDT', ''));
+  const handleCoinSelect = (coin: {id: string, name: string, symbol: string}) => {
+    setSelectedCoin({id: coin.id, name: coin.name});
+    setSearchTerm(coin.name);
     setShowDropdown(false);
     setError('');
   };
@@ -42,13 +42,8 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
     e.preventDefault();
     setError('');
     
-    if (!symbol) {
+    if (!selectedCoin) {
       setError('Please select a coin');
-      return;
-    }
-    
-    if (!allCoins.includes(symbol)) {
-      setError('Selected coin does not exist in our system');
       return;
     }
     
@@ -63,13 +58,14 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
     }
 
     const transaction: Transaction = {
-      symbol,
+      coinId: selectedCoin.id,
+      coinName: selectedCoin.name,
       amount: parseFloat(amount),
       price: parseFloat(avgPrice)
     };
     
     onAddAsset(transaction);
-    setSymbol('');
+    setSelectedCoin(null);
     setAmount('');
     setAvgPrice('');
     setSearchTerm('');
@@ -121,13 +117,19 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
                     </div>
                     {filteredCoins.map((coin) => (
                       <button
-                        key={coin}
+                        key={coin.id}
                         type="button"
-                        className="w-full px-3 py-2 text-left hover:bg-muted transition-colors text-sm flex items-center justify-between"
-                        onClick={() => handleCoinSelect(coin)}
+                        className="w-full px-3 py-2 text-left hover:bg-muted transition-colors text-sm flex items-center gap-2"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleCoinSelect(coin);
+                        }}
                       >
-                        <span>{coin.replace('USDT', '/USDT')}</span>
-                        <span className="text-xs text-muted-foreground">{coin}</span>
+                        <img src={coin.image} alt={coin.name} className="w-5 h-5 rounded-full" />
+                        <div className="flex-1">
+                          <div className="font-medium">{coin.name}</div>
+                          <div className="text-xs text-muted-foreground uppercase">{coin.symbol}</div>
+                        </div>
                       </button>
                     ))}
                   </>
@@ -145,9 +147,9 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
                 </div>
               </div>
             )}
-            {symbol && (
+            {selectedCoin && (
               <div className="mt-2 text-sm text-muted-foreground">
-                Selected: <span className="font-medium text-foreground">{symbol.replace('USDT', '/USDT')}</span>
+                Selected: <span className="font-medium text-foreground">{selectedCoin.name}</span>
               </div>
             )}
           </div>
@@ -187,7 +189,7 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
             <Button 
               type="submit" 
               className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-              disabled={!symbol || !allCoins.includes(symbol)}
+              disabled={!selectedCoin}
             >
               Add Asset
             </Button>

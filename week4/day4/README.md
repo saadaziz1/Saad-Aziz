@@ -1,10 +1,10 @@
 # Crypto Dashboard
 
-A real-time cryptocurrency dashboard built with Next.js, Redux Toolkit, Socket.IO, and Binance WebSocket API.
+A real-time cryptocurrency dashboard built with Next.js, Redux Toolkit, Socket.IO, and CoinGecko API.
 
 ## Features
 
-- Real-time price updates for BTC, ETH, and BNB
+- Real-time price updates for top cryptocurrencies
 - Live connection status indicator
 - Price change indicators with arrows
 - Responsive design with Tailwind CSS
@@ -62,18 +62,18 @@ Open your browser and navigate to http://localhost:3000
 
 ## How It Works
 
-1. **Backend**: Express server connects to Binance WebSocket streams for BTC, ETH, and BNB
+1. **Backend**: Express server polls CoinGecko API every 30 seconds for top cryptocurrencies
 2. **Real-time Updates**: Price updates are broadcasted to all connected clients via Socket.IO
-3. **Frontend**: Next.js app displays prices with Redux Toolkit for state management
-4. **Cache Updates**: RTK Query cache is updated in real-time with Socket.IO data
+3. **Frontend**: Next.js app displays coin data with market cap, 24h changes, and coin images
+4. **Live Data**: Socket.IO ensures all clients receive updated cryptocurrency data
 
 ## Technologies Used
 
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
 - **State Management**: Redux Toolkit, RTK Query
 - **Real-time**: Socket.IO
-- **Backend**: Express.js, WebSocket (ws)
-- **API**: Binance WebSocket API
+- **Backend**: Express.js, HTTPS polling
+- **API**: CoinGecko REST API
 
 ## Available Scripts
 

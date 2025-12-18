@@ -5,11 +5,12 @@ export const usePagination = <T>(items: T[], initialPageSize = 10) => {
   const [pageSize, setPageSize] = useState(initialPageSize);
 
   const paginatedData = useMemo(() => {
+    if (!items || !Array.isArray(items)) return [];
     const startIndex = (currentPage - 1) * pageSize;
     return items.slice(startIndex, startIndex + pageSize);
   }, [items, currentPage, pageSize]);
 
-  const totalPages = Math.ceil(items.length / pageSize);
+  const totalPages = Math.ceil((items?.length || 0) / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
 
   const goToPage = (page: number) => {

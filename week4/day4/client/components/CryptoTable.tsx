@@ -16,7 +16,7 @@ import TableSkeleton from './TableSkeleton';
 
 export default function CryptoTable() {
   const { connected, allCoins, prices } = useSocket();
-  const { searchTerm, setSearchTerm, filteredItems } = useSearch(allCoins, (coin) => coin);
+  const { searchTerm, setSearchTerm, filteredItems } = useSearch(allCoins, (coin) => coin.name + ' ' + coin.symbol);
   const { 
     currentPage, 
     pageSize, 
@@ -86,7 +86,7 @@ export default function CryptoTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[120px]">Symbol</TableHead>
+                <TableHead className="min-w-[120px]">Coin</TableHead>
                 <TableHead className="min-w-[120px]">Price (USD)</TableHead>
                 <TableHead className="min-w-[100px] hidden sm:table-cell">24h Change</TableHead>
                 <TableHead className="min-w-[100px] hidden md:table-cell">Chart</TableHead>
@@ -97,7 +97,7 @@ export default function CryptoTable() {
                 <TableSkeleton rows={10} columns={4} />
               ) : paginatedData.length > 0 ? (
                 paginatedData.map((coin) => (
-                  <CryptoRow key={coin} symbol={coin} socketPrice={prices[coin] ?? null} />
+                  <CryptoRow key={coin.id} coin={coin} />
                 ))
               ) : (
                 <TableRow>

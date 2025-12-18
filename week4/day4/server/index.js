@@ -4,7 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const startBinanceSocket = require('./binanceSocket');
+const startCoinGeckoApi = require('./coinGeckoApi');
 
 const app = express();
 app.use(cors());
@@ -18,6 +18,21 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/portfolio', require('./routes/portfolio'));
+
+// OHLC data endpoint
+app.get('/api/ohlc/:coinId', async (req, res) => {
+  try {
+    const { coinId } = req.params;
+    const { days = 1 } = req.query;
+    const { fetchOHLCData } = require('./coinGeckoApi');
+    const ohlcData = await fetchOHLCData(coinId, days);
+    res.json(ohlcData);
+  } catch (error) {
+    console.error('OHLC endpoint error:', error.message);
+    // Return empty array on error so frontend can handle it
+    res.json([]);
+  }
+});
 
 const server = http.createServer(app);
 
@@ -54,14 +69,14 @@ io.on('connection', (socket) => {
     if (currentWs) {
       currentWs.close();
     }
-    currentWs = await startBinanceSocket(io, limit);
+    currentWs = await startCoinGeckoApi(io, limit);
   });
   
   socket.on('disconnect', () => console.log('Client disconnected:', socket.id));
 });
 
 // Start with default 20 coins
-startBinanceSocket(io, 20).then(ws => currentWs = ws);
+startCoinGeckoApi(io, 20).then(ws => currentWs = ws);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

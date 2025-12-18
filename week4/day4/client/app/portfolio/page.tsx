@@ -17,7 +17,8 @@ import api from '../../lib/axios';
 import ProtectedRoute from '../../components/ProtectedRoute';
 
 interface Holding {
-  symbol: string;
+  coinId: string;
+  coinName: string;
   amount: number;
   avgPrice: number;
   currentPrice?: number;
@@ -25,37 +26,45 @@ interface Holding {
 }
 
 interface Transaction {
-  symbol: string;
+  coinId: string;
+  coinName: string;
   amount: number;
   price: number;
 }
 
 export default function PortfolioPage() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { prices } = useSocket();
-  const prevPricesRef = useRef<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const { allCoins } = useSocket();
+  const prevPricesRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Load from server
-      api.get('/portfolio').then(response => {
-        setHoldings(response.data);
-      }).catch(() => {
-        // Fallback to localStorage
+    const loadPortfolio = async () => {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      if (token) {
+        // Load from server
+        try {
+          const response = await api.get('/portfolio');
+          setHoldings(response.data);
+        } catch {
+          // Fallback to localStorage
+          const savedPortfolio = localStorage.getItem('cryptoPortfolio');
+          if (savedPortfolio) {
+            setHoldings(JSON.parse(savedPortfolio));
+          }
+        }
+      } else {
+        // Load from localStorage
         const savedPortfolio = localStorage.getItem('cryptoPortfolio');
         if (savedPortfolio) {
           setHoldings(JSON.parse(savedPortfolio));
         }
-      });
-    } else {
-      // Load from localStorage
-      const savedPortfolio = localStorage.getItem('cryptoPortfolio');
-      if (savedPortfolio) {
-        setHoldings(JSON.parse(savedPortfolio));
       }
-    }
+      setLoading(false);
+    };
+    
+    loadPortfolio();
   }, []);
 
   useEffect(() => {
@@ -73,28 +82,32 @@ export default function PortfolioPage() {
   }, [holdings]);
 
   useEffect(() => {
+    const coinPrices = allCoins.reduce((acc, coin) => {
+      acc[coin.id] = coin.current_price;
+      return acc;
+    }, {} as Record<string, number>);
+
     const hasRelevantChanges = holdings.some(holding => {
-      const currentPrice = prices[holding.symbol];
-      const prevPrice = prevPricesRef.current[holding.symbol];
+      const currentPrice = coinPrices[holding.coinId];
+      const prevPrice = prevPricesRef.current[holding.coinId];
       return currentPrice && currentPrice !== prevPrice;
     });
 
     if (!hasRelevantChanges) return;
 
-    prevPricesRef.current = { ...prices };
+    prevPricesRef.current = coinPrices;
     
     setHoldings(prev => prev.map(holding => {
-      const socketPrice = prices[holding.symbol];
-      if (!socketPrice) return holding;
+      const newPrice = coinPrices[holding.coinId];
+      if (!newPrice) return holding;
       
-      const newPrice = parseFloat(socketPrice);
       return { ...holding, currentPrice: newPrice };
     }));
-  }, [prices, holdings.length]);
+  }, [allCoins, holdings.length]);
 
   const handleAddAsset = (transaction: Transaction) => {
     setHoldings(prev => {
-      const existingIndex = prev.findIndex(h => h.symbol === transaction.symbol);
+      const existingIndex = prev.findIndex(h => h.coinId === transaction.coinId);
       
       if (existingIndex >= 0) {
         const existing = prev[existingIndex];
@@ -111,24 +124,26 @@ export default function PortfolioPage() {
         };
         return updated;
       } else {
+        const coin = allCoins.find(c => c.id === transaction.coinId);
         const newHolding: Holding = {
-          symbol: transaction.symbol,
+          coinId: transaction.coinId,
+          coinName: transaction.coinName,
           amount: transaction.amount,
           avgPrice: transaction.price,
           totalCost: transaction.amount * transaction.price,
-          currentPrice: prices[transaction.symbol] ? parseFloat(prices[transaction.symbol]) : transaction.price
+          currentPrice: coin?.current_price || transaction.price
         };
         return [...prev, newHolding];
       }
     });
   };
 
-  const handleRemoveAsset = (symbol: string) => {
-    setHoldings(prev => prev.filter(h => h.symbol !== symbol));
+  const handleRemoveAsset = (coinId: string) => {
+    setHoldings(prev => prev.filter(h => h.coinId !== coinId));
   };
 
-  const { searchTerm, setSearchTerm, filteredItems } = useSearch(holdings, (holding) => holding.symbol);
-  const { paginatedData } = usePagination(filteredItems, 10);
+  const { searchTerm, setSearchTerm, filteredItems } = useSearch(holdings || [], (holding) => holding.coinName);
+  const { paginatedData } = usePagination(filteredItems || [], 10);
 
   const portfolioStats = useMemo(() => {
     const totalValue = holdings.reduce((sum, holding) => {
@@ -243,22 +258,35 @@ export default function PortfolioPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedData.map((holding) => {
+                    {(paginatedData || []).map((holding, index) => {
                       const currentValue = holding.currentPrice ? holding.amount * holding.currentPrice : holding.amount * holding.avgPrice;
                       const pnl = currentValue - holding.totalCost;
                       const pnlPercent = holding.totalCost > 0 ? (pnl / holding.totalCost) * 100 : 0;
                       
+                      const coin = allCoins.find(c => c.id === holding.coinId);
+                      
                       return (
-                        <TableRow key={holding.symbol} className="hover:bg-muted/50">
+                        <TableRow key={holding.coinId || `holding-${index}`} className="hover:bg-muted/50">
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                {holding.symbol.slice(0, 2)}
+                              {coin?.image ? (
+                                <img 
+                                  src={coin.image} 
+                                  alt={holding.coinName} 
+                                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full" 
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold ${coin?.image ? 'hidden' : ''}`}>
+                                {(holding.coinName || 'UN').slice(0, 2).toUpperCase()}
                               </div>
                               <div className="flex flex-col">
-                                <span className="font-medium">{holding.symbol.replace('USDT', '/USDT')}</span>
+                                <span className="font-medium">{holding.coinName || 'Unknown'}</span>
                                 <div className="sm:hidden text-xs text-muted-foreground">
-                                  Avg: ${holding.avgPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  Avg: ${(holding.avgPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>
                               </div>
                             </div>
@@ -290,7 +318,7 @@ export default function PortfolioPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleRemoveAsset(holding.symbol)}
+                              onClick={() => handleRemoveAsset(holding.coinId)}
                               className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
                             >
                               <Trash2 className="h-4 w-4" />

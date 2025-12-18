@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import Header from "../components/Header";
 import { AuthProvider } from "../contexts/AuthContext";
+import PageLoader from "../components/PageLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Providers>
+            <PageLoader />
             <Header />
             <main>{children}</main>
           </Providers>

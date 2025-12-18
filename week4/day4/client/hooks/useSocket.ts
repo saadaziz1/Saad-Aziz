@@ -1,18 +1,26 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { socket } from '../socket/socket';
 
+interface CoinData {
+  id: string;
+  symbol: string;
+  name: string;
+  current_price: number;
+  price_change_percentage_24h: number;
+  market_cap: number;
+  image: string;
+}
+
 export const useSocket = () => {
   const [connected, setConnected] = useState(false);
-  const [allCoins, setAllCoins] = useState<string[]>([]);
+  const [allCoins, setAllCoins] = useState<CoinData[]>([]);
   const [prices, setPrices] = useState<Record<string, string>>({});
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
   const handlersSetup = useRef(false);
   const pricesRef = useRef<Record<string, string>>({});
 
-  const handlePriceUpdate = useCallback((data: { symbol: string; price: string }) => {
-    if (pricesRef.current[data.symbol] === data.price) return;
-    
-    pricesRef.current = { ...pricesRef.current, [data.symbol]: data.price };
-    setPrices(pricesRef.current);
+  const handlePriceUpdate = useCallback((data: { id: string; price: number }) => {
+    // Not used with real data polling
   }, []);
 
   useEffect(() => {
@@ -27,14 +35,16 @@ export const useSocket = () => {
       setConnected(false);
     };
 
-    const handleCoinsUpdate = (coins: string[]) => {
-      setAllCoins(coins);
+    const handleCoinsUpdate = (coins: CoinData[]) => {
+      setAllCoins([...coins]); // Force new array reference
+      setLastUpdate(Date.now()); // Force re-render
+      console.log(`Received ${coins.length} coins from server`);
     };
 
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
     socket.on('coinsUpdate', handleCoinsUpdate);
-    socket.on('priceUpdate', handlePriceUpdate);
+    // socket.on('priceUpdate', handlePriceUpdate); // Not needed with real polling
 
     if (socket.connected) {
       setConnected(true);

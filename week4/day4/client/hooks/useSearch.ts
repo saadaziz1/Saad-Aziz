@@ -4,6 +4,7 @@ export const useSearch = <T>(items: T[], searchKey: (item: T) => string) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredItems = useMemo(() => {
+    if (!items || !Array.isArray(items)) return [];
     if (!searchTerm) return items;
     return items.filter(item => 
       searchKey(item).toLowerCase().includes(searchTerm.toLowerCase())
