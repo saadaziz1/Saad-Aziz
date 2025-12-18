@@ -23,9 +23,13 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: '*', // allow any frontend for dev
-    methods: ['GET', 'POST']
-  }
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://saad-aziz.onrender.com', 'https://week4-day4-frontend.com'] 
+      : '*',
+    methods: ['GET', 'POST'],
+    credentials: true
+  },
+  transports: ['websocket', 'polling']
 });
 
 let currentWs = null;
