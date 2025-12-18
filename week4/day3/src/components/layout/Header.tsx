@@ -8,21 +8,15 @@ export function Header() {
   const [activeNav, setActiveNav] = useState('STORE');
   
   const navItems = [
-    { name: 'STORE', width: 52 },
-    { name: 'FAQ', width: 30 },
-    { name: 'HELP', width: 25 },
-    { name: 'UNREAL ENGINE', width: 85 }
+    { name: 'STORE', width: 52, position: 57 },
+    { name: 'FAQ', width: 45, position: 115 },
+    { name: 'HELP', width: 48 , position: 162 },
+    { name: 'UNREAL ENGINE', width: 115, position: 210 }
   ];
   
   const getIndicatorPosition = () => {
-    let position = 58; // Base position for STORE
-    const activeIndex = navItems.findIndex(item => item.name === activeNav);
-    
-    for (let i = 0; i < activeIndex; i++) {
-      position += navItems[i].width + 24; // width + gap-6
-    }
-    
-    return position;
+    const activeItem = navItems.find(item => item.name === activeNav);
+    return activeItem ? activeItem.position : 58;
   };
   
   const getIndicatorWidth = () => {

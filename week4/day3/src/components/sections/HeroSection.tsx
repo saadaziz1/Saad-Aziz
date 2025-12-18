@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import { HeroSideCard } from '../cards/HeroSideCard';
@@ -11,14 +11,23 @@ import 'swiper/css';
 export function HeroSection() {
   const { activeHeroGame, activeHeroIndex, setActiveHero, gameData } = useGameStore();
   const { sideGames } = gameData.heroSection;
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    intervalRef.current = setInterval(() => {
       const nextIndex = (activeHeroIndex + 1) % sideGames.length;
       setActiveHero(sideGames[nextIndex], nextIndex);
     }, 4000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [activeHeroIndex, sideGames, setActiveHero]);
 
   return (
@@ -67,6 +76,9 @@ export function HeroSection() {
                   title={game.title}
                   isActive={activeHeroIndex === index}
                   onClick={() => {
+                    if (intervalRef.current) {
+                      clearInterval(intervalRef.current);
+                    }
                     setActiveHero(game, index);
                   }}
                 />
