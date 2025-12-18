@@ -9,13 +9,25 @@ async function fetchTopCoins(limit = 50) {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
-          const tickers = JSON.parse(data)
-            .filter(ticker => ticker.symbol.endsWith('USDT'))
-            .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+          console.log('Binance API response status:', res.statusCode);
+          const parsed = JSON.parse(data);
+          
+          // Check if response is an array
+          if (!Array.isArray(parsed)) {
+            console.error('Binance API returned non-array:', parsed);
+            reject(new Error('Invalid response format from Binance API'));
+            return;
+          }
+          
+          const tickers = parsed
+            .filter(ticker => ticker.symbol && ticker.symbol.endsWith('USDT'))
+            .sort((a, b) => parseFloat(b.quoteVolume || 0) - parseFloat(a.quoteVolume || 0))
             .slice(0, limit)
             .map(ticker => ticker.symbol.toLowerCase());
           resolve(tickers);
         } catch (err) {
+          console.error('Error parsing Binance response:', err);
+          console.error('Raw response:', data.substring(0, 500));
           reject(err);
         }
       });
@@ -25,8 +37,15 @@ async function fetchTopCoins(limit = 50) {
 
 module.exports = async (io, limit = 50) => {
   try {
-    const coins = await fetchTopCoins(limit);
-    console.log(`Fetched ${coins.length} top coins:`, coins.slice(0, 10));
+    let coins;
+    try {
+      coins = await fetchTopCoins(limit);
+      console.log(`Fetched ${coins.length} top coins:`, coins.slice(0, 10));
+    } catch (apiError) {
+      console.error('Binance API failed, using fallback coins:', apiError.message);
+      // Fallback to popular coins
+      coins = ['btcusdt', 'ethusdt', 'bnbusdt', 'adausdt', 'xrpusdt', 'solusdt', 'dotusdt', 'dogeusdt', 'avaxusdt', 'maticusdt'];
+    }
     
     // Store coins globally for new connections
     global.currentCoins = coins.map(c => c.toUpperCase());
