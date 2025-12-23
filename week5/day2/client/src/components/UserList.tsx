@@ -24,7 +24,7 @@ export const UserList = () => {
       setUsers(userData);
       
       const initialStates: Record<string, boolean> = {};
-      userData.forEach(user => {
+      userData.forEach((user: User) => {
         initialStates[user.id] = false;
       });
       setFollowingStates(initialStates);
@@ -41,14 +41,14 @@ export const UserList = () => {
     try {
       if (isFollowing) {
         await apiService.unfollowUser(userId);
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map((user: User) => 
           user.id === userId 
             ? { ...user, isFollowing: false, followersCount: user.followersCount - 1 }
             : user
         ));
       } else {
         await apiService.followUser(userId);
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map((user: User) => 
           user.id === userId 
             ? { ...user, isFollowing: true, followersCount: user.followersCount + 1 }
             : user
