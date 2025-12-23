@@ -69,7 +69,7 @@ const AdminVideos = () => {
     setUploadData({
       title: movie.title,
       description: movie.description,
-      genres: Array.isArray(movie.genres) ? movie.genres : [movie.genre].filter(Boolean),
+      genres: Array.isArray(movie.genre) ? [movie.genre] : [movie.genre].filter(Boolean),
       releaseYear: movie.releaseYear,
       duration: Math.floor(movie.duration / 60),
       languages: movie.languages || [],
@@ -88,7 +88,7 @@ const AdminVideos = () => {
     try {
       const response = await api.get(`/videos/stream/${movie._id}`);
       setStreamUrl(response.data.videoUrl);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch stream URL:', error);
       setStreamUrl(null);
     }
@@ -137,7 +137,7 @@ const AdminVideos = () => {
         directorImageFile: null
       });
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update failed:', error);
       const errorMessage = error.response?.data?.message || 'Failed to update video';
       alert(errorMessage);

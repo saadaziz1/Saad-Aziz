@@ -219,6 +219,7 @@ const page = () => {
                 <div className="flex items-center justify-center">
                   <CarouselNavigation 
                   currentSlide={currentReviewSlide}
+                  totalSlides={reviews.length}
                   onPrevious={() => reviewsSwiperRef.current?.slidePrev()}
                   onNext={() => reviewsSwiperRef.current?.slideNext()}
                 />

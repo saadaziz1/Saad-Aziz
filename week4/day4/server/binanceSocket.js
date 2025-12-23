@@ -11,9 +11,17 @@ async function fetch24hrTickers() {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
-          const tickers = JSON.parse(data);
+          const parsed = JSON.parse(data);
+          
+          // Check if API returned an error
+          if (parsed.code || !Array.isArray(parsed)) {
+            console.log('Binance API error or rate limit, using fallback data');
+            resolve(generateFallbackTickerData());
+            return;
+          }
+          
           tickerData = {};
-          tickers.forEach(ticker => {
+          parsed.forEach(ticker => {
             tickerData[ticker.symbol] = {
               priceChangePercent: parseFloat(ticker.priceChangePercent || 0),
               volume: parseFloat(ticker.volume || 0)
@@ -21,11 +29,28 @@ async function fetch24hrTickers() {
           });
         } catch (err) {
           console.error('Error parsing 24hr tickers:', err);
+          resolve(generateFallbackTickerData());
+          return;
         }
         resolve(tickerData);
       });
-    }).on('error', () => resolve(tickerData));
+    }).on('error', () => resolve(generateFallbackTickerData()));
   });
+}
+
+// Generate fallback ticker data
+function generateFallbackTickerData() {
+  const fallbackCoins = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'ADAUSDT', 'XRPUSDT', 'SOLUSDT', 'DOTUSDT', 'DOGEUSDT', 'AVAXUSDT', 'MATICUSDT'];
+  const fallbackData = {};
+  
+  fallbackCoins.forEach(coin => {
+    fallbackData[coin] = {
+      priceChangePercent: (Math.random() - 0.5) * 10,
+      volume: Math.random() * 1000000
+    };
+  });
+  
+  return fallbackData;
 }
 
 let marketStats = {
@@ -46,25 +71,31 @@ async function fetchMarketStats() {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
-          const tickers = JSON.parse(data);
-          if (Array.isArray(tickers)) {
-            const totalVolume = tickers.reduce((sum, ticker) => 
-              sum + parseFloat(ticker.quoteVolume || 0), 0
-            );
-            const btcTicker = tickers.find(t => t.symbol === 'BTCUSDT');
-            const btcVolume = btcTicker ? parseFloat(btcTicker.quoteVolume || 0) : 0;
-            const btcDominance = totalVolume > 0 ? (btcVolume / totalVolume) * 100 : 42.3;
-            
-            marketStats = {
-              totalMarketCap: (totalVolume / 1000000000).toFixed(1) + 'B',
-              totalVolume: (totalVolume / 1000000000).toFixed(1) + 'B',
-              btcDominance: btcDominance.toFixed(1) + '%',
-              activeCoins: tickers.length,
-              marketCapChange: (Math.random() * 4 - 2),
-              volumeChange: (Math.random() * 4 - 2),
-              dominanceChange: (Math.random() * 2 - 1)
-            };
+          const parsed = JSON.parse(data);
+          
+          // Check if API returned an error or rate limit
+          if (parsed.code || !Array.isArray(parsed)) {
+            console.log('Using fallback market stats due to API limit');
+            resolve(marketStats);
+            return;
           }
+          
+          const totalVolume = parsed.reduce((sum, ticker) => 
+            sum + parseFloat(ticker.quoteVolume || 0), 0
+          );
+          const btcTicker = parsed.find(t => t.symbol === 'BTCUSDT');
+          const btcVolume = btcTicker ? parseFloat(btcTicker.quoteVolume || 0) : 0;
+          const btcDominance = totalVolume > 0 ? (btcVolume / totalVolume) * 100 : 42.3;
+          
+          marketStats = {
+            totalMarketCap: (totalVolume / 1000000000).toFixed(1) + 'B',
+            totalVolume: (totalVolume / 1000000000).toFixed(1) + 'B',
+            btcDominance: btcDominance.toFixed(1) + '%',
+            activeCoins: parsed.length,
+            marketCapChange: (Math.random() * 4 - 2),
+            volumeChange: (Math.random() * 4 - 2),
+            dominanceChange: (Math.random() * 2 - 1)
+          };
         } catch (err) {
           console.error('Error parsing market stats:', err);
         }
@@ -123,7 +154,7 @@ module.exports = async (io, limit = 50) => {
     global.marketStats = stats;
     global.tickerData = tickers;
     
-    // Update every 30 seconds
+    // Update every 5 minutes to avoid rate limits
     setInterval(async () => {
       const [updatedStats, updatedTickers] = await Promise.all([
         fetchMarketStats(),
@@ -133,7 +164,7 @@ module.exports = async (io, limit = 50) => {
       io.emit('tickerData', updatedTickers);
       global.marketStats = updatedStats;
       global.tickerData = updatedTickers;
-    }, 30000);
+    }, 300000); // 5 minutes
     let coins;
     try {
       coins = await fetchTopCoins(limit);
