@@ -1,0 +1,1138 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "StreamFlix Video Streaming API",
+    "version": "1.0.0",
+    "description": "Comprehensive API for video streaming platform with subscription management, user authentication, and admin controls. All subscription plans (including free trial) require valid credit card information for verification."
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "64f1a2b3c4d5e6f7g8h9i0j1" },
+          "name": { "type": "string", "example": "John Doe" },
+          "email": { "type": "string", "format": "email", "example": "john@example.com" },
+          "role": { "type": "string", "enum": ["USER", "SUPER_ADMIN"], "example": "USER" },
+          "isBlocked": { "type": "boolean", "example": false },
+          "createdAt": { "type": "string", "format": "date-time", "example": "2024-01-15T10:30:00Z" },
+          "updatedAt": { "type": "string", "format": "date-time", "example": "2024-01-15T10:30:00Z" }
+        }
+      },
+      "CardDetails": {
+        "type": "object",
+        "required": ["cardNumber", "expiryDate", "cvv", "cardholderName"],
+        "properties": {
+          "cardNumber": { 
+            "type": "string", 
+            "pattern": "^[0-9]{13,19}$",
+            "example": "4111111111111111",
+            "description": "Credit card number (13-19 digits)"
+          },
+          "expiryDate": { 
+            "type": "string", 
+            "pattern": "^(0[1-9]|1[0-2])\/\\d{2}$",
+            "example": "12/25",
+            "description": "Card expiry date in MM/YY format"
+          },
+          "cvv": { 
+            "type": "string", 
+            "pattern": "^[0-9]{3,4}$",
+            "example": "123",
+            "description": "Card verification value (3-4 digits)"
+          },
+          "cardholderName": { 
+            "type": "string", 
+            "minLength": 2,
+            "example": "John Doe",
+            "description": "Name on the credit card"
+          }
+        }
+      },
+      "Video": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "64f1a2b3c4d5e6f7g8h9i0j2" },
+          "title": { "type": "string", "example": "Avengers: Endgame" },
+          "description": { "type": "string", "example": "After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more to reverse Thanos' actions and restore balance to the universe." },
+          "genre": { "type": "string", "example": "Action" },
+          "releaseYear": { "type": "number", "example": 2019 },
+          "duration": { "type": "number", "example": 10800 },
+          "thumbnailUrl": { "type": "string", "example": "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_.jpg" },
+          "isVisible": { "type": "boolean", "example": true },
+          "languages": { "type": "array", "items": { "type": "string" }, "example": ["English"] },
+          "director": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "example": "Anthony Russo, Joe Russo" },
+              "image": { "type": "string", "example": "https://via.placeholder.com/300x400/1a1a1a/ffffff?text=Director" },
+              "country": { "type": "string", "example": "USA" }
+            }
+          },
+          "cast": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "example": "Robert Downey Jr." },
+                "image": { "type": "string", "example": "https://via.placeholder.com/200x250/1a1a1a/ffffff?text=RDJ" }
+              }
+            }
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "example": "John Smith" },
+                "location": { "type": "string", "example": "From USA" },
+                "rating": { "type": "number", "example": 5 },
+                "review": { "type": "string", "example": "An epic conclusion to the Marvel saga. Incredible action and emotional depth." }
+              }
+            }
+          }
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "64f1a2b3c4d5e6f7g8h9i0j3" },
+          "user": { "type": "string", "example": "64f1a2b3c4d5e6f7g8h9i0j1" },
+          "plan": { 
+            "type": "string", 
+            "enum": ["FREE_TRIAL", "BASIC", "STANDARD", "PREMIUM"], 
+            "example": "BASIC",
+            "description": "Subscription plan type"
+          },
+          "status": { 
+            "type": "string", 
+            "enum": ["ACTIVE", "EXPIRED"], 
+            "example": "ACTIVE",
+            "description": "Current subscription status"
+          },
+          "startDate": { 
+            "type": "string", 
+            "format": "date-time", 
+            "example": "2024-01-15T10:30:00Z",
+            "description": "Subscription start date"
+          },
+          "endDate": { 
+            "type": "string", 
+            "format": "date-time", 
+            "example": "2024-02-15T10:30:00Z",
+            "description": "Subscription end date"
+          },
+          "cardDetails": {
+            "type": "object",
+            "properties": {
+              "cardNumber": { "type": "string", "example": "****1111", "description": "Masked card number" },
+              "expiryMonth": { "type": "number", "example": 12 },
+              "expiryYear": { "type": "number", "example": 2025 }
+            }
+          },
+          "createdAt": { "type": "string", "format": "date-time", "example": "2024-01-15T10:30:00Z" },
+          "updatedAt": { "type": "string", "format": "date-time", "example": "2024-01-15T10:30:00Z" }
+        }
+      },
+      "AnalyticsDashboard": {
+        "type": "object",
+        "properties": {
+          "totalUsers": { "type": "number", "example": 1250 },
+          "totalVideos": { "type": "number", "example": 89 },
+          "totalSubscriptions": { "type": "number", "example": 456 },
+          "activeSubscriptions": { "type": "number", "example": 423 },
+          "expiredSubscriptions": { "type": "number", "example": 33 },
+          "subscriptionsByPlan": {
+            "type": "object",
+            "properties": {
+              "FREE_TRIAL": { "type": "number", "example": 45 },
+              "BASIC": { "type": "number", "example": 200 },
+              "STANDARD": { "type": "number", "example": 150 },
+              "PREMIUM": { "type": "number", "example": 61 }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Error message" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string", "example": "email" },
+                "message": { "type": "string", "example": "Invalid email format" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": { 
+                    "type": "string", 
+                    "minLength": 1,
+                    "example": "John Doe",
+                    "description": "User's full name (required, cannot be empty)"
+                  },
+                  "email": { 
+                    "type": "string", 
+                    "format": "email", 
+                    "example": "john@example.com",
+                    "description": "Valid email address (must be unique)"
+                  },
+                  "password": { 
+                    "type": "string", 
+                    "minLength": 6, 
+                    "example": "password123",
+                    "description": "Password (minimum 6 characters)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Register a new user account. Email must be unique and not already registered.",
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "User registered successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "409": { 
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": { 
+            "description": "Validation failed - Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "429": { "description": "Too many registration attempts - Rate limit exceeded" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { 
+                    "type": "string", 
+                    "format": "email", 
+                    "example": "john@example.com",
+                    "description": "Registered email address"
+                  },
+                  "password": { 
+                    "type": "string", 
+                    "example": "password123",
+                    "description": "User password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Authenticate user with email and password. Returns JWT token for API access.",
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Login successful" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." },
+                        "role": { "type": "string", "example": "USER" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { 
+            "description": "Invalid credentials - Wrong email or password",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": { 
+            "description": "User account is blocked by admin",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": { 
+            "description": "Validation failed - Invalid email format",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "429": { "description": "Too many login attempts - Rate limit exceeded" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["User Management"],
+        "summary": "List all users (Super Admin only)",
+        "description": "Retrieve a list of all registered users. Only accessible by Super Admin users.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Users list retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/User" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Invalid or missing JWT token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": { 
+            "description": "Access denied - Super Admin role required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/profile": {
+      "get": {
+        "tags": ["User Management"],
+        "summary": "Get current user profile",
+        "description": "Retrieve the profile information of the currently authenticated user.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Invalid or missing JWT token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["User Management"],
+        "summary": "Update current user profile",
+        "description": "Update the profile information of the currently authenticated user.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { 
+                    "type": "string", 
+                    "minLength": 1,
+                    "example": "John Smith",
+                    "description": "Updated user name"
+                  },
+                  "email": { 
+                    "type": "string", 
+                    "format": "email", 
+                    "example": "johnsmith@example.com",
+                    "description": "Updated email address"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Invalid or missing JWT token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "409": { 
+            "description": "Email already exists",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/toggle-block/{id}": {
+      "patch": {
+        "tags": ["User Management"],
+        "summary": "Toggle user block status (Super Admin only)",
+        "description": "Toggle the block status of a user account. If blocked, user will be unblocked and vice versa.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "64f1a2b3c4d5e6f7g8h9i0j1",
+            "description": "User ID to toggle block status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User block status toggled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { 
+            "description": "Cannot block/unblock yourself",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Invalid or missing JWT token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": { 
+            "description": "Access denied - Super Admin role required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": { 
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/toggle-role/{id}": {
+      "patch": {
+        "tags": ["User Management"],
+        "summary": "Toggle user role (Super Admin only)",
+        "description": "Toggle user role between USER and SUPER_ADMIN. If user is USER, they will be promoted to SUPER_ADMIN and vice versa.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "64f1a2b3c4d5e6f7g8h9i0j1",
+            "description": "User ID to toggle role"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User role toggled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { 
+            "description": "Cannot change your own role",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Invalid or missing JWT token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": { 
+            "description": "Access denied - Super Admin role required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": { 
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/videos": {
+      "get": {
+        "tags": ["Videos"],
+        "summary": "List all visible videos (public)",
+        "responses": {
+          "200": {
+            "description": "Videos list (without video URLs)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Video" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Videos"],
+        "summary": "Upload new video (Super Admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "description", "genre", "releaseYear", "duration", "video", "thumbnail"],
+                "properties": {
+                  "title": { "type": "string", "example": "Avengers: Endgame" },
+                  "description": { "type": "string", "example": "After the devastating events of Avengers: Infinity War, the universe is in ruins." },
+                  "genre": { "type": "string", "example": "Action" },
+                  "releaseYear": { "type": "integer", "example": 2019 },
+                  "duration": { "type": "integer", "example": 10800 },
+                  "languages": { "type": "array", "items": { "type": "string" }, "example": ["English"] },
+                  "director": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string", "example": "Anthony Russo, Joe Russo" },
+                      "image": { "type": "string", "example": "https://via.placeholder.com/300x400/1a1a1a/ffffff?text=Director" },
+                      "country": { "type": "string", "example": "USA" }
+                    }
+                  },
+                  "cast": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string", "example": "Robert Downey Jr." },
+                        "image": { "type": "string", "example": "https://via.placeholder.com/200x250/1a1a1a/ffffff?text=RDJ" }
+                      }
+                    }
+                  },
+                  "reviews": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string", "example": "John Smith" },
+                        "location": { "type": "string", "example": "From USA" },
+                        "rating": { "type": "number", "example": 5 },
+                        "review": { "type": "string", "example": "An epic conclusion to the Marvel saga." }
+                      }
+                    }
+                  },
+                  "video": { "type": "string", "format": "binary" },
+                  "thumbnail": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Video uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/Video" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Video and thumbnail required" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Access denied" }
+        }
+      }
+    },
+    "/videos/{id}": {
+      "get": {
+        "tags": ["Videos"],
+        "summary": "Get video details (public, no video URL)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "64f1a2b3c4d5e6f7g8h9i0j2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video details (without video URL)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/Video" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Video not found" }
+        }
+      },
+      "put": {
+        "tags": ["Videos"],
+        "summary": "Update video (Super Admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "64f1a2b3c4d5e6f7g8h9i0j2"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "genre": { "type": "string" },
+                  "releaseYear": { "type": "integer" },
+                  "duration": { "type": "integer" },
+                  "video": { "type": "string", "format": "binary" },
+                  "thumbnail": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Video updated successfully" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Access denied" },
+          "404": { "description": "Video not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Videos"],
+        "summary": "Delete video (Super Admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "64f1a2b3c4d5e6f7g8h9i0j2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Video deleted" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Access denied" },
+          "404": { "description": "Video not found" }
+        }
+      }
+    },
+    "/videos/stream/{id}": {
+      "get": {
+        "tags": ["Videos"],
+        "summary": "Get video stream URL (authenticated users with subscription)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "64f1a2b3c4d5e6f7g8h9i0j2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video stream URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "videoUrl": { "type": "string", "example": "https://res.cloudinary.com/demo/video/upload/sample.mp4" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized or login required" },
+          "403": { "description": "Subscription required" },
+          "404": { "description": "Video not found" }
+        }
+      }
+    },
+    "/subscriptions/free-trial": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Activate free trial (Credit card required)",
+        "description": "Activate a 30-day free trial subscription. **IMPORTANT: Valid credit card information is required for verification, even for free trial. No charges will be made during the trial period.**",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cardDetails"],
+                "properties": {
+                  "cardDetails": { "$ref": "#/components/schemas/CardDetails" }
+                }
+              },
+              "examples": {
+                "validCard": {
+                  "summary": "Valid credit card for free trial",
+                  "value": {
+                    "cardDetails": {
+                      "cardNumber": "4111111111111111",
+                      "expiryDate": "12/25",
+                      "cvv": "123",
+                      "cardholderName": "John Doe"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Free trial activated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Free trial activated for 30 days" },
+                    "data": { "$ref": "#/components/schemas/Subscription" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { 
+            "description": "User already has an active subscription or invalid card details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Login required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": { 
+            "description": "Validation failed - Invalid credit card information",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/plan": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Activate paid subscription plan",
+        "description": "Subscribe to a paid plan (Basic, Standard, or Premium). Valid credit card information is required for payment processing.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["planId", "period", "cardDetails"],
+                "properties": {
+                  "planId": { 
+                    "type": "string", 
+                    "enum": ["basic", "standard", "premium"], 
+                    "example": "basic",
+                    "description": "Subscription plan type"
+                  },
+                  "period": { 
+                    "type": "string", 
+                    "enum": ["month", "year"], 
+                    "example": "month",
+                    "description": "Billing period - monthly or yearly"
+                  },
+                  "cardDetails": { "$ref": "#/components/schemas/CardDetails" }
+                }
+              },
+              "examples": {
+                "basicMonthly": {
+                  "summary": "Basic plan - Monthly billing",
+                  "value": {
+                    "planId": "basic",
+                    "period": "month",
+                    "cardDetails": {
+                      "cardNumber": "4111111111111111",
+                      "expiryDate": "12/25",
+                      "cvv": "123",
+                      "cardholderName": "John Doe"
+                    }
+                  }
+                },
+                "premiumYearly": {
+                  "summary": "Premium plan - Yearly billing (20% discount)",
+                  "value": {
+                    "planId": "premium",
+                    "period": "year",
+                    "cardDetails": {
+                      "cardNumber": "5555555555554444",
+                      "expiryDate": "08/26",
+                      "cvv": "456",
+                      "cardholderName": "Jane Smith"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Paid subscription activated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Basic plan activated successfully" },
+                    "data": { "$ref": "#/components/schemas/Subscription" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { 
+            "description": "Invalid plan data or user already has active subscription",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Login required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "402": { 
+            "description": "Payment failed - Invalid credit card or insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": { 
+            "description": "Validation failed - Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/check": {
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "Check current subscription status",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Subscription details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/Subscription" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "No subscription found" }
+        }
+      }
+    },
+    "/subscriptions/cancel": {
+      "patch": {
+        "tags": ["Subscriptions"],
+        "summary": "Cancel current subscription",
+        "description": "Cancel the user's active subscription. The subscription will remain active until the current billing period ends.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Subscription cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Subscription cancelled successfully. Access will continue until 2024-02-15." }
+                  }
+                }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Login required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": { 
+            "description": "No active subscription found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/dashboard": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get dashboard analytics (Super Admin only)",
+        "description": "Retrieve comprehensive analytics data including user statistics, video counts, and subscription metrics.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dashboard analytics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/AnalyticsDashboard" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { 
+            "description": "Unauthorized - Invalid or missing JWT token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": { 
+            "description": "Access denied - Super Admin role required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

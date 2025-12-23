@@ -1,0 +1,23 @@
+/* Custom Swiper Styles */
+.swiper {
+  overflow: visible;
+}
+
+.swiper-slide {
+  height: auto;
+}
+
+/* Hide default navigation buttons since we're using custom ones */
+.swiper-button-next,
+.swiper-button-prev {
+  display: none;
+}
+
+/* Custom scrollbar styling if needed */
+.swiper-scrollbar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.swiper-scrollbar-drag {
+  background: #E50000;
+}
