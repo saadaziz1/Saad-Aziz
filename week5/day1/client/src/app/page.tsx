@@ -45,7 +45,7 @@ export default function Home() {
   // Prevent multiple socket instances
   if (!socketRef.current) {
     // Initialize socket
-    socketRef.current = io(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000", {
+    socketRef.current = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
       query: { username: userId },
       transports: ['websocket', 'polling'],
       forceNew: false,
