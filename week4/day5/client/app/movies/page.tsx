@@ -11,9 +11,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/authStore';
 import { ArrowLeft } from 'lucide-react';
 import { MovieCarousel } from '@/components/ui/movie-carousel';
-import { useMemo } from 'react';
+import { useMemo, Suspense } from 'react';
 
-const page = () => {
+function MoviesContent() {
   const { movies, isMoviesLoading } = useMovies();
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
@@ -268,6 +268,18 @@ const page = () => {
       
       <FreeTrialSection onStartTrial={handleFreeTrialClick} />
     </>
+  )
+}
+
+const page = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading movies...</div>
+      </div>
+    }>
+      <MoviesContent />
+    </Suspense>
   )
 }
 
