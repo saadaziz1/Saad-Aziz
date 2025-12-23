@@ -8,14 +8,10 @@ interface JobCategoryListProps {
 }
 
 export function JobCategoryList({ jobInfo }: JobCategoryListProps) {
-  const { addRole, addLevel, addLanguages, addTools } = useStore((store) => {
-    return {
-      addRole: store.addRole,
-      addLevel: store.addLevel,
-      addLanguages: store.addLanguages,
-      addTools: store.addTools,
-    };
-  });
+  const addRole = useStore((store) => store.addRole);
+  const addLevel = useStore((store) => store.addLevel);
+  const addLanguages = useStore((store) => store.addLanguages);
+  const addTools = useStore((store) => store.addTools);
 
   return (
     <ul className="laptop:gap-4 laptop:space-x-0 laptop:flex-wrap flex space-x-5 text-cyan-800">

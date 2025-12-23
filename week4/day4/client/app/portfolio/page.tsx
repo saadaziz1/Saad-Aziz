@@ -243,20 +243,20 @@ export default function PortfolioPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedData.map((holding) => {
+                    {paginatedData.map((holding, index) => {
                       const currentValue = holding.currentPrice ? holding.amount * holding.currentPrice : holding.amount * holding.avgPrice;
                       const pnl = currentValue - holding.totalCost;
                       const pnlPercent = holding.totalCost > 0 ? (pnl / holding.totalCost) * 100 : 0;
                       
                       return (
-                        <TableRow key={holding.symbol} className="hover:bg-muted/50">
+                        <TableRow key={holding.symbol || `holding-${index}`} className="hover:bg-muted/50">
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                               <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                {holding.symbol.slice(0, 2)}
+                                {(holding.symbol || 'UN').slice(0, 2)}
                               </div>
                               <div className="flex flex-col">
-                                <span className="font-medium">{holding.symbol.replace('USDT', '/USDT')}</span>
+                                <span className="font-medium">{(holding.symbol || 'Unknown').replace('USDT', '/USDT')}</span>
                                 <div className="sm:hidden text-xs text-muted-foreground">
                                   Avg: ${holding.avgPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>

@@ -135,7 +135,7 @@ const ProductDetails = ({
       {/* Variants */}
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-4 text-[#282828] dark:text-foreground">Variants</h3>
-        <div className="-mx-4 px-4 overflow-x-auto">
+        <div className="-mx-4 px-4 overflow-x-auto h-32">
           <div className="flex gap-2 pb-2" style={{width: 'max-content'}}>
             {variants.map((variant, index) => {
               const variantOutOfStock = variant.stock <= 0;

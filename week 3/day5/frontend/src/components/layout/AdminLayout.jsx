@@ -6,7 +6,8 @@ const AdminLayout = ({ children, pageTitle }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen min-w-screen">
+    <div className='max-w-400 mx-auto'>
+    <div className="flex  ">
       <AdminNav isOpen={isNavOpen} setIsOpen={setIsNavOpen} />
       <main className="flex-1 w-full lg:w-[840px] xl:w-[1090px] ">
         <div className="lg:hidden flex justify-between items-center p-4 border-b">
@@ -22,6 +23,7 @@ const AdminLayout = ({ children, pageTitle }) => {
           {children}
         </div>
       </main>
+    </div>
     </div>
   );
 };

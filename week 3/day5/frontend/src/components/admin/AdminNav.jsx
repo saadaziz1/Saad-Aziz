@@ -48,11 +48,14 @@ const AdminNav = ({ isOpen, setIsOpen }) => {
       )}
 
       {/* Sidebar */}
-      <div className={`
-        fixed lg:static top-0 left-0 h-full w-64 bg-background border-r border-border z-50 flex-shrink-0
-        transform transition-transform duration-300 lg:transform-none
-        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+     <div className={`
+  fixed lg:relative
+  top-0 left-0 h-screen w-64
+  bg-background border-r border-border
+  z-50 flex-shrink-0
+  transform transition-transform duration-300
+  ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-4 border-b border-border">

@@ -38,8 +38,13 @@ app.use(cors()); // customize origin when you wire frontend
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-// Swagger JSON
+// Swagger JSON spec
 app.get("/swagger.json", (req, res) => {
+  res.json(swaggerSpec);
+});
+
+// Standard OpenAPI JSON endpoint
+app.get("/api-docs.json", (req, res) => {
   res.json(swaggerSpec);
 });
 

@@ -18,6 +18,7 @@ const Profile = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authAPI.me().then(res => res.data),
+    enabled: false, // Disable API call, use authUser instead
   });
 
   const { data: ordersData, isLoading: ordersLoading } = useOrders();
@@ -28,13 +29,17 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    if (data?.user) {
+    const currentUser = data?.user || authUser;
+
+    if (currentUser) {
       setFormData({
-        name: data.user.name || '',
-        email: data.user.email || '',
+        name: currentUser.name || '',
+        email: currentUser.email || '',
       });
     }
-  }, [data]);
+  }, [data, authUser]);
+
+
 
   const updateProfileMutation = useMutation({
     mutationFn: (data) => authAPI.updateProfile(data).then(res => res.data),
@@ -61,23 +66,25 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateProfileMutation.mutateAsync(formData);
+    await updateProfileMutation.mutateAsync({ name: user.name, email: user.email });
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const updatedUser = { ...user, [e.target.name]: e.target.value };
+    if (data?.user) {
+      queryClient.setQueryData(['user-profile'], { ...data, user: updatedUser });
+    } else {
+      useAuthStore.setState({ user: updatedUser });
+    }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 md:p-8">
-        <p className="text-muted-foreground">Loading profile...</p>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-background flex items-center justify-center p-4 md:p-8">
+  //       <p className="text-muted-foreground">Loading profile...</p>
+  //     </div>
+  //   );
+  // }
 
   const user = data?.user || authUser;
 
@@ -116,7 +123,7 @@ const Profile = () => {
                     <Input
                       id="name"
                       name="name"
-                      value={formData.name}
+                      value={user?.name || ''}
                       onChange={handleChange}
                       required
                     />
@@ -128,7 +135,7 @@ const Profile = () => {
                       id="email"
                       name="email"
                       type="email"
-                      value={formData.email}
+                      value={user?.email || ''}
                       onChange={handleChange}
                       required
                     />

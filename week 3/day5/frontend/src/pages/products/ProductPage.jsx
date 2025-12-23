@@ -8,6 +8,7 @@ import RelatedProducts from "../../components/products/RelatedProducts";
 import { useProduct, useProducts } from "../../hooks/useProducts";
 import { useAddToCart } from "../../hooks/useCart";
 import useAuthStore from "../../store/authStore";
+import { toast } from "../../hooks/useToast";
 
 export const ProductPage = () => {
   const { id } = useParams();
@@ -102,17 +103,29 @@ export const ProductPage = () => {
 
     const selectedVariant = product.variants.find(v => v.id === currentSelectedVariantId);
     if (!selectedVariant) {
-      alert('Please select a variant');
+      toast({
+        title: "Variant Required",
+        description: "Please select a variant before adding to cart.",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!selectedVariant.isActive) {
-      alert('This variant is not available');
+      toast({
+        title: "Unavailable Variant",
+        description: "This variant is not available.",
+        variant: "destructive",
+      });
       return;
     }
 
     if (selectedVariant.stock < quantity) {
-      alert(`Only ${selectedVariant.stock} items available in stock`);
+      toast({
+        title: "Insufficient Stock",
+        description: `Only ${selectedVariant.stock} items available in stock.`,
+        variant: "destructive",
+      });
       return;
     }
 
@@ -122,10 +135,17 @@ export const ProductPage = () => {
         variantId: selectedVariant.variantId || selectedVariant.id,
         quantity: quantity,
       });
-      alert('Product added to cart!');
-      // Optionally show success message or open cart
+      toast({
+        title: "Added to Cart",
+        description: `${quantity} ${selectedVariant.label} added to your cart.`,
+        variant: "success",
+      });
     } catch (error) {
-      console.error('Failed to add to cart:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add product to cart. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

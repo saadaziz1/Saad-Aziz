@@ -1,13 +1,16 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { cryptoApi } from './cryptoApi';
+import { configureStore, createSlice } from '@reduxjs/toolkit';
 
+// Simple slice to keep store valid
+const appSlice = createSlice({
+  name: 'app',
+  initialState: { initialized: true },
+  reducers: {},
+});
 
 export const store = configureStore({
   reducer: {
-    [cryptoApi.reducerPath]: cryptoApi.reducer,
+    app: appSlice.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(cryptoApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

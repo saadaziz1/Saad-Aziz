@@ -1,7 +1,7 @@
 'use client';
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useGetInitialPriceQuery, useGet24hrTickerQuery } from '../store/cryptoApi';
+import { useSocket } from '../hooks/useSocket';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
@@ -15,36 +15,33 @@ interface CryptoRowProps {
 
 const CryptoRow: React.FC<CryptoRowProps> = ({ symbol, socketPrice }) => {
   const router = useRouter();
-  const { data, isLoading, isError } = useGetInitialPriceQuery(symbol);
-  const { data: tickerData } = useGet24hrTickerQuery(symbol);
-
-  const currentPrice = socketPrice || data?.price || '0';
-  const change24h = tickerData ? parseFloat(tickerData.priceChangePercent) : 0;
-
-  // Generate dummy 24h chart data based on current price and 24h change
+  const { prices, tickerData } = useSocket();
+  
+  const currentPrice = socketPrice || prices[symbol] || '0';
+  const ticker = tickerData[symbol];
+  const change24h = ticker?.priceChangePercent || 0;
+  
+  // Generate simple trending chart based on 24h change
   const chartData = useMemo(() => {
-    const basePrice = parseFloat(currentPrice);
-    if (basePrice <= 0) return [];
+    if (change24h === 0) return Array.from({ length: 8 }, () => ({ value: 50 }));
     
-    const startPrice = basePrice / (1 + change24h / 100);
-    return Array.from({ length: 24 }, (_, i) => {
-      const progress = i / 23;
-      const variation = (Math.random() - 0.5) * 0.02;
-      const price = startPrice + (basePrice - startPrice) * progress + startPrice * variation;
-      return { value: price };
+    const isPositive = change24h > 0;
+    const points = 8;
+    
+    return Array.from({ length: points }, (_, i) => {
+      const progress = i / (points - 1);
+      if (isPositive) {
+        return { value: 20 + progress * 60 + Math.random() * 10 };
+      } else {
+        return { value: 80 - progress * 60 - Math.random() * 10 };
+      }
     });
-  }, [currentPrice, change24h]);
-
-  if (isLoading) return <CryptoRowSkeleton />;
-
-  if (isError)
-    return (
-      <TableRow>
-        <TableCell colSpan={4} className="text-center text-destructive">
-          Error
-        </TableCell>
-      </TableRow>
-    );
+  }, [change24h]);
+  
+  // Show skeleton if no ticker data or invalid price
+  if (!ticker || parseFloat(currentPrice) <= 0) {
+    return <CryptoRowSkeleton />;
+  }
 
   const formattedPrice = parseFloat(currentPrice).toLocaleString('en-US', {
     minimumFractionDigits: 2,

@@ -54,7 +54,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
           tools: null,
         };
         set({ categories: newCategories });
-        localStorage.setItem("categories", JSON.stringify(newCategories));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newCategories));
+        }
         return;
       }
 
@@ -67,7 +69,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
         };
 
         set({ categories: newRole });
-        localStorage.setItem("categories", JSON.stringify(newRole));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newRole));
+        }
       }
     },
 
@@ -82,7 +86,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
           tools: null,
         };
         set({ categories: newCategories });
-        localStorage.setItem("categories", JSON.stringify(newCategories));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newCategories));
+        }
         return;
       }
 
@@ -95,7 +101,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
         };
 
         set({ categories: newLevel });
-        localStorage.setItem("categories", JSON.stringify(newLevel));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newLevel));
+        }
       }
     },
 
@@ -110,7 +118,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
           tools: null,
         };
         set({ categories: newCategories });
-        localStorage.setItem("categories", JSON.stringify(newCategories));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newCategories));
+        }
         return;
       }
 
@@ -125,7 +135,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
         };
 
         set({ categories: newCategories });
-        localStorage.setItem("categories", JSON.stringify(newCategories));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newCategories));
+        }
       }
     },
 
@@ -140,6 +152,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
           tools: [tools],
         };
         set({ categories: newCategories });
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newCategories));
+        }
         return;
       }
 
@@ -154,7 +169,9 @@ export const useStore = create<CategoriesStore>((set, get) => {
         };
 
         set({ categories: newCategories });
-        localStorage.setItem("categories", JSON.stringify(newCategories));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(newCategories));
+        }
       }
     },
 
@@ -185,17 +202,23 @@ export const useStore = create<CategoriesStore>((set, get) => {
 
       if (allPropertiesNull) {
         set({ categories: null });
-        localStorage.removeItem("categories");
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem("categories");
+        }
       } else {
         set({ categories: updatedCategories });
-        localStorage.setItem("categories", JSON.stringify(updatedCategories));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("categories", JSON.stringify(updatedCategories));
+        }
       }
 
     },
 
     clearCategory() {
       set({ categories: null });
-      localStorage.removeItem("categories");
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem("categories");
+      }
     },
   };
 });

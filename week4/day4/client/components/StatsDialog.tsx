@@ -115,7 +115,7 @@ export default function StatsDialog({ coins, prices }: StatsDialogProps) {
                         border: '1px solid #374151',
                         borderRadius: '8px'
                       }}
-                      formatter={(value: number) => [`$${value.toFixed(2)}`, 'Price']}
+                      formatter={(value: number | undefined) => [`$${(value || 0).toFixed(2)}`, 'Price']}
                     />
                     <Bar dataKey="price" fill="#10B981" />
                   </BarChart>

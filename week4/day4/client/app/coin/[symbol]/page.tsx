@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, TrendingUp, TrendingDown, BarChart3, CandlestickChart as CandlestickIcon } from 'lucide-react';
 import TradingChart from '../../../components/TradingChart';
 import { useSocket } from '../../../hooks/useSocket';
-import { useGetInitialPriceQuery, useGetKlinesQuery, useGet24hrTickerQuery } from '../../../store/cryptoApi';
+import { socket } from '../../../socket/socket';
 import Loader from '../../../components/Loader';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 
@@ -20,25 +20,49 @@ export default function CoinDetailsPage() {
   const [timeframe, setTimeframe] = useState<'1m' | '1h' | '4h' | '1d'>('1h');
 
   
-  const { prices } = useSocket();
-  const { data, isLoading } = useGetInitialPriceQuery(symbol);
-  const { data: tickerData, isLoading: tickerLoading } = useGet24hrTickerQuery(symbol);
+  const [klinesData, setKlinesData] = useState<any[]>([]);
+  const [klinesLoading, setKlinesLoading] = useState(false);
+  
+  const { prices, tickerData } = useSocket();
+  const ticker = tickerData[symbol];
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    if (ticker) {
+      setIsLoading(false);
+    }
+  }, [ticker]);
+  
+  const requestKlines = (symbol: string, interval: string, limit: number) => {
+    setKlinesLoading(true);
+    socket.emit('requestKlines', { symbol, interval, limit });
+  };
+  
+  useEffect(() => {
+    const handleKlinesData = ({ symbol: responseSymbol, klines }: { symbol: string; klines: any[] }) => {
+      if (responseSymbol === symbol) {
+        setKlinesData(klines);
+        setKlinesLoading(false);
+      }
+    };
+    
+    socket.on('klinesData', handleKlinesData);
+    return () => {
+      socket.off('klinesData', handleKlinesData);
+    };
+  }, [symbol]);
+  
+  useEffect(() => {
+    requestKlines(symbol, intervalMap[timeframe], limitMap[timeframe]);
+  }, [symbol, timeframe]);
   
   const intervalMap = { '1m': '1m', '1h': '1h', '4h': '4h', '1d': '1d' } as const;
   const limitMap = { '1m': 100, '1h': 100, '4h': 100, '1d': 100 } as const;
   
-  const { data: klinesData, isLoading: klinesLoading } = useGetKlinesQuery({
-    symbol,
-    interval: intervalMap[timeframe],
-    limit: limitMap[timeframe]
-  }, {
-    pollingInterval: timeframe === '1m' ? 5000 : 0
-  });
-  
-  const currentPrice = prices[symbol] || data?.price || '0';
-  const change24h = tickerData ? parseFloat(tickerData.priceChangePercent) : 0;
-  const volume24h = tickerData ? parseFloat(tickerData.volume) * parseFloat(currentPrice) : 0;
-  const marketCap = tickerData ? parseFloat(currentPrice) * parseFloat(tickerData.count) * 1000 : 0;
+  const currentPrice = prices[symbol] || '0';
+  const change24h = ticker ? ticker.priceChangePercent : 0;
+  const volume24h = ticker ? ticker.volume * parseFloat(currentPrice) : 0;
+  const marketCap = ticker ? parseFloat(currentPrice) * ticker.volume * 10 : 0;
 
   const chartData = useMemo(() => {
     if (!klinesData) return [];
@@ -53,7 +77,7 @@ export default function CoinDetailsPage() {
     }));
   }, [klinesData]);
 
-  if (isLoading || klinesLoading || tickerLoading) {
+  if (isLoading || klinesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-4 flex items-center justify-center">
         <Loader size="lg" text="Loading coin details..." />

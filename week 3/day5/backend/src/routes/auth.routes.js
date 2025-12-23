@@ -146,29 +146,7 @@ router.post('/login', validateRequest(loginSchema), authController.login);
  */
 router.get('/me', authMiddleware, authController.me);
 
-/**
- * @swagger
- * /api/auth/profile:
- *   put:
- *     summary: Update user profile
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: Profile updated successfully
- */
+
 router.put('/profile', authMiddleware, authController.updateProfile);
 
 /**

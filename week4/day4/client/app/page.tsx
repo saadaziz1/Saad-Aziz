@@ -3,10 +3,14 @@
 import CryptoTable from '../components/CryptoTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Activity, DollarSign } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TrendingUp, TrendingDown, Activity, DollarSign } from 'lucide-react';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { useSocket } from '../hooks/useSocket';
 
 export default function DashboardPage() {
+  const { marketStats } = useSocket();
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-4 pt-8">
@@ -25,8 +29,18 @@ export default function DashboardPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$2.1T</div>
-              <p className="text-xs text-muted-foreground">+2.1% from yesterday</p>
+              <div className="text-2xl font-bold">${marketStats?.totalMarketCap || '2.1T'}</div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                {marketStats?.marketCapChange && marketStats.marketCapChange >= 0 ? (
+                  <TrendingUp className="h-3 w-3 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 text-red-500" />
+                )}
+                {marketStats?.marketCapChange ? 
+                  `${marketStats.marketCapChange >= 0 ? '+' : ''}${marketStats.marketCapChange.toFixed(1)}% from yesterday` : 
+                  '+2.1% from yesterday'
+                }
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -35,8 +49,18 @@ export default function DashboardPage() {
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$89.2B</div>
-              <p className="text-xs text-muted-foreground">+12.5% from yesterday</p>
+              <div className="text-2xl font-bold">${marketStats?.totalVolume || '89.2B'}</div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                {marketStats?.volumeChange && marketStats.volumeChange >= 0 ? (
+                  <TrendingUp className="h-3 w-3 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 text-red-500" />
+                )}
+                {marketStats?.volumeChange ? 
+                  `${marketStats.volumeChange >= 0 ? '+' : ''}${marketStats.volumeChange.toFixed(1)}% from yesterday` : 
+                  '+12.5% from yesterday'
+                }
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -45,7 +69,7 @@ export default function DashboardPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,247</div>
+              <div className="text-2xl font-bold">{marketStats?.activeCoins || 1247}</div>
               <p className="text-xs text-muted-foreground">Live trading pairs</p>
             </CardContent>
           </Card>

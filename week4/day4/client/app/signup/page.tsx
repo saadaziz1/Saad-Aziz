@@ -92,7 +92,7 @@ export default function SignupPage() {
               onChange={(e) => { setPassword(e.target.value); setError(''); }}
               required
             />
-            <Button type="submit" className="w-full" disabled={loading || success}>
+            <Button type="submit" className="w-full" disabled={loading || !!success}>
               {loading ? 'Signing up...' : 'Sign Up'}
             </Button>
             <Button

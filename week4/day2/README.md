@@ -11,15 +11,17 @@ A modern job listing application with advanced filtering capabilities and dark m
 - **Responsive Design**: Optimized for desktop and mobile devices
 - **Skeleton Loading**: Smooth loading states for better UX
 - **Persistent Filters**: Filter preferences saved in localStorage
+- **Static Generation**: Pre-built pages for optimal performance
+- **Conditional UI**: Filter bar hidden on job detail pages
 
 ## Technologies Used
 
-- **Next.js** - React framework for production
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Zustand** - Lightweight state management
-- **React** - UI library
-- **ESLint** - Code linting and formatting
+- **Next.js 15** - React framework with App Router
+- **React 19** - Latest React with improved hydration
+- **TypeScript 5.7** - Type-safe JavaScript
+- **Tailwind CSS 3.3** - Utility-first CSS framework
+- **Zustand 5** - Lightweight state management
+- **ESLint 9** - Code linting and formatting
 
 ## Getting Started
 

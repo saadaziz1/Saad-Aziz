@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import AdminLayout from './components/layout/AdminLayout';
+import { Toaster } from './components/ui/toaster';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -25,7 +26,7 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-container mx-auto">
+      <main className="flex-1 max-w-container ">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
@@ -47,6 +48,7 @@ const App = () => {
           } />
           
           {/* Admin Routes */}
+          
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout pageTitle="Dashboard"><Dashboard /></AdminLayout>
@@ -77,9 +79,12 @@ const App = () => {
               <AdminLayout pageTitle="Users"><Users /></AdminLayout>
             </ProtectedRoute>
           } />
+          
         </Routes>
+        
       </main>
       <Footer />
+      <Toaster />
     </div>
   );
 };

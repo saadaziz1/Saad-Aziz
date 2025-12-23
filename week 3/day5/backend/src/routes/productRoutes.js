@@ -128,6 +128,15 @@ router.get('/:id', productController.get);
  * /api/products:
  *   post:
  *     summary: Create a new product with image upload
+ *     description: |
+ *       Creates a new product with optional image upload and variants.
+ *       
+ *       **Important Notes:**
+ *       - SKUs are auto-generated if not provided in variants
+ *       - Use unique values to avoid duplicate errors
+ *       - Slug is auto-generated from name if not provided
+ *       - To clear form completely, refresh the page instead of using reset
+ *       - Variants field accepts JSON array or empty array []
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -145,27 +154,31 @@ router.get('/:id', productController.get);
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Premium Earl Grey"
+ *                 example: "Premium Earl Grey Tea"
+ *                 description: "Unique product name"
  *               description:
  *                 type: string
- *                 example: "A classic blend of Ceylon black tea with bergamot oil"
+ *                 example: "A classic blend of Ceylon black tea with bergamot oil and natural flavoring"
  *               category:
  *                 type: string
  *                 enum: ["Black teas", "Green teas", "White teas", "Chai", "Matcha", "Herbal teas", "Oolong", "Rooibos", "Teaware"]
  *                 example: "Black teas"
  *               basePrice:
  *                 type: number
- *                 example: 59.99
+ *                 example: 24.99
+ *                 minimum: 0
  *               tags:
  *                 type: string
- *                 example: "organic,premium,iranian"
+ *                 example: "organic,premium,bergamot"
+ *                 description: "Comma-separated tags"
  *               slug:
  *                 type: string
- *                 example: "premium-saffron"
+ *                 example: "premium-earl-grey-tea"
+ *                 description: "URL-friendly slug (auto-generated if not provided)"
  *               variants:
  *                 type: string
- *                 description: JSON array of variants with required fields
- *                 example: '[{"name":"50g","priceDiff":0,"stock":100,"sku":"TEA-50G-001","isActive":true},{"name":"100g","priceDiff":5,"stock":50,"sku":"TEA-100G-001","isActive":true}]'
+ *                 description: "JSON array of variants. SKU is auto-generated if not provided. Leave empty array [] for no variants."
+ *                 example: '[{"name":"50g","priceDiff":0,"stock":100,"isActive":true},{"name":"100g","priceDiff":5,"stock":50,"isActive":true}]'
  *               image:
  *                 type: string
  *                 format: binary
@@ -183,7 +196,29 @@ router.get('/:id', productController.get);
  *                 product:
  *                   $ref: '#/components/schemas/Product'
  *       400:
- *         description: Bad request - validation error
+ *         description: Bad request - validation error or duplicate data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Duplicate SKU detected. SKUs must be unique across all variants."
+ *             examples:
+ *               duplicateError:
+ *                 summary: "Duplicate SKU Error"
+ *                 value:
+ *                   success: false
+ *                   message: "Duplicate SKU detected. SKUs must be unique across all variants."
+ *               validationError:
+ *                 summary: "Validation Error"
+ *                 value:
+ *                   success: false
+ *                   message: "Product name is required"
  *       401:
  *         description: Unauthorized - no token provided
  *       403:
@@ -202,6 +237,14 @@ router.post(
  * /api/products/{id}:
  *   put:
  *     summary: Update existing product with optional image
+ *     description: |
+ *       Updates an existing product. All fields are optional.
+ *       
+ *       **Important Notes:**
+ *       - SKUs are auto-generated if not provided in variants
+ *       - Only provide fields you want to update
+ *       - Variants field accepts JSON array or empty array []
+ *       - Image is optional - existing image kept if not provided
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -221,24 +264,65 @@ router.post(
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "Updated Premium Earl Grey Tea"
+ *                 description: "Product name"
  *               description:
  *                 type: string
+ *                 example: "Updated description with new details"
  *               category:
  *                 type: string
+ *                 enum: ["Black teas", "Green teas", "White teas", "Chai", "Matcha", "Herbal teas", "Oolong", "Rooibos", "Teaware"]
+ *                 example: "Black teas"
  *               basePrice:
  *                 type: number
+ *                 example: 29.99
+ *                 minimum: 0
  *               tags:
  *                 type: string
+ *                 example: "organic,premium,updated"
+ *                 description: "Comma-separated tags"
+ *               slug:
+ *                 type: string
+ *                 example: "updated-premium-earl-grey"
+ *                 description: "URL-friendly slug"
  *               variants:
  *                 type: string
- *                 description: JSON array of variants
+ *                 description: "JSON array of variants. SKU is auto-generated if not provided. Leave empty array [] for no variants."
+ *                 example: '[{"name":"50g","priceDiff":0,"stock":75,"isActive":true},{"name":"100g","priceDiff":8,"stock":25,"isActive":true}]'
  *               image:
  *                 type: string
  *                 format: binary
- *                 description: New featured image (optional)
+ *                 description: "New featured image (optional - keeps existing if not provided)"
+ *              
  *     responses:
  *       200:
  *         description: Product updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 product:
+ *                   $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Bad request - validation error or duplicate data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Duplicate SKU detected. SKUs must be unique across all variants."
+ *       401:
+ *         description: Unauthorized - no token provided
+ *       403:
+ *         description: Forbidden - not admin
  *       404:
  *         description: Product not found
  */
@@ -278,48 +362,6 @@ router.delete(
   productController.delete
 );
 
-/**
- * @swagger
- * /api/products/upload/image:
- *   post:
- *     summary: Upload standalone image to Cloudinary
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - image
- *             properties:
- *               image:
- *                 type: string
- *                 format: binary
- *                 description: Image file to upload
- *     responses:
- *       200:
- *         description: Image uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 imageUrl:
- *                   type: string
- *                   description: Cloudinary URL
- *                   example: "https://res.cloudinary.com/dxnxa5jgc/image/upload/v1234567/filename.jpg"
- *                 message:
- *                   type: string
- *       400:
- *         description: No file uploaded
- *       500:
- *         description: Cloudinary upload failed
- */
 router.post(
   '/upload/image',
   authMiddleware,
@@ -422,6 +464,7 @@ router.post(
  *         sku:
  *           type: string
  *           example: "EARL-100G-001"
+ *           description: "Auto-generated if not provided. Must be unique across all variants."
  *         isActive:
  *           type: boolean
  *           default: true

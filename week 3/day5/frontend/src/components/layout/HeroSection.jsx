@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 
 const HeroSection = () => {
   return (
-    <div className="lg:w-301 w-full flex flex-col lg:flex-row lg:justify-between justify-center items-center 2xl:mx-auto mx-0 font-montserrat">
+    <div className="lg:max-w-301  w-full flex flex-col lg:flex-row lg:justify-between justify-center items-center 2xl:mx-auto mx-0 font-montserrat">
       <div className="lg:w-1/2 w-full block ">
         <img
           src="./LayoutImages/Landing Main Image.png"

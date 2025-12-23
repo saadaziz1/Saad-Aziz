@@ -1,12 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useStore } from "@/store";
 import { CategoryButton } from "@/components/category-button";
 import { ClearButton } from "@/components/clear-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Header() {
+  const pathname = usePathname();
   const categories = useStore((store) => store.categories);
+  const isJobDetailsPage = pathname.startsWith('/jobs/');
 
   return (
     <header className="h-[156px] bg-cyan-800 dark:bg-gray-800 bg-header-desktop bg-cover bg-center transition-colors relative">
@@ -15,7 +18,7 @@ export function Header() {
           <ThemeToggle />
         </div>
         <div className="flex items-end h-full pb-4">
-          {categories && (
+          {categories && !isJobDetailsPage && (
             <div className="mx-auto mb-[-30px] flex w-full max-w-job justify-between gap-4 rounded-lg bg-white dark:bg-gray-800 px-10 py-5 transition-colors shadow-lg">
           <div className="laptop:gap-2 flex flex-wrap gap-4 ">
             {categories.role && (

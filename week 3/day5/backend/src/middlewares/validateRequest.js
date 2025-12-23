@@ -11,7 +11,7 @@ const validateRequest = (schema) => (req, res, next) => {
         field: e.path.join('.') || 'unknown',
         message: e.message
       }));
-      return res.status(422).json({ success: false, errors });
+      return res.status(400).json({ success: false, errors });
     }
     next(err);
   }
