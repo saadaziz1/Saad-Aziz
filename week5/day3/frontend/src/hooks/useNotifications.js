@@ -6,53 +6,52 @@ import { toast } from './useToast';
 import useAuthStore from '../store/authStore';
 
 export const useNotifications = () => {
-  const socket = useSocket();
+  const { socket, isConnected } = useSocket();
   const { addNotification } = useNotificationStore();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !isConnected || !user) {
+      console.log('Waiting for socket connection...', { socket: !!socket, isConnected, user: !!user });
+      return;
+    }
 
-    // Listen for new reviews (broadcast to all users)
+    console.log('Setting up notification listeners - socket connected');
+
     const handleNewReview = (data) => {
-      console.log('Received newReview event:', data);
-      
-      // Always refresh reviews for all users (including author)
+      console.log('✅ New review received:', data);
+      const reviewData = data._doc || data;
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
       
-      // Skip notification if this is from the current user or if excludeUserId matches
-      if (data.excludeUserId === user?.id || data.userId?._id === user?.id) {
+      if (data.excludeUserId === user?.id || reviewData.userId?._id === user?.id) {
+        console.log('Skipping notification for current user');
         return;
       }
       
       addNotification({
         type: 'new-review',
         title: 'New Review',
-        message: `${data.userId?.name || 'Someone'} added a new review`,
-        data,
+        message: `${reviewData.userId?.name || 'Someone'} added a new review`,
+        data: reviewData,
       });
       
       toast({
         title: 'New Review',
-        description: `${data.userId?.name || 'Someone'} just reviewed a product!`,
+        description: `${reviewData.userId?.name || 'Someone'} just reviewed a product!`,
         variant: 'default',
       });
     };
 
-    // Listen for review replies (direct to review owner)
     const handleReviewReply = (data) => {
+      console.log('✅ Review reply received:', data);
       addNotification({
         type: 'review-reply',
         title: 'New Reply',
         message: `Someone replied to your review`,
         data,
       });
-      
-      // Aggressively refresh reviews
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.refetchQueries({ queryKey: ['reviews'] });
-      
       toast({
         title: 'New Reply',
         description: 'Someone replied to your review!',
@@ -60,27 +59,20 @@ export const useNotifications = () => {
       });
     };
 
-    // Listen for review likes
     const handleReviewLike = (data) => {
+      console.log('✅ Review like received:', data);
       addNotification({
         type: 'review-like',
         title: 'Review Liked',
         message: `Someone liked your review`,
         data,
       });
-      
-      // Aggressively refresh reviews
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.refetchQueries({ queryKey: ['reviews'] });
     };
 
-    // Listen for review updates (replies and likes)
     const handleReviewUpdate = (data) => {
-      console.log('Received reviewUpdate event:', data);
-      // Aggressively refresh all review queries
+      console.log('✅ Review update received:', data);
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.refetchQueries({ queryKey: ['reviews'] });
-      console.log('Invalidated and refetched reviews queries due to reviewUpdate');
     };
 
     socket.on('newReview', handleNewReview);
@@ -88,13 +80,16 @@ export const useNotifications = () => {
     socket.on('reviewReply', handleReviewReply);
     socket.on('reviewLike', handleReviewLike);
 
+    console.log('Event listeners attached');
+
     return () => {
+      console.log('Cleaning up event listeners');
       socket.off('newReview', handleNewReview);
       socket.off('reviewUpdate', handleReviewUpdate);
       socket.off('reviewReply', handleReviewReply);
       socket.off('reviewLike', handleReviewLike);
     };
-  }, [socket, addNotification, queryClient]);
+  }, [socket, isConnected, addNotification, queryClient, user]);
 
   return socket;
 };

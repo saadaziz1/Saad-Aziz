@@ -199,7 +199,7 @@ const Reviews = ({ productId }) => {
               {review.replies?.length > 0 && (
                 <div className="ml-6 space-y-2 border-l-2 border-gray-100 pl-4">
                   {review.replies.map((reply, index) => (
-                    <div key={index} className="bg-gray-50 p-3 rounded">
+                    <div key={index} className="bg-gray-50 dark:bg-black p-3 rounded">
                       <div className="flex justify-between items-start mb-1">
                         <div className="font-medium text-sm">
                           {reply.userId?.name || 'Anonymous User'}

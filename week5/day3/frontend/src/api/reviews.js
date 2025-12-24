@@ -1,6 +1,6 @@
 import axios from './axios';
 
-const REVIEWS_BASE_URL = 'http://localhost:3001';
+const REVIEWS_BASE_URL = import.meta.env.VITE_API_REVIEWS_SERVICE || 'http://localhost:3001';
 
 const reviewsApi = axios.create({
   baseURL: REVIEWS_BASE_URL,

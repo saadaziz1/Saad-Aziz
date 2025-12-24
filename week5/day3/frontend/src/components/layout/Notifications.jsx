@@ -71,17 +71,17 @@ const Notifications = () => {
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`p-3 rounded cursor-pointer transition-colors ${
+                    className={`p-3 rounded cursor-pointer transition-colors dark:text-white ${
                       notification.read 
-                        ? 'bg-gray-50 hover:bg-gray-100' 
-                        : 'bg-blue-50 hover:bg-blue-100 border-l-4 border-blue-500'
+                        ? 'bg-gray-50 dark:bg-black hover:bg-gray-100' 
+                        : 'bg-blue-50 dark:bg-gray-500 hover:bg-blue-100 border-l-4 border-blue-500 dark:border-yellow-500'
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="font-medium text-sm">{notification.title}</div>
-                        <div className="text-sm text-gray-600">{notification.message}</div>
-                        <div className="text-xs text-gray-400 mt-1">
+                        <div className="text-sm text-gray-600 dark:text-white">{notification.message}</div>
+                        <div className="text-xs text-gray-400 dark:text-white mt-1">
                           {new Date(notification.timestamp).toLocaleTimeString()}
                         </div>
                       </div>
