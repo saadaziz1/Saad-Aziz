@@ -6,7 +6,8 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Heart, MessageCircle, Send, Star } from 'lucide-react';
-import SimpleTextEditor from '../ui/SimpleTextEditor';
+import Editor from '../ui/Editor';
+import { extractMentionIdsFromHTML, extractPlainTextFromHTML } from '../../utils/mentionUtils';
 
 const Reviews = ({ productId }) => {
   const [newReview, setNewReview] = useState('');
@@ -27,17 +28,18 @@ const Reviews = ({ productId }) => {
       navigate('/login');
       return;
     }
-    if (!newReview.trim() || !newRating) return;
+    
+    const plainText = extractPlainTextFromHTML(newReview);
+    if (!plainText.trim() || !newRating) return;
 
-    // Extract mentions from text content
-    const mentionMatches = newReview.match(/@(\w+)/g) || [];
-    const mentions = []; // For now, we'll need user IDs, but this is simplified
+    // Extract mention IDs from HTML content
+    const mentions = extractMentionIdsFromHTML(newReview);
     
     await createReviewMutation.mutateAsync({
       productId,
       content: newReview,
-      plainText: newReview,
-      mentions,
+      plainText: plainText,
+      mentions: mentions,
       rating: newRating,
     });
     setNewReview('');
@@ -45,18 +47,20 @@ const Reviews = ({ productId }) => {
   };
 
   const handleReply = async (reviewId) => {
-    const content = replyText[reviewId]?.trim();
+    const content = replyText[reviewId];
     if (!content || !isAuthenticated()) return;
 
-    // Extract mentions from text content
-    const mentionMatches = content.match(/@(\w+)/g) || [];
-    const mentions = []; // For now, we'll need user IDs, but this is simplified
+    const plainText = extractPlainTextFromHTML(content);
+    if (!plainText.trim()) return;
+
+    // Extract mention IDs from HTML content
+    const mentions = extractMentionIdsFromHTML(content);
 
     await replyMutation.mutateAsync({
       reviewId,
       content,
-      plainText: content,
-      mentions,
+      plainText: plainText,
+      mentions: mentions,
     });
     setReplyText({ ...replyText, [reviewId]: '' });
     setShowReplyForm({ ...showReplyForm, [reviewId]: false });
@@ -102,7 +106,7 @@ const Reviews = ({ productId }) => {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <SimpleTextEditor
+            <Editor
               content={newReview}
               onChange={setNewReview}
               placeholder={isAuthenticated() ? "Write your review... (Type @ to mention users)" : "Write your review... (Login required)"}
@@ -111,7 +115,7 @@ const Reviews = ({ productId }) => {
             />
             <Button 
               type="submit" 
-              disabled={!newReview.trim() || !newRating || createReviewMutation.isPending}
+              disabled={!extractPlainTextFromHTML(newReview).trim() || !newRating || createReviewMutation.isPending}
               className="w-full sm:w-auto self-end"
             >
               <Send className="w-4 h-4 mr-2" />
@@ -156,9 +160,10 @@ const Reviews = ({ productId }) => {
                 </div>
               </div>
               
-              <div className="mb-3 whitespace-pre-wrap">
-                {review.content}
-              </div>
+              <div 
+                className="mb-3 prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: review.content }}
+              />
               
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-3">
                 <Button
@@ -190,7 +195,7 @@ const Reviews = ({ productId }) => {
               {/* Reply Form */}
               {showReplyForm[review._id] && (
                 <div className="flex flex-col gap-2 mb-3">
-                  <SimpleTextEditor
+                  <Editor
                     content={replyText[review._id] || ''}
                     onChange={(content) => setReplyText({ 
                       ...replyText, 
@@ -202,7 +207,7 @@ const Reviews = ({ productId }) => {
                   <Button 
                     size="sm"
                     onClick={() => handleReply(review._id)}
-                    disabled={!replyText[review._id]?.trim() || replyMutation.isPending}
+                    disabled={!extractPlainTextFromHTML(replyText[review._id] || '').trim() || replyMutation.isPending}
                     className="w-full sm:w-auto self-end"
                   >
                     <Send className="w-4 h-4 mr-2" />
@@ -229,9 +234,10 @@ const Reviews = ({ productId }) => {
                           {new Date(reply.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="text-sm whitespace-pre-wrap">
-                        {reply.content}
-                      </div>
+                      <div 
+                        className="text-sm prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: reply.content }}
+                      />
                     </div>
                   ))}
                 </div>

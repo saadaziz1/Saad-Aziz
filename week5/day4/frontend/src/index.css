@@ -129,37 +129,27 @@
   }
 }
 
-/* TipTap Editor Styles */
-.ProseMirror {
-  outline: none !important;
-  border: none !important;
-  padding: 12px;
-  min-height: 60px;
+/* Quill Editor Styles */
+.ql-container {
+  font-family: inherit;
+}
+
+.ql-editor {
+  font-size: 14px;
   line-height: 1.5;
 }
 
-.ProseMirror:focus {
-  outline: none !important;
+/* Global Mention Styles */
+.mention {
+  background-color: rgb(219 234 254);
+  color: rgb(30 64 175);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  display: inline-block;
 }
 
-.ProseMirror .mention {
-  @apply bg-blue-100 text-blue-800 px-1 rounded;
-}
-
-.dark .ProseMirror .mention {
-  @apply bg-blue-900 text-blue-200;
-}
-
-.mention-popup {
-  z-index: 9999;
-}
-
-/* Ensure editor content is visible */
-.ProseMirror p {
-  margin: 0;
-  padding: 0;
-}
-
-.ProseMirror p:not(:last-child) {
-  margin-bottom: 8px;
+.dark .mention {
+  background-color: rgb(30 58 138);
+  color: rgb(191 219 254);
 }

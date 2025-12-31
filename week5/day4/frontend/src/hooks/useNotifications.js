@@ -29,6 +29,12 @@ export const useNotifications = () => {
         return;
       }
       
+      // If user is mentioned, they will get a specific mention notification
+      if (reviewData.mentions && reviewData.mentions.includes(user?.id)) {
+        console.log('Skipping generic notification because user is mentioned');
+        return;
+      }
+      
       addNotification({
         type: 'new-review',
         title: 'New Review',
