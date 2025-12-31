@@ -5,107 +5,90 @@ import { ImageGallery } from "@/components/layout/image-gallery"
 import { BiddingInterface } from "@/components/bidding/bidding-interface"
 import { BidderList } from "@/components/bidding/bidder-list"
 import { PaymentSteps } from "@/components/layout/payment-steps"
+import { AuctionDetailSkeleton } from "@/components/skeletons/AuctionDetailSkeleton"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useParams } from "next/navigation"
 import { useCar } from "@/hooks/useCars"
 import { useBids } from "@/hooks/useBids"
 import { useAuthStore } from "@/stores/authStore"
-import { formatPrice, formatTimeRemaining } from "@/lib/auctionUtils"
+import { formatPrice } from "@/lib/auctionUtils"
 import { useState, useEffect, useCallback } from "react"
+import { useCountdownTimer } from "@/hooks/useCountdownTimer"
 import { useSocketContext } from "@/providers/SocketProvider"
-import { Car } from "@/types/api"
+import { Car, User } from "@/types/api"
 import { toast } from "sonner"
 
 export default function AuctionDetailPage() {
   const params = useParams()
   const id = params.id as string
   const user = useAuthStore((state) => state.user)
-  
+
   const { data: car, isLoading: carLoading, refetch: refetchCar } = useCar(id)
   const { data: bids, isLoading: bidsLoading, refetch: refetchBids } = useBids()
-  
+
   // Real-time state for bid updates
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  
+  const timer = useCountdownTimer(car?.endTime || new Date());
+
   const { joinAuction: socketJoinAuction, currentBids, isConnected, initializeBidData } = useSocketContext();
-  
+
   const joinAuction = useCallback((auctionId: string) => {
     socketJoinAuction(auctionId);
   }, [socketJoinAuction]);
-  
+
   // Initialize socket data when both car and bids are loaded
   useEffect(() => {
     if (bids && car && !carLoading && !bidsLoading) {
       const typedCar = car as Car;
       const carBids = bids.filter(bid => bid.auctionId === typedCar._id);
       const bidCount = carBids.length;
-      const currentPrice = carBids.length > 0 ? 
-        Math.max(...carBids.map(b => b.amount)) : 
+      const currentPrice = carBids.length > 0 ?
+        Math.max(...carBids.map(b => b.amount)) :
         (typedCar.currentPrice || typedCar.startingPrice || 0);
-      
+
       initializeBidData(id, currentPrice, bidCount);
       console.log(`📊 AuctionDetail: Initialized bid data for ${id}:`, { price: currentPrice, count: bidCount, carBids: carBids.length });
     }
   }, [bids, car, id, initializeBidData, carLoading, bidsLoading]);
-  
+
   // Join auction room (only once)
   useEffect(() => {
-    if (id && isConnected) {
-      console.log(`🏠 AuctionDetail: Joining auction room ${id}`);
+    if (isConnected && id) {
+      console.log(`🏠 AuctionDetail: Joining room for ${id}`);
       joinAuction(id);
     }
-  }, [id, isConnected, joinAuction]);
-  
-  // Update time countdown every second
-  useEffect(() => {
-    const updateCountdown = () => {
-      if (car) {
-        const typedCar = car as Car;
-        if (typedCar.endTime) {
-          const now = new Date().getTime();
-          const endTime = new Date(typedCar.endTime).getTime();
-          const difference = endTime - now;
-          
-          if (difference > 0) {
-            setTimeLeft({
-              days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-              hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-              minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-              seconds: Math.floor((difference % (1000 * 60)) / 1000)
-            });
-          } else {
-            setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-          }
-        }
-      }
-    };
-    
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, [car]);
+  }, [isConnected, id, joinAuction]);
+
   // Handle socket updates
   useEffect(() => {
-    if (currentBids[id]) {
-      const socketData = currentBids[id];
+    const socketData = currentBids[id];
+    if (socketData) {
       console.log(`📨 AuctionDetail: Socket update for ${id}:`, socketData);
-      
+
       // Show notification for other users
       if (socketData.bidderId && socketData.bidderId !== user?._id) {
         toast.success(`New bid placed: ${formatPrice(socketData.amount)}`);
       }
-      
+
       // Refresh database data for consistency
       refetchBids();
       refetchCar();
     }
-  }, [currentBids, id, refetchBids, refetchCar, user]);
-  
+  }, [currentBids[id], id, refetchBids, refetchCar, user?._id]);
+
   if (carLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>
+    return (
+      <>
+        <HeroSection
+          title="Auction Details"
+          description="Loading auction information..."
+          breadcrumbs={[{ label: "Home", href: "/" }, { label: "Auction Detail" }]}
+        />
+        <AuctionDetailSkeleton />
+      </>
+    );
   }
-  
+
   if (!car) {
     return <div className="flex justify-center items-center min-h-screen">Car not found</div>
   }
@@ -116,83 +99,91 @@ export default function AuctionDetailPage() {
     const auctionId = typeof bid.auctionId === 'string' ? bid.auctionId : (bid.auctionId as any)?._id;
     return auctionId === typedCar._id;
   }) || []
-  
+
   // Calculate current values from database + socket updates
   const socketData = currentBids[id];
   const dbBidCount = carBids.length;
-  const dbCurrentPrice = carBids.length > 0 ? 
-    Math.max(...carBids.map(b => b.amount)) : 
+  const dbCurrentPrice = carBids.length > 0 ?
+    Math.max(...carBids.map(b => b.amount)) :
     (typedCar.currentPrice || typedCar.startingPrice || 0);
-  
+
   // Use socket data if available and higher than database data, otherwise use database data
   const displayBidCount = (socketData?.count && socketData.count > dbBidCount) ? socketData.count : dbBidCount;
   const displayCurrentPrice = formatPrice(socketData?.amount ?? dbCurrentPrice);
-  const topBidder = carBids.length > 0 ? carBids.reduce((prev, current) => 
+  const topBidder = carBids.length > 0 ? carBids.reduce((prev, current) =>
     (prev.amount > current.amount) ? prev : current
   ) : null
-  
+
   // Check if current user is the winner
-  const isWinner = topBidder && user && (() => {
-    const bidderId = typeof topBidder.bidderId === 'string' ? topBidder.bidderId : (topBidder.bidderId as any)?._id;
-    return bidderId === user._id;
-  })();
-  const winningAmount = topBidder ? topBidder.amount : (typedCar.currentPrice || typedCar.startingPrice || 0)
-  
+  const isAuctionEnded = typedCar.isCompleted || timer.isEnded;
+
+  const userId = user?._id || user?.id || (user as any)?.sub;
+  const isWinnerMatched = !!(topBidder && userId && (() => {
+    const bidderRef = topBidder.bidderId;
+    const bId = typeof bidderRef === 'string' ? bidderRef : (bidderRef as any)?._id || (bidderRef as any)?.id;
+    const match = String(bId) === String(userId);
+    return match;
+  })());
+
+  const isWinner = isAuctionEnded && isWinnerMatched;
+  // Helper to get bidder info (handles both ID and populated User)
+  const extractUser = (bidder: string | User | undefined) => {
+    if (!bidder) return { name: 'Unknown', avatar: '/placeholder-user.jpg', id: '' };
+    if (typeof bidder === 'string') return {
+      name: `User ${bidder.slice(-4)}`,
+      avatar: '/placeholder-user.jpg',
+      id: bidder
+    };
+    const bId = bidder._id || (bidder as any).id || '';
+    return {
+      name: bidder.fullName || bidder.username || `User ${bId.slice(-4)}`,
+      avatar: bidder.profilePicture || '/professional-headshot.png',
+      id: bId,
+      email: bidder.email,
+      mobileNumber: bidder.mobileNumber,
+      nationality: bidder.nationality,
+      idType: bidder.idType
+    };
+  };
+
   // Merge database bidders (no realtime state needed)
   const bidderMap = new Map();
   carBids.forEach(bid => {
-    const bidderId = typeof bid.bidderId === 'string' ? bid.bidderId : (bid.bidderId as any)?._id;
-    const bidderKey = bidderId?.slice(-4) || 'Unknown';
-    
-    if (!bidderMap.has(bidderKey) || bidderMap.get(bidderKey).amount < bid.amount) {
+    const info = extractUser(bid.bidderId);
+    const bidderKey = info.id || 'Unknown';
+
+    if (!bidderMap.has(bidderKey) || bidderMap.get(bidderKey).rawAmount < bid.amount) {
       bidderMap.set(bidderKey, {
         id: bid._id,
-        name: bidderKey,
+        name: info.name,
         amount: formatPrice(bid.amount),
+        rawAmount: bid.amount,
         time: new Date(bid.placedAt).toLocaleTimeString(),
-        avatar: "/placeholder-user.jpg"
+        avatar: info.avatar
       });
     }
   });
-  
+
   const realBidders = Array.from(bidderMap.values())
     .sort((a, b) => parseFloat(b.amount.replace(/[^0-9.-]+/g, "")) - parseFloat(a.amount.replace(/[^0-9.-]+/g, "")));
 
-  // Payment steps for winner
-  const paymentSteps = [
-    {
-      date: new Date().toLocaleDateString(),
-      time: "Immediate",
-      amount: formatPrice(winningAmount),
-      id: `${id}-payment`,
-      status: "current" as const,
-      label: "Payment Due",
-    },
-    {
-      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      time: "2-3 Days",
-      amount: formatPrice(winningAmount),
-      id: `${id}-processing`,
-      status: "pending" as const,
-      label: "Payment Processing",
-    },
-    {
-      date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      time: "5-7 Days",
-      amount: formatPrice(winningAmount),
-      id: `${id}-shipping`,
-      status: "pending" as const,
-      label: "Ready For Shipping",
-    },
-    {
-      date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      time: "10-14 Days",
-      amount: formatPrice(winningAmount),
-      id: `${id}-delivery`,
-      status: "pending" as const,
-      label: "Delivered",
-    },
-  ];
+  // Shipping status logic
+  const paymentDate = typedCar.endTime ? new Date(typedCar.endTime).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
+  const deliveryDate = typedCar.endTime ? new Date(new Date(typedCar.endTime).getTime() + 2 * 1000).toLocaleDateString('en-GB') : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB');
+
+  const getShippingStatus = () => {
+    if (!isAuctionEnded) return "ready";
+    // Ensure we use the latest endTime
+    const end = typedCar.endTime ? new Date(typedCar.endTime).getTime() : Date.now();
+    const timeSinceEnd = Date.now() - end;
+    const ONE_SEC = 1 * 1000;
+    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+    if (timeSinceEnd > FIVE_DAYS) return "delivered";
+    if (timeSinceEnd > ONE_SEC) return "transit";
+    return "ready";
+  }
+  const shippingStatus = getShippingStatus() as "ready" | "transit" | "delivered";
+
 
   const handleBidUpdate = () => {
     // Socket will handle the real-time updates
@@ -201,6 +192,13 @@ export default function AuctionDetailPage() {
       refetchBids();
       refetchCar();
     }, 500);
+  };
+
+  const scrollToPayment = () => {
+    const element = document.getElementById('payment-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -213,12 +211,12 @@ export default function AuctionDetailPage() {
 
       <div className=" min-h-screen py-8 px-4">
         <div className="max-w-7xl mx-auto">
-           <ImageGallery
-                  mainImage={typedCar.photos?.[0] || "/placeholder.jpg"}
-                  thumbnails={typedCar.photos || ["/placeholder.jpg"]}
-                  title={typedCar.title}
-                  status={typedCar.isCompleted ? undefined : "trending"}
-                />
+          <ImageGallery
+            mainImage={typedCar.photos?.[0] || "/placeholder.jpg"}
+            thumbnails={typedCar.photos || ["/placeholder.jpg"]}
+            title={typedCar.title}
+            status={isAuctionEnded ? undefined : "trending"}
+          />
 
 
           <div className="flex flex-col lg:flex-row gap-8 mt-10">
@@ -229,41 +227,41 @@ export default function AuctionDetailPage() {
               <div className="bg-[#F1F2FF] px-5 py-2.5 rounded-sm">
                 <div className="flex flex-col md:flex-row justify-center gap-2  md:justify-between items-start md:items-center">
                   {/* Time Left Section */}
-                  <div >
-                  <div className="flex ">
-                    <div className="text-center bg-white rounded-sm mr-3 p-0.5">
-                      <div className="text-[10px] font-bold text-[#2E3D83]">{timeLeft.days}</div>
-                      <div className="text-[8px] font-medium text-[#939393]">Days</div>
+                  {!isAuctionEnded && <div >
+                    <div className="flex ">
+                      <div className="text-center bg-white rounded-sm mr-3 p-0.5">
+                        <div className="text-[10px] font-bold text-[#2E3D83]">{timer.days}</div>
+                        <div className="text-[8px] font-medium text-[#939393]">Days</div>
+                      </div>
+                      <div className="text-center bg-white rounded-sm mr-3 p-0.5">
+                        <div className="text-[10px] font-bold text-[#2E3D83]">{timer.hours}</div>
+                        <div className="text-[8px] font-medium text-[#939393]">Hours</div>
+                      </div>
+                      <div className="text-center bg-white rounded-sm mr-3 p-0.5">
+                        <div className="text-[10px] font-bold text-[#2E3D83]">{timer.minutes}</div>
+                        <div className="text-[8px] font-medium text-[#939393]">Mins</div>
+                      </div>
+                      <div className="text-center bg-white rounded-sm mr-3 p-0.5">
+                        <div className="text-[10px] font-bold text-[#2E3D83]">{timer.seconds}</div>
+                        <div className="text-[8px] font-medium text-[#939393]">Secs</div>
+                      </div>
+
                     </div>
-                    <div className="text-center bg-white rounded-sm mr-3 p-0.5">
-                      <div className="text-[10px] font-bold text-[#2E3D83]">{timeLeft.hours}</div>
-                      <div className="text-[8px] font-medium text-[#939393]">Hours</div>
-                    </div>
-                    <div className="text-center bg-white rounded-sm mr-3 p-0.5">
-                      <div className="text-[10px] font-bold text-[#2E3D83]">{timeLeft.minutes}</div>
-                      <div className="text-[8px] font-medium text-[#939393]">Mins</div>
-                    </div>
-                    <div className="text-center bg-white rounded-sm mr-3 p-0.5">
-                      <div className="text-[10px] font-bold text-[#2E3D83]">{timeLeft.seconds}</div>
-                      <div className="text-[8px] font-medium text-[#939393]">Secs</div>
-                    </div>
-                   
-                  </div>
-                   <div >
+                    <div >
                       <div className="text-[10px] text-[#939393]">Time Left</div>
                     </div>
-                  </div>
-                  
+                  </div>}
+
                   {/* Current Bid */}
                   <div >
-                    <div className="text-sm font-bold text-[#2E3D83] mb-1.25">{displayCurrentPrice}</div>
-                    <div className="text-[10px] text-[#939393]">Current Bid</div>
+                    <div className={isAuctionEnded ? 'text-sm font-bold text-green-500 mb-1.25' : 'text-sm font-bold text-[#2E3D83] mb-1.25'}>{displayCurrentPrice}</div>
+                    <div className="text-[10px] text-[#939393]">{isAuctionEnded ? 'Winning Bid' : 'Current Bid'}</div>
                   </div>
-                  
+
                   {/* End Time */}
                   <div >
                     <div className="text-sm font-bold text-[#2E3D83] mb-1.25">
-                      {typedCar.endTime ? 
+                      {typedCar.endTime ?
                         new Date(typedCar.endTime).toLocaleString('en-US', {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -271,36 +269,36 @@ export default function AuctionDetailPage() {
                           day: '2-digit',
                           month: 'short',
                           year: 'numeric'
-                        }).replace(',', '') : 
+                        }).replace(',', '') :
                         '06:00pm 03 Jan 2023'
                       }
                     </div>
                     <div className="text-[10px] text-[#939393]">End Time</div>
                   </div>
-                  
+
                   {/* Min Increment */}
-                  <div >
+                  {!isAuctionEnded && <div >
                     <div className="text-sm font-bold text-[#2E3D83] mb-1.25">100</div>
                     <div className="text-[10px] text-[#939393]">Min. Increment</div>
-                  </div>
-                  
+                  </div>}
+
                   {/* Total Bids */}
-                  <div >
+                  {!isAuctionEnded && <div >
                     <div className="text-sm font-bold text-[#2E3D83] mb-1.25">{displayBidCount}</div>
                     <div className="text-[10px] text-[#939393]">Total Bids</div>
-                  </div>
-                  
+                  </div>}
+
                   {/* Lot No */}
                   <div >
                     <div className="text-sm font-bold text-[#2E3D83] mb-1.25">{typedCar._id?.slice(-6) || '379831'}</div>
                     <div className="text-[10px] text-[#939393]">Lot No.</div>
                   </div>
-                  
+
                   {/* Odometer */}
-                  <div >
+                  {!isAuctionEnded && <div >
                     <div className="text-sm font-bold text-[#2E3D83] mb-1.25">10,878 KM</div>
                     <div className="text-[10px] text-[#939393]">Odometer</div>
-                  </div>
+                  </div>}
                 </div>
               </div>
 
@@ -336,91 +334,114 @@ export default function AuctionDetailPage() {
                 </div>
               </div>
 
-              {/* Payment Section for Winner */}
-              {typedCar.isCompleted && isWinner && (
+              {isAuctionEnded && (
                 <>
-                  <div className="bg-orange-100 border border-orange-300 rounded-lg p-4 mb-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Badge className="bg-green-500 text-white mb-2">🎉 Congratulations! You Won!</Badge>
-                        <p className="text-orange-800 font-medium">
-                          Please make your payment within 6 days
-                        </p>
+                  {isWinner && (
+                    <Card className="shadow-sm gap-0 rounded-sm py-0 overflow-hidden border-none text-[#2E3D83]">
+                      <div className="bg-[#2E3D83] text-white p-4">
+                        <h3 className="text-lg font-semibold">Winner</h3>
                       </div>
-                      <button 
-                        className="bg-[#4A5FBF] hover:bg-[#3A4FAF] text-white px-6 py-2 rounded-lg font-medium"
-                        onClick={() => toast.success("Payment processing initiated!")}
-                      >
-                        Make Payment
-                      </button>
-                    </div>
-                  </div>
+                      <div className="p-8  bg-[#F1F2FF]">
+                        <div className="grid grid-cols-1 md:grid-cols-[0.5fr_1fr_1fr] gap-10 items-center">
+                          <div className="w-24 h-24 shrink-0 overflow-hidden rounded-full aspect-square">
+                            <img
+                              src={user?.profilePicture || "/placeholder.svg"}
+                              alt={user?.fullName || "Winner"}
+                              className="w-full h-full object-cover border-4 border-white shadow-sm rounded-full"
+                            />
+                          </div>
+                          <div className=" text-lg mx-2">
+                            <div className="flex justify-between  items-center">
+                              <span className="font-bold w-32 shrink-0">Full Name</span>
+                              <span className="text-[#939393] text-right">{user?.fullName}</span>
+                            </div>
 
-                  <Card className="shadow-sm">
-                    <div className="bg-[#4A5FBF] text-white p-4">
-                      <h3 className="text-lg font-semibold">Winner Details</h3>
-                    </div>
-                    <div className="p-6">
-                      <div className="flex items-center gap-4">
-                        <img
-                          src="/professional-headshot.png"
-                          alt={user?.fullName || "Winner"}
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                        <div className="flex-1 grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-600">Full Name:</span>
-                            <span className="ml-2 font-medium">{user?.fullName}</span>
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold w-32 shrink-0">Mobile Number</span>
+                              <span className="text-[#939393] text-right ">{user?.mobileNumber || "1234567890"}</span>
+                            </div>
+
+
+                            <div className="flex justify-between  items-center">
+                              <span className="font-bold w-32 shrink-0">ID Type</span>
+                              <span className="text-[#939393] text-right">{user?.idType}</span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-gray-600">Email:</span>
-                            <span className="ml-2">{user?.email}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Winning Bid:</span>
-                            <span className="ml-2 font-bold text-[#4A5FBF]">{formatPrice(winningAmount)}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Total Bids:</span>
-                            <span className="ml-2">{displayBidCount}</span>
+                          <div className="text-lg mx-2">
+                            <div className="flex justify-between  items-center">
+                              <span className="font-bold w-32 shrink-0">Email</span>
+                              <span className="text-[#939393] text-right">{user?.email}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold w-32 shrink-0">Nationality</span>
+                              <span className="text-[#939393] text-right">{user?.nationality}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  )}
 
-                  <PaymentSteps steps={paymentSteps} />
+                  <div id="payment-section">
+                    <PaymentSteps
+                      paymentDate={paymentDate}
+                      deliveryDate={deliveryDate}
+                      status={isWinner ? shippingStatus : "ended"}
+                    />
+                  </div>
                 </>
               )}
-
               {/* Top Bidder for non-winners or ongoing auctions */}
-              {(!typedCar.isCompleted || !isWinner) && topBidder && (
-                <Card className="shadow-sm overflow-hidden py-0 rounded-sm bg-[#F1F2FF]">
+              {(!isAuctionEnded || !isWinner) && topBidder && (
+                <Card className="shadow-sm overflow-hidden gap-0 py-0 rounded-sm border-none text-[#2E3D83]">
                   <div className="bg-[#2E3D83] text-white p-4">
-                    <h3 className="text-lg font-semibold">Top Bidder</h3>
+                    <h3 className="text-lg font-semibold">{isAuctionEnded ? "Winner" : "Top Bidder"}</h3>
                   </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src="/professional-headshot.png"
-                        alt="Top Bidder"
-                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                      />
-                      <div className="flex-1">
-                        <div className="grid grid-cols-1 gap-3">
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Bidder ID:</span>
-                            <span className="font-semibold">{(() => {
-                              const bidderId = typeof topBidder.bidderId === 'string' ? topBidder.bidderId : (topBidder.bidderId as any)?._id;
-                              return bidderId?.slice(-8) || 'Unknown';
-                            })()}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Bid Amount:</span>
-                            <span className="font-bold text-[#4A5FBF] text-lg">{displayCurrentPrice}</span>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="p-8 bg-[#F1F2FF]">
+                    <div className="grid grid-cols-1 md:grid-cols-[0.5fr_1fr_1fr] gap-10 items-center">
+                      {(() => {
+                        const info = extractUser(topBidder?.bidderId);
+                        return (
+                          <>
+                            <div className="w-24 h-24 shrink-0 overflow-hidden rounded-full aspect-square">
+                              <img
+                                src={info.avatar}
+                                alt={info.name}
+                                className="w-full h-full object-cover border-4 border-white shadow-sm rounded-full"
+                              />
+                            </div>
+
+                            <div className="text-lg mx-2">
+                              <div className="flex justify-between text-left items-center">
+                                <span className="font-bold w-32 shrink-0">Full Name</span>
+                                <span className="text-[#939393]">{info.name}</span>
+                              </div>
+                              <div className="flex justify-between text-left items-center">
+                                <span className="font-bold w-32 shrink-0">Mobile Number</span>
+                                <span className="text-[#939393]">{info.mobileNumber || "N/A"}</span>
+                              </div>
+                              <div className="flex justify-between text-left items-center">
+                                <span className="font-bold w-32 shrink-0">ID Type</span>
+                                <span className="text-[#939393]">{info.idType || "N/A"}</span>
+                              </div>
+                              <div className="flex justify-between text-left items-center">
+                                <span className="font-bold w-32 shrink-0">Bid Amount</span>
+                                <span className="text-green-600 font-bold">{displayCurrentPrice}</span>
+                              </div>
+                            </div>
+                            <div className="text-lg mx-2">
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold w-32 shrink-0">Email</span>
+                                <span className="text-[#939393] truncate">{info.email || " N/A"}</span>
+                              </div>
+                              <div className="flex justify-between text-left items-center">
+                                <span className="font-bold w-32 shrink-0">Nationality</span>
+                                <span className="text-[#939393]">{info.nationality || "N/A"}</span>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </Card>
@@ -429,19 +450,23 @@ export default function AuctionDetailPage() {
 
             {/* Right Column - Bidder List */}
             <div className=" w-full lg:w-1/4">
-            <div className="mb-5 shadow-sm">
+              <div className="mb-5 shadow-sm">
                 <BiddingInterface
                   currentBid={displayCurrentPrice}
-                  timeRemaining={typedCar.endTime || new Date().toISOString()}
+                  timeRemaining={typedCar.endTime}
                   totalBids={displayBidCount}
-                  isEnded={typedCar.isCompleted}
+                  isLive={isConnected}
+                  isEnded={isAuctionEnded}
+                  isWinner={isWinner}
+                  onMakePayment={scrollToPayment}
+                  ownerId={typeof typedCar.sellerId === 'string' ? typedCar.sellerId : (typedCar.sellerId as any)?._id || (typedCar.sellerId as any)?.id}
                 />
               </div>
 
               <div>
-              <BidderList 
-                bidders={realBidders}
-              />
+                <BidderList
+                  bidders={realBidders}
+                />
               </div>
             </div>
           </div>

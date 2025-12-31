@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { HeroSection } from "@/components/layout/hero-section";
 import { AuctionListingCard } from "@/components/cards/auction-listing-card";
+import { AuctionListingCardSkeleton } from "@/components/skeletons/AuctionListingCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,24 +58,24 @@ export default function CarAuctionPage() {
 
   // Initialize socket data and join rooms for visible cars
   useEffect(() => {
-      if (cars && bids && isConnected) {
-          (cars as Car[]).forEach(car => {
-              // Join the room for real-time updates
-              joinAuction(car._id);
-              
-              // Initialize data if not already present
-               const carBids = bids.filter(bid => {
-                const auctionId = typeof bid.auctionId === 'string' ? bid.auctionId : (bid.auctionId as any)?._id;
-                return auctionId === car._id;
-              });
-              const bidCount = carBids.length;
-              const currentPrice = car.currentPrice || car.startingPrice || 0;
-              // We only initialize if we don't have socket data yet to avoid overwriting newer socket data
-              if (!currentBids[car._id]) {
-                 initializeBidData(car._id, currentPrice, bidCount);
-              }
-          });
-      }
+    if (cars && bids && isConnected) {
+      (cars as Car[]).forEach(car => {
+        // Join the room for real-time updates
+        joinAuction(car._id);
+
+        // Initialize data if not already present
+        const carBids = bids.filter(bid => {
+          const auctionId = typeof bid.auctionId === 'string' ? bid.auctionId : (bid.auctionId as any)?._id;
+          return auctionId === car._id;
+        });
+        const bidCount = carBids.length;
+        const currentPrice = car.currentPrice || car.startingPrice || 0;
+        // We only initialize if we don't have socket data yet to avoid overwriting newer socket data
+        if (!currentBids[car._id]) {
+          initializeBidData(car._id, currentPrice, bidCount);
+        }
+      });
+    }
   }, [cars, bids, isConnected, joinAuction, initializeBidData]);
 
 
@@ -140,7 +141,7 @@ export default function CarAuctionPage() {
 
   const displayCars = paginatedCars.map((car: Car) => {
     const timeLeft = calculateTimeLeft(car.endTime || new Date().toISOString());
-    
+
     // Real-time Socket Data Integration
     const socketData = currentBids[car._id];
 
@@ -149,7 +150,7 @@ export default function CarAuctionPage() {
       const auctionId = typeof bid.auctionId === 'string' ? bid.auctionId : (bid.auctionId as any)?._id;
       return auctionId === car._id;
     }) || [];
-    
+
     const dbPrice = car.currentPrice || car.startingPrice || 0;
     const dbBidCount = carBids.length;
 
@@ -169,6 +170,7 @@ export default function CarAuctionPage() {
       description: car.description || "No description available",
       status:
         timeLeft.expired || car.isCompleted ? null : ("trending" as const),
+      ownerId: car.sellerId,
     };
   });
 
@@ -182,7 +184,7 @@ export default function CarAuctionPage() {
     if (filters.model) searchFilters.model = filters.model;
     if (filters.minPrice > 0) searchFilters.minPrice = filters.minPrice.toString();
     if (filters.maxPrice < 1000000) searchFilters.maxPrice = filters.maxPrice.toString();
-    
+
     setSearchFilters(searchFilters);
     setAppliedFilters(filters);
     setCurrentPage(1);
@@ -249,8 +251,17 @@ export default function CarAuctionPage() {
             { label: "Auction", href: "/car-auction" },
           ]}
         />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center">Loading auctions...</div>
+        <div className="max-w-7xl mx-auto px-4 py-8 min-h-screen">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-3 space-y-6">
+              {[...Array(5)].map((_, i) => (
+                <AuctionListingCardSkeleton key={i} />
+              ))}
+            </div>
+            <div className="hidden lg:block lg:col-span-1">
+              <div className="bg-gray-200 animate-pulse h-96 rounded-md" />
+            </div>
+          </div>
         </div>
       </>
     );
@@ -271,7 +282,7 @@ export default function CarAuctionPage() {
         {/* Mobile Filters - Above cards on small screens */}
         <div className="lg:hidden mb-6">
           <Card className="py-0 bg-[#2E3D83] rounded-sm">
-            <div 
+            <div
               className="bg-[#4658AC] text-white p-4 rounded-t-lg cursor-pointer flex justify-between items-center"
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
@@ -345,8 +356,8 @@ export default function CarAuctionPage() {
                 {Math.min(startIndex + CARS_PER_PAGE, sortedCars.length)} of{" "}
                 {sortedCars.length} Results
               </span>
-              <select 
-                value={sortBy} 
+              <select
+                value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-white text-black px-3 py-1 rounded text-sm"
               >
@@ -362,7 +373,7 @@ export default function CarAuctionPage() {
               {displayCars.map((car: any) => {
                 const statusAllowed =
                   car.status &&
-                  ["trending", "Sold"].includes(String(car.status))
+                    ["trending", "Sold"].includes(String(car.status))
                     ? (car.status as "trending" | "Sold")
                     : null;
                 return (
@@ -378,6 +389,7 @@ export default function CarAuctionPage() {
                     rating={car.rating}
                     description={car.description}
                     status={statusAllowed}
+                    ownerId={car.ownerId}
                   />
                 );
               })}

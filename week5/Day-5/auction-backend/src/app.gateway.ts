@@ -10,7 +10,7 @@ import { NotificationsService } from './notifications/notifications.service';
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: "*",
     credentials: true,
   },
 })
@@ -18,7 +18,7 @@ export class AppGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly notificationService: NotificationsService) {}
+  constructor(private readonly notificationService: NotificationsService) { }
 
   @SubscribeMessage('joinAuction')
   handleJoinAuction(@MessageBody() data: { auctionId: string }) {

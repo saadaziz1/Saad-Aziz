@@ -22,9 +22,49 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @ApiOperation({ summary: 'Login user', description: 'Authenticate user with username/email and password' })
-  @ApiResponse({ status: 200, description: 'Login successful, returns JWT access token' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiOperation({
+    summary: 'User Login',
+    description: 'Authenticate user with username/email and password. Returns JWT access token and user information.'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    schema: {
+      example: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        user: {
+          _id: '507f1f77bcf86cd799439011',
+          username: 'john_doe',
+          email: 'john@example.com',
+          fullName: 'John Doe',
+          mobileNumber: '1234567890',
+          countryCode: '+971'
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: ['Email or username is required', 'Password must be at least 6 characters long'],
+        error: 'Bad Request'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid credentials',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Invalid credentials',
+        error: 'Unauthorized'
+      }
+    }
+  })
   async login(@Body() loginDto: LoginDto) {
     const validatedUser = await this.authService.validateUser(
       loginDto.identifier,
@@ -49,9 +89,38 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  @ApiOperation({ summary: 'Register user', description: 'Create a new user account' })
-  @ApiResponse({ status: 201, description: 'User successfully registered, returns JWT access token' })
-  @ApiResponse({ status: 400, description: 'Username, email or mobile number already exists' })
+  @ApiOperation({
+    summary: 'User Registration',
+    description: 'Create a new user account. Returns JWT access token and user information upon successful registration.'
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully registered',
+    schema: {
+      example: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        user: {
+          _id: '507f1f77bcf86cd799439011',
+          username: 'john_doe',
+          email: 'john@example.com',
+          fullName: 'John Doe',
+          mobileNumber: '1234567890',
+          countryCode: '+971'
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error or user already exists',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Username, email or mobile number already exists',
+        error: 'Bad Request'
+      }
+    }
+  })
   async register(@Body() registerDto: RegisterDto) {
     try {
       const user = await this.authService.register(

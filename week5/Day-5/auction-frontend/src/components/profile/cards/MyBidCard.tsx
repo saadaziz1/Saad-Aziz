@@ -6,6 +6,7 @@ import { useSocketContext } from "@/providers/SocketProvider";
 import type { Car } from "@/types/api";
 import { formatPrice } from "@/lib/auctionUtils";
 import Link from "next/link";
+import { useAuthStore } from "@/stores/authStore";
 
 interface MyBidCardProps {
   car: Car;
@@ -16,6 +17,7 @@ interface MyBidCardProps {
 export function MyBidCard({ car, userBids, onPlaceBid }: MyBidCardProps) {
   const timeLeft = useCountdownTimer(car.endTime);
   const { currentBids } = useSocketContext();
+  const user = useAuthStore((state) => state.user);
 
   const realtimePrice =
     currentBids[car._id]?.amount ||
@@ -29,9 +31,7 @@ export function MyBidCard({ car, userBids, onPlaceBid }: MyBidCardProps) {
   const realTimeBidCount =
     currentBids[car._id]?.count || car.bids?.length || 0;
 
-  const handlePlaceBid = () => {
-    onPlaceBid?.(car);
-  };
+  const isOwner = !!(user && car.sellerId && (String(user._id) === String(car.sellerId) || String((user as any).id) === String(car.sellerId) || String((user as any).sub) === String(car.sellerId)));
 
   return (
     <Card className="bg-white py-0 overflow-hidden">
@@ -64,9 +64,8 @@ export function MyBidCard({ car, userBids, onPlaceBid }: MyBidCardProps) {
             <p className="text-xs text-[#939393]">Winning Bid</p>
           </div>
           <div
-            className={`text-sm rounded-sm p-3 text-right ${
-              isWinning ? "bg-[#E8FFEC] text-[#01DB0A]" : "bg-[#FEE0E0] text-[#FF451D]"
-            }`}
+            className={`text-sm rounded-sm p-3 text-right ${isWinning ? "bg-[#E8FFEC] text-[#01DB0A]" : "bg-[#FEE0E0] text-[#FF451D]"
+              }`}
           >
             <p className="font-bold">{formatPrice(myHighestBid)}</p>
             <p className="text-xs text-[#939393]">Your Bid</p>
@@ -100,15 +99,15 @@ export function MyBidCard({ car, userBids, onPlaceBid }: MyBidCardProps) {
             <p className="text-[#939393]">total bid count</p>
           </div>
         </div>
-<Link href={`/auction/${car._id}`}>
-              <Button
-                variant="outline"
-                className="w-full text-sm font-bold py-3 border-[#2E3D83] text-[#2E3D83]" 
-              >
-                {timeLeft.isEnded  ? "Sold" : "Submit A Bid"}
-              </Button>
-            </Link>
-      
+        <Link href={`/auction/${car._id}`}>
+          <Button
+            variant="outline"
+            disabled={isOwner && !timeLeft.isEnded}
+            className="w-full text-sm font-bold py-3 border-[#2E3D83] text-[#2E3D83]"
+          >
+            {timeLeft.isEnded ? "Sold" : isOwner ? "Your Auction" : "Submit A Bid"}
+          </Button>
+        </Link>
       </div>
     </Card>
   );

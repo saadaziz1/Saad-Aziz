@@ -14,6 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { sellCarSchema } from "@/lib/validationSchemas";
 import { countries } from "@/lib/countryCodes";
+import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // Type inference from schema would be ideal, but for now defining explicit interface matching schema
 interface SellCarFormData {
@@ -45,6 +48,8 @@ export default function SellYourCarPage() {
 
 function SellYourCarContent() {
   const createCarMutation = useCreateCar();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const {
@@ -112,6 +117,11 @@ function SellYourCarContent() {
   };
 
   const onSubmit = async (data: SellCarFormData) => {
+    if (!isAuthenticated) {
+      toast.warning("Please login to list your car for auction");
+      router.push("/login");
+      return;
+    }
     try {
       const formData = new FormData();
 

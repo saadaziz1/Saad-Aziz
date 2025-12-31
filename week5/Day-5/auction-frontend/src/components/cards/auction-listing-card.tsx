@@ -25,6 +25,7 @@ export interface AuctionListingCardProps {
   description: string;
   status?: "trending" | "Sold" | null;
   stacked?: boolean;
+  ownerId?: string;
 }
 
 export function AuctionListingCard({
@@ -39,30 +40,33 @@ export function AuctionListingCard({
   description,
   status,
   stacked = false,
+  ownerId,
 }: AuctionListingCardProps) {
   const { data: wishlist } = useWishlist();
   const addToWishlistMutation = useAddToWishlist();
   const removeFromWishlistMutation = useRemoveFromWishlist();
+  const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isOwner = !!(user && ownerId && (String(user._id) === String(ownerId) || String((user as any).id) === String(ownerId) || String((user as any).sub) === String(ownerId)));
   const sold = useCountdownTimer(endTime);
- 
-if(sold.isEnded){
-  status = "Sold";
-}
 
-  const isInWishlist = wishlist?.carIds?.some(car => 
+  if (sold.isEnded) {
+    status = "Sold";
+  }
+
+  const isInWishlist = wishlist?.carIds?.some(car =>
     typeof car === 'string' ? car === id : car._id === id
   ) || false;
-  
+
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       toast.error('Please login to add items to wishlist');
       return;
     }
-    
+
     try {
       if (isInWishlist) {
         await removeFromWishlistMutation.mutateAsync(id);
@@ -77,20 +81,18 @@ if(sold.isEnded){
     <Card className="relative bg-white border py-0 border-gray-200 rounded-md overflow-hidden">
       {/* Out of flow */}
       {status && (
-          <Badge
-            className={`absolute top-0 left-0 z-10 rounded-xs  ${
-              status === "trending" ? "bg-[#EF233C]" : status === "Sold" ? "bg-[#EAECF3] text-[#2E3D83]" : "bg-green-500"
+        <Badge
+          className={`absolute top-0 left-0 z-10 rounded-xs  ${status === "trending" ? "bg-[#EF233C]" : status === "Sold" ? "bg-[#EAECF3] text-[#2E3D83]" : "bg-green-500"
             }`}
-          >
-            {status}
-          </Badge>
-        )}
+        >
+          {status}
+        </Badge>
+      )}
 
       <div className="absolute -top-3 -right-3 z-10 rounded-full w-14.5 h-14.5 bg-[#EAECF3]">
-        <Star 
-          className={`relative top-5 left-4 w-5 h-5 cursor-pointer transition-colors ${
-            isInWishlist ? 'fill-yellow-400 text-yellow-400' : 'text-[#2E3D83]'
-          }`}
+        <Star
+          className={`relative top-5 left-4 w-5 h-5 cursor-pointer transition-colors ${isInWishlist ? 'fill-yellow-400 text-yellow-400' : 'text-[#2E3D83]'
+            }`}
           onClick={handleWishlistToggle}
         />
       </div>
@@ -98,13 +100,13 @@ if(sold.isEnded){
       {/* MAIN ROW */}
       <div className={stacked ? "flex flex-col" : "flex flex-col md:flex-row"}>
         {/* COLUMN 1 — IMAGE */}
-          {stacked && <h3 className="text-md text-center pt-10 pb-2  font-bold text-[#2E3D83]">{name}</h3>}
+        {stacked && <h3 className="text-md text-center pt-10 pb-2  font-bold text-[#2E3D83]">{name}</h3>}
 
-        <div className={stacked ? "w-full" : "w-full md:w-1/4"}>
+        <div className={stacked ? "w-full h-64 relative overflow-hidden shrink-0" : "w-full md:w-1/4 h-64 md:h-auto relative overflow-hidden shrink-0"}>
           <img
             src={image || "/placeholder.svg"}
             alt={name}
-            className={stacked ? "w-full h-48 object-cover" : "w-full md:h-full h-48 object-cover"}
+            className="absolute inset-0 w-full h-full object-cover"
           />
         </div>
 
@@ -120,9 +122,8 @@ if(sold.isEnded){
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`w-3.5 h-3.5 ${
-                  i < rating ? "fill-[#F4C23D] text-[#F4C23D]" : "text-gray-300"
-                }`}
+                className={`w-3.5 h-3.5 ${i < rating ? "fill-[#F4C23D] text-[#F4C23D]" : "text-gray-300"
+                  }`}
               />
             ))}
           </div>
@@ -142,25 +143,25 @@ if(sold.isEnded){
         <div className={stacked ? "w-full" : "w-full md:w-2/4"}>
           <div className={"flex flex-row"}>
             <div className={stacked ? "w-full px-4  py-0 flex flex-col justify-center" : "w-full md:w-1/2 px-4 py-0 md:py-4 flex flex-col justify-center"}>
-              <div className={stacked? "text-xs font-bold text-[#2E3D83]":"text-xs md:text-sm font-bold text-[#2E3D83]"}>{price}</div>
+              <div className={stacked ? "text-xs font-bold text-[#2E3D83]" : "text-xs md:text-sm font-bold text-[#2E3D83]"}>{price}</div>
               <div className="text-xs text-[#939393] mb-3">Current Bid</div>
 
               <div className="flex justify-start">
                 <div className="text-center bg-white border border-[#2E3D83] rounded-sm mr-2 p-1 font-bold text-[#2E3D83]">
-                  <div className={stacked? "text-[8px]":" text-[8px] md:text-[10px] "}>{timeLeft.days}</div>
-                  <div className={stacked? "text-[6px]":"text-[6px] md:text-[8px] font-medium text-[#939393]"}>Days</div>
+                  <div className={stacked ? "text-[8px]" : " text-[8px] md:text-[10px] "}>{timeLeft.days}</div>
+                  <div className={stacked ? "text-[6px]" : "text-[6px] md:text-[8px] font-medium text-[#939393]"}>Days</div>
                 </div>
                 <div className="text-center bg-white border border-[#2E3D83] rounded-sm mr-2 p-1 font-bold text-[#2E3D83]">
-                  <div className={stacked? "text-[8px]":"text-[8px] md:text-[10px]  "}>{timeLeft.hours}</div>
-                  <div className={stacked? "text-[6px]":"text-[6px] md:text-[8px] font-medium text-[#939393]"}>Hours</div>
+                  <div className={stacked ? "text-[8px]" : "text-[8px] md:text-[10px]  "}>{timeLeft.hours}</div>
+                  <div className={stacked ? "text-[6px]" : "text-[6px] md:text-[8px] font-medium text-[#939393]"}>Hours</div>
                 </div>
                 <div className="text-center bg-white border border-[#2E3D83] rounded-sm mr-2 p-1 font-bold text-[#2E3D83]">
-                  <div className={stacked? "text-[8px]":"text-[8px] md:text-[10px]  "}>{timeLeft.minutes}</div>
-                  <div className={stacked? "text-[6px]":"text-[6px] md:text-[8px] font-medium text-[#939393]"}>Mins</div>
+                  <div className={stacked ? "text-[8px]" : "text-[8px] md:text-[10px]  "}>{timeLeft.minutes}</div>
+                  <div className={stacked ? "text-[6px]" : "text-[6px] md:text-[8px] font-medium text-[#939393]"}>Mins</div>
                 </div>
                 <div className="text-center bg-white border border-[#2E3D83] rounded-sm mr-2 p-1 font-bold text-[#2E3D83]">
-                  <div className={stacked? "text-[8px]":"text-[8px] md:text-[10px]  "}>{timeLeft.seconds}</div>
-                  <div className={stacked? "text-[6px]":"text-[6px] md:text-[8px] font-medium text-[#939393]"}>Secs</div>
+                  <div className={stacked ? "text-[8px]" : "text-[8px] md:text-[10px]  "}>{timeLeft.seconds}</div>
+                  <div className={stacked ? "text-[6px]" : "text-[6px] md:text-[8px] font-medium text-[#939393]"}>Secs</div>
                 </div>
               </div>
               <div className="text-xs text-[#939393] ">Time Left</div>
@@ -168,23 +169,23 @@ if(sold.isEnded){
 
             {/* COLUMN 4 — TOTAL BIDS + END TIME */}
             <div className={stacked ? "w-full px-4 py-0 pt-2 flex flex-col justify-center" : "w-full md:w-1/2 px-4 py-0 pt-2 md:py-4 md:pt-0 flex flex-col justify-center"}>
-              <div className={stacked? "text-xs font-bold text-[#2E3D83]":"text-xs md:text-sm font-bold text-[#2E3D83]"}>
+              <div className={stacked ? "text-xs font-bold text-[#2E3D83]" : "text-xs md:text-sm font-bold text-[#2E3D83]"}>
                 {totalBids}
               </div>
               <div className="text-xs text-[#939393] mb-3">Total Bids</div>
 
-              <div className={stacked? "text-xs font-bold text-[#2E3D83]":"text-xs md:text-sm font-bold text-[#2E3D83]"}>
+              <div className={stacked ? "text-xs font-bold text-[#2E3D83]" : "text-xs md:text-sm font-bold text-[#2E3D83]"}>
                 {endTime
                   ? new Date(endTime)
-                      .toLocaleString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
-                      .replace(",", "")
+                    .toLocaleString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                    .replace(",", "")
                   : "06:00pm 03 Jan 2023"}
               </div>
               <div className="text-xs text-[#939393]">End Time</div>
@@ -195,9 +196,12 @@ if(sold.isEnded){
             <Link href={`/auction/${id}`}>
               <Button
                 variant="outline"
-                className={stacked ? "w-full text-sm font-bold py-3 border-[#2E3D83] text-[#2E3D83]" : "w-full text-sm md:text-base font-bold py-4 md:py-6 border-[#2E3D83] text-[#2E3D83]"}
+                disabled={isOwner && !sold.isEnded}
+                className={stacked
+                  ? "w-full text-sm font-bold py-3 border-[#2E3D83] text-[#2E3D83]"
+                  : "w-full text-sm md:text-base font-bold py-4 md:py-6 border-[#2E3D83] text-[#2E3D83]"}
               >
-                {sold.isEnded ? "Sold" : "Submit A Bid"}
+                {sold.isEnded ? "Sold" : isOwner ? "Your Auction" : "Submit A Bid"}
               </Button>
             </Link>
           </div>

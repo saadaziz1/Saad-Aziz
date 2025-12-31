@@ -12,7 +12,7 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: "*",
     credentials: true,
   },
 })
@@ -38,12 +38,12 @@ export class BiddingGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @ConnectedSocket() client: Socket,
   ) {
     const roomName = `auction-${data.auctionId}`;
-    
+
     // Check if client is already in the room
     if (client.rooms.has(roomName)) {
       return; // Already in room, don't join again
     }
-    
+
     client.join(roomName);
     console.log(`🏠 Client ${client.id} joined auction room: ${roomName}`);
     this.logger.log(`Client ${client.id} joined auction ${data.auctionId}`);
@@ -64,7 +64,7 @@ export class BiddingGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const roomName = `auction-${auctionId}`;
     console.log(`📡 Emitting newBid to room ${roomName}:`, bidData);
     console.log(`👥 Clients in room:`, this.server.sockets.adapter.rooms.get(roomName)?.size || 0);
-    
+
     this.server.to(roomName).emit('newBid', bidData);
     this.logger.log(`Emitted newBid to auction ${auctionId}`);
   }

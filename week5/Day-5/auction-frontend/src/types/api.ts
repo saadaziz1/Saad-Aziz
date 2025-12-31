@@ -6,6 +6,8 @@ export interface User {
   fullName: string;
   mobileNumber: string;
   profilePicture?: string;
+  nationality?: string;
+  idType?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -72,8 +74,8 @@ export interface Auction {
 
 export interface Bid {
   _id: string;
-  auctionId: string;
-  bidderId: string;
+  auctionId: string | Car;
+  bidderId: string | User;
   amount: number;
   placedAt: string;
   createdAt?: string;

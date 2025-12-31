@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useAuthStore } from "@/stores/authStore"
 import { useAuctionTimer } from "@/hooks/useAuctionTimer"
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from "@/hooks/useWishlist"
+import { cn } from "@/lib/utils"
 
 
 export interface CarCardProps {
@@ -16,10 +17,11 @@ export interface CarCardProps {
   currentBid: string
   timeRemaining: string
   endTime?: string
-  status: "trending" | "Sold" 
+  status: "trending" | "Sold"
   rating: number
   description?: string
   endType: string
+  ownerId?: string
 }
 
 export interface AuctionListingProps extends CarCardProps {
@@ -30,21 +32,23 @@ export interface AuctionListingProps extends CarCardProps {
   location: string
 }
 
-export function CarCard({ id, name, image, price, currentBid, timeRemaining, endTime, status, rating }: CarCardProps) {
-   const liveTimeRemaining = useAuctionTimer(endTime || null);
+export function CarCard({ id, name, image, price, currentBid, timeRemaining, endTime, status, rating, ownerId }: CarCardProps) {
+  const liveTimeRemaining = useAuctionTimer(endTime || null);
   const { data: wishlist } = useWishlist();
   const addToWishlistMutation = useAddToWishlist();
   const removeFromWishlistMutation = useRemoveFromWishlist();
-  
-  const isInWishlist = wishlist?.carIds?.some(car => 
+  const user = useAuthStore((state) => state.user);
+  const isOwner = !!(user && ownerId && (String(user._id) === String(ownerId) || String((user as any).id) === String(ownerId) || String((user as any).sub) === String(ownerId)));
+
+  const isInWishlist = wishlist?.carIds?.some(car =>
     typeof car === 'string' ? car === id : car._id === id
   ) || false;
-  
+
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-   
+
+
     try {
       if (isInWishlist) {
         await removeFromWishlistMutation.mutateAsync(id);
@@ -62,33 +66,31 @@ export function CarCard({ id, name, image, price, currentBid, timeRemaining, end
 
         {status && (
           <Badge
-            className={`absolute top-0 left-0 z-10 rounded-xs  ${
-              status === "trending" ? "bg-[#EF233C]" : status === "Sold" ? "bg-[#EAECF3] text-[#2E3D83]" : "bg-green-500"
-            }`}
+            className={`absolute top-0 left-0 z-10 rounded-xs  ${status === "trending" ? "bg-[#EF233C]" : status === "Sold" ? "bg-[#EAECF3] text-[#2E3D83]" : "bg-green-500"
+              }`}
           >
             {status}
           </Badge>
         )}
         <div className="rounded-full absolute -top-6 -right-6 shadow-md w-16.5 h-16.5 z-10">
-          <Star 
-            className={`relative top-8 -right-3 z-10 w-5 h-5 cursor-pointer transition-colors ${
-              isInWishlist ? 'fill-yellow-400 text-yellow-400' : 'text-[#2E3D83] hover:text-red-500'
-            }`}
+          <Star
+            className={`relative top-8 -right-3 z-10 w-5 h-5 cursor-pointer transition-colors ${isInWishlist ? 'fill-yellow-400 text-yellow-400' : 'text-[#2E3D83] hover:text-red-500'
+              }`}
             onClick={handleWishlistToggle}
           />
         </div>
-<div className="h-39 w-full overflow-hidden flex items-center justify-center">
-  <img
-    src={image || "/placeholder.svg"}
-    alt={name}
-    className="w-full h-full object-cover"
-  />
-</div>
+        <div className="h-39 w-full overflow-hidden flex items-center justify-center">
+          <img
+            src={image || "/placeholder.svg"}
+            alt={name}
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
 
       <div className="p-5.5 pt-0">
-        
-       
+
+
 
         <div className="flex items-center justify-between space-y-2 mb-4">
           <div className=" text-sm">
@@ -104,7 +106,16 @@ export function CarCard({ id, name, image, price, currentBid, timeRemaining, end
         </div>
 
         <Link href={`/auction/${id}`}>
-          <Button className={liveTimeRemaining === "Auction Ended" ? "w-full bg-gray-400 py-5 hover:bg-[#3A4FAF] cursor-pointer " : "  w-full bg-[#2E3D83] py-5 hover:bg-[#3A4FAF] cursor-pointer "}>{liveTimeRemaining === "Auction Ended" ? "Sold" : "Submit A Bid"}</Button>
+          <Button
+            disabled={isOwner && liveTimeRemaining !== "Auction Ended"}
+            className={cn(
+              "w-full py-5 cursor-pointer ",
+              liveTimeRemaining === "Auction Ended" ? "bg-gray-400 hover:bg-gray-500" : "bg-[#2E3D83] hover:bg-[#3A4FAF]",
+              isOwner && liveTimeRemaining !== "Auction Ended" && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {liveTimeRemaining === "Auction Ended" ? "Sold" : isOwner ? "Your Auction" : "Submit A Bid"}
+          </Button>
         </Link>
       </div>
     </Card>

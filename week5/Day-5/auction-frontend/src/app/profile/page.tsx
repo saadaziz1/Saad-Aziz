@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const [active, setActive] = useState<
     "personal" | "cars" | "bids" | "wishlist"
   >("personal");
-  
+
   // Sync tab with URL
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -42,13 +42,13 @@ export default function ProfilePage() {
   const logout = useAuthStore((s) => s.logout);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const userId = extractId(user);
-  
+
   const { data: userData, isLoading: isUserLoading, error: userError } = useUser(userId);
-  
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
-  
+
   // Protect route
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
@@ -60,10 +60,10 @@ export default function ProfilePage() {
   useEffect(() => {
     if (userError) {
       console.error("Error fetching user data:", userError);
-       // Optional: logout if 404 or 401
+      // Optional: logout if 404 or 401
       if ((userError as any)?.response?.status === 404 || (userError as any)?.response?.status === 401) {
-         logout();
-         router.push('/login');
+        logout();
+        router.push('/login');
       }
     }
   }, [userError, logout, router]);
@@ -106,7 +106,7 @@ export default function ProfilePage() {
   // ----------------------------
   // Hydration
   // ----------------------------
- 
+
 
   const { data: cars } = useCars();
   const { data: bids } = useBids();
@@ -118,7 +118,7 @@ export default function ProfilePage() {
     cars.forEach((car) => joinAuction(car._id));
   }, [cars, isHydrated, joinAuction]);
 
-  
+
   const { handleProfileSave } = useProfileApi();
 
   // Adapter for ProfileForm: ensures return type is void | Promise<void> and shows toast
@@ -145,21 +145,21 @@ export default function ProfilePage() {
   const myBidCars =
     bids && cars && user
       ? (cars as Car[]).filter((car) =>
-          bids.some(
-            (bid) =>
-              extractId(bid.bidderId) === extractId(user) &&
-              extractId(bid.auctionId) === car._id
-          )
+        bids.some(
+          (bid) =>
+            extractId(bid.bidderId) === extractId(user) &&
+            extractId(bid.auctionId) === car._id
         )
+      )
       : [];
 
   const wishlistCars =
     wishlist?.carIds && cars
       ? (cars as Car[]).filter((car) =>
-          wishlist.carIds
-            .map((id: any) => extractId(id))
-            .includes(car._id)
-        )
+        wishlist.carIds
+          .map((id: any) => extractId(id))
+          .includes(car._id)
+      )
       : [];
 
   return (
@@ -167,7 +167,7 @@ export default function ProfilePage() {
       <HeroSection
         title="My Profile"
         description="Lorem ipsum dolor sit amet consectetur. At in pretium semper vitae eu eu mus."
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "My Profile", href:'/profile' }]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "My Profile", href: '/profile' }]}
       />
 
       <div className="py-16 px-4">
@@ -196,9 +196,30 @@ export default function ProfilePage() {
 
               {active === "bids" && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {myBidCars.map((car) => (
-                    <MyBidCard key={car._id} car={car} userBids={[]} />
-                  ))}
+                  {myBidCars.map((car) => {
+                    // Extract user's bids for this car
+                    const userCarBids = bids
+                      ? bids
+                        .filter(
+                          (bid) =>
+                            extractId(bid.bidderId) === extractId(user) &&
+                            extractId(bid.auctionId) === car._id
+                        )
+                        .map((bid) => ({
+                          amount: bid.amount,
+                          bidderId: extractId(bid.bidderId) || "",
+                          auctionId: extractId(bid.auctionId) || "",
+                        }))
+                      : [];
+
+                    return (
+                      <MyBidCard
+                        key={car._id}
+                        car={car}
+                        userBids={userCarBids}
+                      />
+                    );
+                  })}
                 </div>
               )}
 
