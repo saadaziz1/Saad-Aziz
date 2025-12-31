@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Image Upload</title>
+</head>
+<body>
+    <h1>Test Image Upload</h1>
+    <form id="testForm">
+        <input type="file" id="imageFile" accept="image/*" required>
+        <input type="text" id="productName" placeholder="Product Name" required>
+        <input type="text" id="description" placeholder="Description" required>
+        <select id="category" required>
+            <option value="">Select Category</option>
+            <option value="Black teas">Black teas</option>
+            <option value="Green teas">Green teas</option>
+        </select>
+        <input type="number" id="basePrice" placeholder="Base Price" step="0.01" required>
+        <button type="submit">Test Upload</button>
+    </form>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('imageFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            console.log('🧪 Test Upload - File selected:', {
+                name: file.name,
+                size: file.size,
+                type: file.type
+            });
+            
+            formData.append('name', document.getElementById('productName').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('basePrice', document.getElementById('basePrice').value);
+            formData.append('image', file);
+            
+            console.log('🧪 FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`  ${key}: [File] ${value.name}`);
+                } else {
+                    console.log(`  ${key}: ${value}`);
+                }
+            }
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('https://week3-day5.vercel.app/api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                console.log('🧪 Response:', result);
+                
+                if (response.ok) {
+                    alert('✅ Upload successful! Check console for details.');
+                } else {
+                    alert('❌ Upload failed: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('🧪 Upload error:', error);
+                alert('❌ Upload error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -35,11 +35,6 @@ const ProductDetails = ({
     }
     
     onAddToBag();
-    toast({
-      title: "Added to Bag",
-      description: `${quantity} ${selectedVariantData.name} added to your bag.`,
-      variant: "success",
-    });
   };
   const getVariantIcon = (index) => {
      console.log("ProductDetails props:", {
