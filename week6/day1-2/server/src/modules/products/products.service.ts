@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Product, ProductDocument } from './schemas/product.schema';
@@ -74,7 +74,14 @@ export class ProductService {
       images: imageUrls,
     });
 
-    return newProduct.save();
+    try {
+      return await newProduct.save();
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new ConflictException(`Product with SKU "${sku}" already exists`);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -185,18 +192,26 @@ export class ProductService {
     }
 
     Object.assign(product, updateProductDto);
-    const updatedProduct = await product.save();
 
-    // Trigger notification if sale started via update form
-    if (!wasOnSale && updatedProduct.isOnSale) {
-      this.notificationsGateway.notifyAll('sale_started', {
-        message: `Big Sale! ${updatedProduct.name} is now ${updatedProduct.discountPercentage}% off!`,
-        productId: updatedProduct._id,
-        discountPercentage: updatedProduct.discountPercentage,
-      });
+    try {
+      const updatedProduct = await product.save();
+
+      // Trigger notification if sale started via update form
+      if (!wasOnSale && updatedProduct.isOnSale) {
+        this.notificationsGateway.notifyAll('sale_started', {
+          message: `Big Sale! ${updatedProduct.name} is now ${updatedProduct.discountPercentage}% off!`,
+          productId: updatedProduct._id,
+          discountPercentage: updatedProduct.discountPercentage,
+        });
+      }
+
+      return updatedProduct;
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new ConflictException(`Product with SKU "${updateProductDto.sku}" already exists`);
+      }
+      throw error;
     }
-
-    return updatedProduct;
   }
 
   /**

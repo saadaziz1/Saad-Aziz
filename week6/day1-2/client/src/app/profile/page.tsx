@@ -83,7 +83,7 @@ export default function ProfilePage() {
                 <div className="mb-8">
                     <div className="bg-gray-50 p-1 rounded-xl">
                         <div className="bg-white text-black shadow-sm border border-gray-100 px-4 py-3 rounded-lg font-semibold text-center">
-                            👤 Profile Details
+                            Profile Details
                         </div>
                     </div>
                 </div>

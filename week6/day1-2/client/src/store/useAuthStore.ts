@@ -25,12 +25,14 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             setAuth: (user, token) => {
                 localStorage.setItem('auth-token', token);
-                Cookies.set('auth-token', token, { expires: 7 });
+                Cookies.set('auth-token', token, { expires: 7, path: '/' });
+                Cookies.set('user-role', user.role, { expires: 7, path: '/' });
                 set({ user, token, isAuthenticated: true });
             },
             logout: () => {
                 localStorage.removeItem('auth-token');
-                Cookies.remove('auth-token');
+                Cookies.remove('auth-token', { path: '/' });
+                Cookies.remove('user-role', { path: '/' });
                 set({ user: null, token: null, isAuthenticated: false });
             },
         }),

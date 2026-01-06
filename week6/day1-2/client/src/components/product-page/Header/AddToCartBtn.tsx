@@ -18,6 +18,8 @@ const AddToCartBtn = ({ data }: { data: Product & { quantity: number; payWithPoi
     (state: RootState) => state.products
   );
 
+  const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
+
   const handleAdd = async () => {
     console.log("AddToCartBtn - Data:", data);
     console.log("AddToCartBtn - Selections:", { sizeSelection, colorSelection });
@@ -60,11 +62,11 @@ const AddToCartBtn = ({ data }: { data: Product & { quantity: number; payWithPoi
   return (
     <button
       type="button"
-      disabled={isAdding}
+      disabled={isAdding || isAdmin}
       className="bg-black w-full ml-3 sm:ml-5 rounded-full h-11 md:h-[52px] text-sm sm:text-base text-white hover:bg-black/80 transition-all disabled:opacity-50 font-medium"
       onClick={handleAdd}
     >
-      {isAdding ? "Adding..." : "Add to Cart"}
+      {isAdding ? "Adding..." : isAdmin ? "Admins Restricted" : "Add to Cart"}
     </button>
   );
 };

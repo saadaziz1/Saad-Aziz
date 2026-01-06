@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import DashboardProfileDropdown from "./DashboardProfileDropdown";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -44,8 +45,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // Auth Guard
   useEffect(() => {
     if (!isLoadingProfile) {
-      if (!profile || (profile.role !== 'ADMIN' && profile.role !== 'SUPER_ADMIN')) {
+      if (!profile) {
         router.push('/login');
+      } else if (profile.role !== 'ADMIN' && profile.role !== 'SUPER_ADMIN') {
+        router.push('/');
       }
     }
   }, [profile, isLoadingProfile, router]);
@@ -269,10 +272,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full border-2 border-white" />
               </button>
-              <div className="flex items-center space-x-2 lg:space-x-3 bg-gray-50 hover:bg-gray-100 transition-colors rounded-lg px-2 lg:px-3 py-1.5 border border-gray-100 cursor-pointer">
-                <span className="text-[10px] lg:text-xs font-bold text-gray-700 uppercase">{profile?.role || 'Admin'}</span>
-                <ChevronDown className="w-3 h-3 lg:w-4 lg:h-4 text-gray-400" />
-              </div>
+              <DashboardProfileDropdown />
             </div>
           </header>
 

@@ -40,7 +40,7 @@ export class Product {
     @Prop({ default: '' })
     brand: string;
 
-    @Prop({ default: '' })
+    @Prop({ unique: true, sparse: true })
     sku: string;
 
     @Prop({ type: [String], default: [] })

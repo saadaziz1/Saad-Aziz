@@ -10,16 +10,20 @@ import {
   Req,
   Query,
   UseInterceptors,
+  Request,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiBody, ApiQuery, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CartService } from './cart.service';
 import { JwtAuthGuard } from '../../common/guards/jwt.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 
 @ApiTags('Cart')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('cart')
 export class CartController {
 
@@ -29,7 +33,10 @@ export class CartController {
    * Get logged-in user's cart
    */
   @Get()
-  getCart(@Req() req) {
+  @Roles(Role.USER)
+  @ApiOperation({ summary: 'Get current user cart (User only)' })
+  @ApiResponse({ status: 200, description: 'Return user cart.' })
+  getCart(@Request() req) {
     return this.cartService.getUserCart(req.user.userId);
   }
 
@@ -37,8 +44,11 @@ export class CartController {
    * Add product to cart with variants
    */
   @Post('add')
+  @Roles(Role.USER)
+  @ApiOperation({ summary: 'Add item to cart (User only)' })
   @ApiBody({ type: AddToCartDto })
-  addToCart(@Req() req, @Body() dto: AddToCartDto) {
+  @ApiResponse({ status: 201, description: 'Item added to cart successfully.' })
+  addToCart(@Request() req, @Body() dto: AddToCartDto) {
     return this.cartService.addItem(
       req.user.userId,
       dto.productId,
@@ -53,8 +63,11 @@ export class CartController {
    * Update cart item quantity
    */
   @Patch('update')
+  @Roles(Role.USER)
+  @ApiOperation({ summary: 'Update cart item quantity (User only)' })
   @ApiBody({ type: UpdateCartDto })
-  updateCart(@Req() req, @Body() dto: UpdateCartDto) {
+  @ApiResponse({ status: 200, description: 'Cart updated successfully.' })
+  updateCart(@Request() req, @Body() dto: UpdateCartDto) {
     return this.cartService.updateItem(
       req.user.userId,
       dto.productId,
@@ -69,8 +82,11 @@ export class CartController {
    * Remove item from cart
    */
   @Delete('remove/:productId')
+  @Roles(Role.USER)
+  @ApiOperation({ summary: 'Remove item from cart (User only)' })
+  @ApiResponse({ status: 200, description: 'Item removed from cart successfully.' })
   removeItem(
-    @Req() req,
+    @Request() req,
     @Param('productId') productId: string,
     @Query('color') color?: string,
     @Query('size') size?: string,
@@ -82,7 +98,10 @@ export class CartController {
    * Clear entire cart
    */
   @Delete('clear')
-  clearCart(@Req() req) {
+  @Roles(Role.USER)
+  @ApiOperation({ summary: 'Clear entire cart (User only)' })
+  @ApiResponse({ status: 200, description: 'Cart cleared successfully.' })
+  clearCart(@Request() req) {
     return this.cartService.clearCart(req.user.userId);
   }
 }

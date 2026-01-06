@@ -18,12 +18,12 @@ export class UpdateCartDto {
     @ApiProperty({ enum: ProductColor, required: false, example: ProductColor.BLACK })
     @IsOptional()
     @IsEnum(ProductColor)
-    selectedColor?: string;
+    selectedColor?: ProductColor;
 
     @ApiProperty({ enum: ProductSize, required: false, example: ProductSize.M })
     @IsOptional()
     @IsEnum(ProductSize)
-    selectedSize?: string;
+    selectedSize?: ProductSize;
 
     @ApiProperty({ required: false })
     @IsOptional()

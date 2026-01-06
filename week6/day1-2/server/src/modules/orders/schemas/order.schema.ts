@@ -92,6 +92,25 @@ export class Order {
         postalCode: string;
         phone: string;
     };
+
+    /**
+     * Payment information
+     */
+    @Prop({
+        type: {
+            method: { type: String, enum: ['card', 'points'], default: 'card' },
+            cardHolderName: { type: String },
+            cardNumber: { type: String },
+            expiryDate: { type: String },
+        },
+        required: false,
+    })
+    paymentInfo?: {
+        method: string;
+        cardHolderName?: string;
+        cardNumber?: string;
+        expiryDate?: string;
+    };
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

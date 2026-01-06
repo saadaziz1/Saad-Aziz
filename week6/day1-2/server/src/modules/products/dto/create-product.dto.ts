@@ -100,4 +100,8 @@ export class CreateProductDto {
     @Transform(({ value }) => value === 'true' || value === true)
     @IsBoolean()
     isOnSale?: boolean;
+
+    @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, description: 'Product images (max 3)' })
+    @IsOptional()
+    images?: any[];
 }

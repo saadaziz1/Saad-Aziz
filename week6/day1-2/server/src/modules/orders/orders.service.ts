@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
@@ -10,6 +10,7 @@ import { OrderStatus } from '../../common/enums/order-status.enum';
 import { Role } from '../../common/enums/role.enum';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { LedgerType } from '../loyalty/schemas/loyalty-ledger.schema';
+import { CheckoutDto } from './dto/checkout.dto';
 
 @Injectable()
 export class OrdersService {
@@ -23,12 +24,12 @@ export class OrdersService {
     private loyaltyService: LoyaltyService,
   ) { }
 
-  async placeOrder(userId: string, checkoutData?: any) {
+  async placeOrder(userId: string, checkoutData: CheckoutDto) {
     console.log('OrdersService.placeOrder - Starting for user:', userId);
 
     const user = await this.usersService.findById(userId);
     if (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) {
-      throw new BadRequestException('Administrators cannot place orders');
+      throw new ForbiddenException('Admins and Super Admins are not allowed to place orders');
     }
 
     const cart = await this.cartService.getUserCart(userId);
@@ -43,6 +44,10 @@ export class OrdersService {
     const orderItems: any[] = [];
 
     for (const item of cart.items) {
+      if (!item.productId) {
+        console.warn(`Product missing for item in cart. Skipping...`);
+        continue;
+      }
       const prodId = (item.productId as any)._id || item.productId;
       const product: ProductDocument = await this.productService.findById(prodId.toString());
 
@@ -115,6 +120,12 @@ export class OrdersService {
         city: checkoutData.city,
         postalCode: checkoutData.postalCode,
         phone: checkoutData.phone,
+      } : undefined,
+      paymentInfo: checkoutData ? {
+        method: checkoutData.paymentMethod || 'card',
+        cardHolderName: checkoutData.cardHolderName,
+        cardNumber: checkoutData.cardNumber ? `**** **** **** ${checkoutData.cardNumber.slice(-4)}` : undefined, // Masking for safety but saving relevant info
+        expiryDate: checkoutData.expiryDate,
       } : undefined,
     });
 

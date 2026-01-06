@@ -1,7 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Cart, CartDocument } from './schemas/cart.schema';
+import { UsersService } from '../users/users.service';
+import { ProductService } from '../products/products.service';
+import { Role } from '../../common/enums/role.enum';
 
 @Injectable()
 export class CartService {
@@ -12,7 +15,16 @@ export class CartService {
   constructor(
     @InjectModel(Cart.name)
     private cartModel: Model<CartDocument>,
+    private usersService: UsersService,
+    private productService: ProductService,
   ) { }
+
+  private async checkUserRole(userId: string) {
+    const user = await this.usersService.findById(userId);
+    if (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) {
+      throw new ForbiddenException('Admins and Super Admins are not allowed to have a personal cart');
+    }
+  }
 
   /**
    * Get or create cart for user
@@ -41,6 +53,11 @@ export class CartService {
     selectedSize?: string,
     payWithPoints: boolean = false,
   ) {
+    await this.checkUserRole(userId);
+
+    // Verify product exists
+    await this.productService.findById(productId);
+
     const cart = await this.cartModel.findOne({ userId });
 
     if (!cart) {
@@ -68,7 +85,8 @@ export class CartService {
       });
     }
 
-    return cart.save();
+    await cart.save();
+    return this.getUserCart(userId);
   }
 
   /**
@@ -82,6 +100,7 @@ export class CartService {
     selectedSize?: string,
     payWithPoints?: boolean,
   ) {
+    await this.checkUserRole(userId);
     const cart = await this.cartModel.findOne({ userId });
 
     if (!cart) {
@@ -103,7 +122,8 @@ export class CartService {
     if (payWithPoints !== undefined) {
       item.payWithPoints = payWithPoints;
     }
-    return cart.save();
+    await cart.save();
+    return this.getUserCart(userId);
   }
 
   /**
@@ -128,7 +148,8 @@ export class CartService {
           item.selectedSize === selectedSize),
     );
 
-    return cart.save();
+    await cart.save();
+    return this.getUserCart(userId);
   }
 
   /**
