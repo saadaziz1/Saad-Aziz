@@ -18,10 +18,11 @@ import * as multer from 'multer';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from './users.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
+import { UserResponseDto, UpdateUserDto } from './dto/update-user.dto';
+import { ErrorResponseDto } from '../auth/dto/auth.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -44,8 +45,23 @@ export class UsersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
-  @ApiResponse({ status: 200, description: 'Return user data', type: User })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return user data',
+    type: UserResponseDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    type: ErrorResponseDto,
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'User with id 507f1f77bcf86cd799439011 not found',
+        error: 'Not Found'
+      }
+    }
+  })
   async getById(@Param('id') id: string): Promise<User> {
     const user = await this.usersService.findById(id);
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
@@ -92,9 +108,35 @@ export class UsersController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'User updated successfully', type: User })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 409, description: 'Email or mobile number already in use' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully',
+    type: UserResponseDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    type: ErrorResponseDto,
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'User not found',
+        error: 'Not Found'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Email or mobile number already in use',
+    type: ErrorResponseDto,
+    schema: {
+      example: {
+        statusCode: 409,
+        message: 'Email already in use',
+        error: 'Conflict'
+      }
+    }
+  })
   async update(
     @Param('id') id: string,
     @Body() body: UpdateUserDto,

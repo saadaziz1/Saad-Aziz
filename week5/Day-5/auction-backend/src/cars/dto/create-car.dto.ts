@@ -185,3 +185,58 @@ export class CreateCarDto {
   })
   modified?: string;
 }
+
+export class CarResponseDto {
+  @ApiProperty({ example: '507f1f77bcf86cd799439011' })
+  _id: string;
+
+  @ApiProperty({ example: '2022 BMW M4 Competition' })
+  title: string;
+
+  @ApiProperty({ example: 'BMW', enum: CarMake })
+  make: string;
+
+  @ApiProperty({ example: 'M4', enum: CarModel })
+  model: string;
+
+  @ApiProperty({ example: 2022 })
+  year: number;
+
+  @ApiProperty({ example: 55000 })
+  currentPrice: number;
+
+  @ApiProperty({ example: 50000 })
+  startingPrice: number;
+
+  @ApiProperty({ example: ['https://example.com/car1.jpg'] })
+  photos: string[];
+
+  @ApiProperty({ example: '2025-01-01T10:00:00Z' })
+  startTime: string;
+
+  @ApiProperty({ example: '2025-01-08T10:00:00Z' })
+  endTime: string;
+
+  @ApiProperty({ example: 12 })
+  totalBids: number;
+
+  @ApiProperty({ example: 'coupe' })
+  bodyType: string;
+
+  @ApiProperty({ example: 15000 })
+  mileage: number;
+
+  @ApiProperty({ example: '65f1a2b3c4d5e6f7a8b9c0d1', description: 'Seller ID' })
+  sellerId: string;
+}
+
+export class FilterOptionsResponseDto {
+  @ApiProperty({ example: ['BMW', 'Mercedes', 'Toyota'] })
+  makes: string[];
+
+  @ApiProperty({ example: ['M4', 'C-Class', 'Corolla'] })
+  models: string[];
+
+  @ApiProperty({ example: [2024, 2023, 2022] })
+  years: number[];
+}

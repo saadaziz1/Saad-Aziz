@@ -100,7 +100,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-8 max-w-7xl mx-auto">
               <div className="border-b border-white">
                 <div className="inline-block px-6 mx-24 border-b-[5px] border-[#FFC300] pb-2">
                   <span className="text-white font-medium text-xl">Live Auction</span>

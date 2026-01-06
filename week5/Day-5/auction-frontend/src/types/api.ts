@@ -37,6 +37,7 @@ export interface RegisterRequest {
   password: string;
   fullName: string;
   mobileNumber: string;
+  countryCode: string;
 }
 
 export interface Car {

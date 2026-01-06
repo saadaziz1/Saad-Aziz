@@ -7,10 +7,10 @@ import {
   UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, LoginResponseDto, ErrorResponseDto } from './dto/auth.dto';
 import { UserDocument } from '../users/schemas/user.schema';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -29,23 +29,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Login successful',
-    schema: {
-      example: {
-        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        user: {
-          _id: '507f1f77bcf86cd799439011',
-          username: 'john_doe',
-          email: 'john@example.com',
-          fullName: 'John Doe',
-          mobileNumber: '1234567890',
-          countryCode: '+971'
-        }
-      }
-    }
+    type: LoginResponseDto
   })
   @ApiResponse({
     status: 400,
     description: 'Validation error',
+    type: ErrorResponseDto,
     schema: {
       example: {
         statusCode: 400,
@@ -57,6 +46,7 @@ export class AuthController {
   @ApiResponse({
     status: 401,
     description: 'Invalid credentials',
+    type: ErrorResponseDto,
     schema: {
       example: {
         statusCode: 401,
@@ -96,28 +86,29 @@ export class AuthController {
   @ApiResponse({
     status: 201,
     description: 'User successfully registered',
-    schema: {
-      example: {
-        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        user: {
-          _id: '507f1f77bcf86cd799439011',
-          username: 'john_doe',
-          email: 'john@example.com',
-          fullName: 'John Doe',
-          mobileNumber: '1234567890',
-          countryCode: '+971'
-        }
-      }
-    }
+    type: LoginResponseDto
   })
   @ApiResponse({
     status: 400,
-    description: 'Validation error or user already exists',
+    description: 'Validation error',
+    type: ErrorResponseDto,
     schema: {
       example: {
         statusCode: 400,
         message: 'Username, email or mobile number already exists',
         error: 'Bad Request'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User already exists',
+    type: ErrorResponseDto,
+    schema: {
+      example: {
+        statusCode: 409,
+        message: 'Username already taken',
+        error: 'Conflict'
       }
     }
   })
@@ -151,5 +142,37 @@ export class AuthController {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  @Public()
+  @Post('check-username')
+  @ApiOperation({
+    summary: 'Check Username Availability',
+    description: 'Check if a username is already taken.'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Username availability status',
+    schema: {
+      example: {
+        available: true
+      }
+    }
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username: { type: 'string', example: 'john_doe_99', description: 'The username to check for availability' }
+      },
+      required: ['username']
+    }
+  })
+  async checkUsername(@Body('username') username: string) {
+    if (!username) {
+      throw new HttpException('Username is required', HttpStatus.BAD_REQUEST);
+    }
+    const available = await this.authService.checkUsername(username);
+    return { available };
   }
 }

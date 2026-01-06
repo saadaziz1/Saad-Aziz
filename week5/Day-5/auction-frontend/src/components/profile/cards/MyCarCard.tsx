@@ -31,7 +31,7 @@ export function MyCarCard({ car, onEndAuction }: MyCarCardProps) {
   return (
     <Card className="bg-white py-0 rounded-sm max-h-[400px] overflow-hidden">
       <div className="relative">
-        <h3 className="py-5.5 border-b text-center font-semibold text-lg mt-2 z-5 text-[#2E3D83]">
+        <h3 className="py-5 border-b text-center font-semibold text-lg mt-2 z-10 text-[#2E3D83]">
           {car.title}
         </h3>
 
@@ -43,7 +43,7 @@ export function MyCarCard({ car, onEndAuction }: MyCarCardProps) {
           </div>
         )}
 
-        <div className="h-39 w-full overflow-hidden flex items-center justify-center">
+        <div className="h-40 w-full overflow-hidden flex items-center justify-center">
           <img
             src={car.photos?.[0] || "/placeholder.svg"}
             alt={car.title}
@@ -63,15 +63,14 @@ export function MyCarCard({ car, onEndAuction }: MyCarCardProps) {
             <p className="text-xs text-[#939393]">Total Bids</p>
           </div>
         </div>
-        
+
         <Button
           onClick={handleEndAuction}
           disabled={timeLeft.isEnded}
-          className={`w-full ${
-            timeLeft.isEnded
+          className={`w-full ${timeLeft.isEnded
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-[#2E3D83] hover:bg-[#3A4FAF]"
-          } text-white py-5`}
+            } text-white py-5`}
         >
           {timeLeft.isEnded ? "Sold" : "End Bid"}
         </Button>

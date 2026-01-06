@@ -1,5 +1,5 @@
 import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateUserDto {
   @ApiProperty({ example: 'john_doe', description: 'Username', required: false })
@@ -112,4 +112,36 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   plateState?: string;
+}
+
+export class UserResponseDto {
+  @ApiProperty({ example: '507f1f77bcf86cd799439011' })
+  _id: string;
+
+  @ApiProperty({ example: 'john_doe' })
+  username: string;
+
+  @ApiProperty({ example: 'john@example.com' })
+  email: string;
+
+  @ApiProperty({ example: 'John Doe' })
+  fullName: string;
+
+  @ApiPropertyOptional({ example: '+1' })
+  countryCode?: string;
+
+  @ApiPropertyOptional({ example: '1234567890' })
+  mobileNumber?: string;
+
+  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
+  profilePicture?: string;
+
+  @ApiPropertyOptional({ example: 'Individual' })
+  trafficType?: string;
+
+  @ApiPropertyOptional({ example: 'TF123456' })
+  trafficFileNumber?: string;
+
+  @ApiPropertyOptional({ example: 'DL12345678' })
+  driverLicenseNumber?: string;
 }

@@ -102,7 +102,7 @@ export function AuctionListingCard({
         {/* COLUMN 1 — IMAGE */}
         {stacked && <h3 className="text-md text-center pt-10 pb-2  font-bold text-[#2E3D83]">{name}</h3>}
 
-        <div className={stacked ? "w-full h-64 relative overflow-hidden shrink-0" : "w-full md:w-1/4 h-64 md:h-auto relative overflow-hidden shrink-0"}>
+        <div className={stacked ? "w-full h-39 relative overflow-hidden shrink-0" : "w-full md:w-1/4 h-39 md:h-auto relative overflow-hidden shrink-0"}>
           <img
             src={image || "/placeholder.svg"}
             alt={name}

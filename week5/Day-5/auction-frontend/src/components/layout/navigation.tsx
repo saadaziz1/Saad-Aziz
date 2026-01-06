@@ -27,7 +27,6 @@ import { NotificationMenu } from "./NotificationMenu";
 export function Navigation() {
   const pathname = usePathname();
   const isHome = pathname === "/";
-
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useLogout();
 
@@ -47,6 +46,7 @@ export function Navigation() {
         { href: "/contact", label: "Contact" },
       ].map(({ href, label }) => {
         const active = pathname === href;
+
         return (
           <Link
             key={href}
@@ -57,9 +57,9 @@ export function Navigation() {
             {active && (
               <>
                 {isMobile ? (
-                  <span className="ml-2 inline-block h-[6px] w-[6px] rounded-full bg-[#FFCB23]" />
+                  <span className="ml-2 h-2 w-2 rounded-full bg-[#FFCB23]" />
                 ) : (
-                  <span className="absolute left-1/2 -translate-x-1/2 -bottom-2 h-[3px] w-[16px] rounded-full bg-[#FFCB23]" />
+                  <span className="absolute left-1/2 -translate-x-1/2 -bottom-2 h-[3px] w-4 rounded-full bg-[#FFCB23]" />
                 )}
               </>
             )}
@@ -72,24 +72,24 @@ export function Navigation() {
   return (
     <nav
       className={clsx(
-        "py-4 px-4 transition-all duration-300",
+        "w-full py-4 transition-all duration-300",
         isHome
-          ? "absolute top-9 left-0 w-full bg-transparent z-50"
-          : "bg-white shadow-sm relative"
+          ? "absolute top-9 left-0 z-50 bg-transparent"
+          : "relative bg-white shadow-sm"
       )}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center">
           <img
-            src="/car-deposit%20Logo.png"
+            src="/car-deposit Logo.png"
             alt="logo"
-            className="object-contain"
+            className="h-10 w-auto object-contain"
           />
         </Link>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop Nav */}
+        <div className="hidden lg:flex items-center gap-8">
           <NavLinks isHome={isHome} />
         </div>
 
@@ -98,22 +98,22 @@ export function Navigation() {
           {isAuthenticated && <NotificationMenu />}
 
           {/* Desktop Auth */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             {!isAuthenticated ? (
               <>
                 <Link href="/login">
                   <Button
                     variant="outline"
                     className={clsx(
-                      "bg-transparent",
                       isHome
-                        ? "text-white border-white"
-                        : "text-[#2E3D83] border-[#2E3D83]"
+                        ? "border-[#2E3D83] text-[#2E3D83]"
+                        : "border-[#2E3D83] text-[#2E3D83]"
                     )}
                   >
                     Sign in
                   </Button>
                 </Link>
+
                 <Link href="/register">
                   <Button className="bg-[#4A5FBF] hover:bg-[#3A4FAF]">
                     Register now
@@ -132,6 +132,7 @@ export function Navigation() {
                       <IconCar />
                     </button>
                   </DropdownMenuTrigger>
+
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem asChild>
                       <Link href="/profile">Profile</Link>
@@ -148,73 +149,71 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile Menu */}
-          <div className="md:hidden">
+          {/* ✅ MOBILE MENU */}
+          <div className="lg:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost">
-                  <Menu className="w-10 h-10 text-[#2E3D83]" />
-                </Button>
+                <button
+                  aria-label="Open menu"
+                  className="flex items-center justify-center w-12 h-12 rounded-md text-[#2E3D83] hover:bg-black/5"
+                >
+                  <Menu className="w-7 h-7" />
+                </button>
               </SheetTrigger>
 
               <SheetContent
                 side="right"
-                className="bg-[#2E3D83] text-white space-y-6 pt-10"
+                className="bg-[#2E3D83] text-white pt-10"
               >
                 <SheetTitle className="sr-only">Navigation</SheetTitle>
                 <SheetDescription className="sr-only">
-                  Mobile menu
+                  Mobile navigation
                 </SheetDescription>
 
-                <div className="flex flex-col gap-4 text-lg px-4 text-white">
+                <div className="flex flex-col gap-5 px-6 text-lg">
                   <NavLinks isHome={false} isMobile />
                 </div>
 
                 {!isAuthenticated ? (
-                  <div className="flex flex-col gap-3 pt-8 px-4">
+                  <div className="flex flex-col gap-3 px-6 pt-10">
                     <Button
-                      variant="outline"
                       asChild
-                      className="w-full text-white border-white"
+                      variant="outline"
+                      className="border-white text-[#2E3D83]"
                     >
                       <Link href="/login">Sign in</Link>
                     </Button>
+
                     <Button
                       asChild
-                      className="w-full bg-white text-[#2E3D83]"
+                      className="bg-white text-[#2E3D83]"
                     >
                       <Link href="/register">Register</Link>
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-6 pt-10 pb-8 px-4 border-t border-white/20">
+                  <div className="mt-10 border-t border-white/20 px-6 pt-6 space-y-6">
                     <Link
                       href="/profile"
-                      className="flex items-center gap-4 text-lg font-medium"
+                      className="flex items-center gap-4 text-lg"
                     >
-                      <div className="w-6 text-white">
-                        <IconCar />
-                      </div>
+                      <IconCar />
                       Profile
                     </Link>
 
                     <Link
                       href="/profile?tab=wishlist"
-                      className="flex items-center gap-4 text-lg font-medium"
+                      className="flex items-center gap-4 text-lg"
                     >
-                      <div className="w-6 text-white">
-                        <IconStar />
-                      </div>
+                      <IconStar />
                       Wishlist
                     </Link>
 
                     <button
                       onClick={logout}
-                      className="flex items-center gap-4 text-lg font-medium text-red-300"
+                      className="flex items-center gap-4 text-lg text-red-300"
                     >
-                      <div className="w-6 text-white">
-                        <LogOutIcon />
-                      </div>
+                      <LogOutIcon />
                       Logout
                     </button>
                   </div>
@@ -228,14 +227,11 @@ export function Navigation() {
   );
 }
 
-/* helpers */
-const navClass = (
-  active: boolean,
-  isHome: boolean,
-  isMobile?: boolean
-) =>
+/* ================= helpers ================= */
+
+const navClass = (active: boolean, isHome: boolean, isMobile?: boolean) =>
   clsx(
-    "relative font-medium transition-colors duration-200",
+    "relative font-medium transition-colors",
     isMobile
       ? "text-white hover:text-yellow-300"
       : isHome
@@ -243,7 +239,6 @@ const navClass = (
         : "text-[#2E3D83] hover:text-[#4A5FBF]",
     active && "font-bold"
   );
-
 /* icons */
 const IconCar = () => (
   <svg

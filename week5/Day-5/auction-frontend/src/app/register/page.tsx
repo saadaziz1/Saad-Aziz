@@ -13,16 +13,16 @@ export default function RegisterPage() {
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Register" }]}
       />
 
-      <div className="py-16 px-4">
-        <div className="max-w-lg mx-auto">
+      <div className="min-h-[calc(100vh-400px)] max-w-lg mx-auto py-16 px-4 bg-gray-50 flex flex-col justify-center">
+        <div className="max-w-xl mx-auto w-full">
           {/* Toggle Buttons */}
-          <div className="flex rounded-full border border-gray-300 p-1 mb-8">
-            <button className="flex-1 py-2 px-4 rounded-full text-white bg-[#4A5FBF] font-medium">
+          <div className="flex rounded-full border border-gray-200 bg-white p-1 mb-12 shadow-sm">
+            <button className="flex-1 py-3 px-6 rounded-full text-white bg-[#4A5FBF] font-semibold transition-all shadow-md">
               Register
             </button>
             <Link
               href="/login"
-              className="flex-1 py-2 px-4 rounded-full text-gray-600 text-center font-medium hover:bg-gray-50"
+              className="flex-1 py-3 px-6 rounded-full text-gray-500 text-center font-semibold hover:text-[#4A5FBF] transition-all"
             >
               Login
             </Link>

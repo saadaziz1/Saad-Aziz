@@ -2,9 +2,10 @@ import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, Uploade
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CarsService } from './cars.service';
-import { CreateCarDto } from './dto/create-car.dto';
+import { CreateCarDto, CarResponseDto, FilterOptionsResponseDto } from './dto/create-car.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
+import { ErrorResponseDto } from '../auth/dto/auth.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Types } from 'mongoose';
 
@@ -77,12 +78,16 @@ export class CarsController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Get all cars with optional filters' })
-  @ApiQuery({ name: 'make', required: false })
-  @ApiQuery({ name: 'model', required: false })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiQuery({ name: 'minPrice', required: false })
-  @ApiQuery({ name: 'maxPrice', required: false })
-  @ApiResponse({ status: 200, description: 'Return filtered list of cars' })
+  @ApiQuery({ name: 'make', required: false, example: 'BMW' })
+  @ApiQuery({ name: 'model', required: false, example: 'M4' })
+  @ApiQuery({ name: 'year', required: false, example: '2022' })
+  @ApiQuery({ name: 'minPrice', required: false, example: '10000' })
+  @ApiQuery({ name: 'maxPrice', required: false, example: '100000' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return filtered list of cars',
+    type: [CarResponseDto]
+  })
   findAll(
     @Query('make') make?: string,
     @Query('model') model?: string,
@@ -96,7 +101,11 @@ export class CarsController {
   @Public()
   @Get('filters/options')
   @ApiOperation({ summary: 'Get available filter options (makes, models, etc.)' })
-  @ApiResponse({ status: 200, description: 'Return filter options' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return filter options',
+    type: FilterOptionsResponseDto
+  })
   getFilterOptions() {
     return this.carsService.getFilterOptions();
   }
@@ -104,8 +113,23 @@ export class CarsController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get car by ID' })
-  @ApiResponse({ status: 200, description: 'Return car details' })
-  @ApiResponse({ status: 404, description: 'Car not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return car details',
+    type: CarResponseDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Car not found',
+    type: ErrorResponseDto,
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Car with ID 507f1f77bcf86cd799439011 not found',
+        error: 'Not Found'
+      }
+    }
+  })
   findOne(@Param('id') id: string) {
     return this.carsService.findOne(id);
   }

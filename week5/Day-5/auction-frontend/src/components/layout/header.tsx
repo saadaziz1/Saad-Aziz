@@ -3,7 +3,7 @@ import { Mail, Phone } from "lucide-react"
 export function Header() {
   return (
     <div className="bg-[#2E3D83] text-white py-2 px-4">
-      <div className="max-w-7xl mx-auto flex justify-between items-center text-sm">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm">
         <div className="flex items-center gap-2">
           <Phone className="w-4 h-4" />
           <span>Call Us</span>

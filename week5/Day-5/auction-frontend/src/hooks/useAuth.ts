@@ -52,3 +52,9 @@ export const useLogout = () => {
     router.push('/');
   };
 };
+
+export const useCheckUsername = () => {
+  return useMutation({
+    mutationFn: authApi.checkUsername,
+  });
+};

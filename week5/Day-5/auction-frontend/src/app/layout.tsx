@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="max-w-360 mx-auto">
+      <body className="">
         <QueryProvider>
           <SocketProvider>
             <div className="flex flex-col">

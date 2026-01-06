@@ -11,4 +11,9 @@ export const authApi = {
     const response = await api.post<AuthResponse>('/auth/register', data);
     return response.data;
   },
+
+  checkUsername: async (username: string): Promise<{ available: boolean }> => {
+    const response = await api.post<{ available: boolean }>('/auth/check-username', { username });
+    return response.data;
+  },
 };

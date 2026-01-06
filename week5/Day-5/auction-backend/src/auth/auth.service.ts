@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -61,19 +61,19 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await this.usersService.findByUsername(username);
     if (existingUser) {
-      throw new UnauthorizedException('Username already exists');
+      throw new ConflictException('Username already exists');
     }
 
     // Check if email already exists
     const existingEmail = await this.usersService.findByEmail(email);
     if (existingEmail) {
-      throw new UnauthorizedException('Email already exists');
+      throw new ConflictException('Email already exists');
     }
 
     // Check if mobile number already exists
     const existingMobile = await this.usersService.findByMobile(mobileNumber);
     if (existingMobile) {
-      throw new UnauthorizedException('Mobile number already exists');
+      throw new ConflictException('Mobile number already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -87,5 +87,10 @@ export class AuthService {
     } as UserDocument;
 
     return this.usersService.create(userData);
+  }
+
+  async checkUsername(username: string): Promise<boolean> {
+    const user = await this.usersService.findByUsername(username);
+    return !user;
   }
 }

@@ -7,12 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { AutocompleteInput } from "@/components/filters/autocomplete-input";
 import { useCars } from "@/hooks/useCars";
 import { useBids } from "@/hooks/useBids";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { formatPrice } from "@/lib/auctionUtils";
 import { Car } from "@/types/api";
+import { CAR_MAKES, CAR_MODELS_BY_MAKE, BODY_TYPES } from '@/types/car-enums';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSocketContext } from "@/providers/SocketProvider";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -99,19 +106,28 @@ export default function CarAuctionPage() {
     };
   };
 
+  const getAvailableModels = () => {
+    if (filters.make && filters.make !== "all") {
+      return CAR_MODELS_BY_MAKE[filters.make] || [];
+    }
+    // Return all models from all makes, deduplicated
+    const allModels = Object.values(CAR_MODELS_BY_MAKE).flat();
+    return Array.from(new Set(allModels)).sort();
+  };
+
   const filteredCars =
     (cars as Car[])?.filter((car: Car) => {
       const carPrice = car.currentPrice || car.startingPrice || 0;
       return (
-        (!appliedFilters.carType ||
+        (!appliedFilters.carType || appliedFilters.carType === "all" ||
           car.bodyType
             ?.toLowerCase()
             .includes(appliedFilters.carType.toLowerCase())) &&
-        (!appliedFilters.make ||
+        (!appliedFilters.make || appliedFilters.make === "all" ||
           car.make
             ?.toLowerCase()
             .includes(appliedFilters.make.toLowerCase())) &&
-        (!appliedFilters.model ||
+        (!appliedFilters.model || appliedFilters.model === "all" ||
           car.model
             ?.toLowerCase()
             .includes(appliedFilters.model.toLowerCase())) &&
@@ -180,8 +196,8 @@ export default function CarAuctionPage() {
 
   const applyFilters = () => {
     const searchFilters: any = {};
-    if (filters.make) searchFilters.make = filters.make;
-    if (filters.model) searchFilters.model = filters.model;
+    if (filters.make && filters.make !== "all") searchFilters.make = filters.make;
+    if (filters.model && filters.model !== "all") searchFilters.model = filters.model;
     if (filters.minPrice > 0) searchFilters.minPrice = filters.minPrice.toString();
     if (filters.maxPrice < 1000000) searchFilters.maxPrice = filters.maxPrice.toString();
 
@@ -291,38 +307,75 @@ export default function CarAuctionPage() {
             </div>
             {filtersOpen && (
               <CardContent className="p-4 space-y-4">
-                <Input
-                  placeholder="Any Car Type..."
+                <Select
                   value={filters.carType}
-                  onChange={(e) => handleFilterChange("carType", e.target.value)}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
-                />
+                  onValueChange={(value) => handleFilterChange("carType", value)}
+                >
+                  <SelectTrigger className="w-full border border-[#828BB5] text-white bg-transparent rounded-sm">
+                    <SelectValue placeholder="Any Car Type..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2E3D83] border-[#828BB5] text-white">
+                    <SelectItem value="all">Any Car Type</SelectItem>
+                    {BODY_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={filters.make}
+                  onValueChange={(value) => {
+                    handleFilterChange("make", value);
+                    handleFilterChange("model", "all");
+                  }}
+                >
+                  <SelectTrigger className="w-full border border-[#828BB5] text-white bg-transparent rounded-sm">
+                    <SelectValue placeholder="Any Make..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2E3D83] border-[#828BB5] text-white">
+                    <SelectItem value="all">Any Make</SelectItem>
+                    {CAR_MAKES.map((make) => (
+                      <SelectItem key={make} value={make}>
+                        {make}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={filters.model}
+                  onValueChange={(value) => handleFilterChange("model", value)}
+                  disabled={!filters.make || filters.make === "all"}
+                >
+                  <SelectTrigger className="w-full border border-[#828BB5] text-white bg-transparent rounded-sm disabled:opacity-50">
+                    <SelectValue placeholder="Any Model..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2E3D83] border-[#828BB5] text-white">
+                    <SelectItem value="all">Any Model</SelectItem>
+                    {(CAR_MODELS_BY_MAKE[filters.make] || []).map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 <Input
                   placeholder="Any Color..."
                   value={filters.color}
                   onChange={(e) => handleFilterChange("color", e.target.value)}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
+                  className="border border-[#828BB5] text-white bg-transparent rounded-sm placeholder:text-[#BABABA]/70"
                 />
-                <AutocompleteInput
-                  placeholder="Any Make..."
-                  value={filters.make}
-                  onChange={(value) => handleFilterChange("make", value)}
-                  suggestions={filterOptions?.makes || []}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
-                />
-                <AutocompleteInput
-                  placeholder="Any Model..."
-                  value={filters.model}
-                  onChange={(value) => handleFilterChange("model", value)}
-                  suggestions={filterOptions?.models || []}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
-                />
+
                 <Input
                   placeholder="Search style..."
                   value={filters.style}
                   onChange={(e) => handleFilterChange("style", e.target.value)}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
+                  className="border border-[#828BB5] text-white bg-transparent rounded-sm placeholder:text-[#BABABA]/70"
                 />
+
                 <div className="space-y-3">
                   <Slider
                     defaultValue={[0, 1000]}
@@ -428,38 +481,75 @@ export default function CarAuctionPage() {
                 <h3 className="font-semibold">Filter By</h3>
               </div>
               <CardContent className="p-4 space-y-4">
-                <Input
-                  placeholder="Any Car Type..."
+                <Select
                   value={filters.carType}
-                  onChange={(e) => handleFilterChange("carType", e.target.value)}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
-                />
+                  onValueChange={(value) => handleFilterChange("carType", value)}
+                >
+                  <SelectTrigger className="w-full border border-[#828BB5] text-white bg-transparent rounded-sm">
+                    <SelectValue placeholder="Any Car Type..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2E3D83] border-[#828BB5] text-white">
+                    <SelectItem value="all">Any Car Type</SelectItem>
+                    {BODY_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={filters.make}
+                  onValueChange={(value) => {
+                    handleFilterChange("make", value);
+                    handleFilterChange("model", "all");
+                  }}
+                >
+                  <SelectTrigger className="w-full border border-[#828BB5] text-white bg-transparent rounded-sm">
+                    <SelectValue placeholder="Any Make..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2E3D83] border-[#828BB5] text-white">
+                    <SelectItem value="all">Any Make</SelectItem>
+                    {CAR_MAKES.map((make) => (
+                      <SelectItem key={make} value={make}>
+                        {make}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={filters.model}
+                  onValueChange={(value) => handleFilterChange("model", value)}
+                  disabled={!filters.make || filters.make === "all"}
+                >
+                  <SelectTrigger className="w-full border border-[#828BB5] text-white bg-transparent rounded-sm disabled:opacity-50">
+                    <SelectValue placeholder="Any Model..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2E3D83] border-[#828BB5] text-white">
+                    <SelectItem value="all">Any Model</SelectItem>
+                    {(CAR_MODELS_BY_MAKE[filters.make] || []).map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 <Input
                   placeholder="Any Color..."
                   value={filters.color}
                   onChange={(e) => handleFilterChange("color", e.target.value)}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
+                  className="border border-[#828BB5] text-white bg-transparent rounded-sm placeholder:text-[#BABABA]/70"
                 />
-                <AutocompleteInput
-                  placeholder="Any Make..."
-                  value={filters.make}
-                  onChange={(value) => handleFilterChange("make", value)}
-                  suggestions={filterOptions?.makes || []}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
-                />
-                <AutocompleteInput
-                  placeholder="Any Model..."
-                  value={filters.model}
-                  onChange={(value) => handleFilterChange("model", value)}
-                  suggestions={filterOptions?.models || []}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
-                />
+
                 <Input
                   placeholder="Search style..."
                   value={filters.style}
                   onChange={(e) => handleFilterChange("style", e.target.value)}
-                  className="border border-[#828BB5] text-[#BABABA] rounded-sm"
+                  className="border border-[#828BB5] text-white bg-transparent rounded-sm placeholder:text-[#BABABA]/70"
                 />
+
                 <div className="space-y-3">
                   <Slider
                     defaultValue={[0, 1000]}

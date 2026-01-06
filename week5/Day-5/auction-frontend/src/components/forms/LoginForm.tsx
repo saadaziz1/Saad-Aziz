@@ -2,13 +2,14 @@
 
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLogin } from '@/hooks/useAuth';
 import { loginSchema } from '@/lib/validationSchemas';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface LoginFormData {
   identifier: string;
@@ -18,6 +19,7 @@ interface LoginFormData {
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const loginMutation = useLogin();
 
   const {
@@ -35,6 +37,11 @@ export function LoginForm() {
     },
   });
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   const rememberMe = watch('rememberMe');
 
   const onSubmit = async (data: LoginFormData) => {
@@ -48,22 +55,43 @@ export function LoginForm() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-4 w-1/4" />
+        </div>
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {loginMutation.error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2 text-sm animate-in fade-in slide-in-from-top-1">
+          <span className="w-1 h-1 rounded-full bg-red-700" />
           {loginMutation.error.response?.data?.message || loginMutation.error.message || 'Login failed'}
         </div>
       )}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Enter Your Email*
+          Enter Your Email or Username*
         </label>
         <Input
           {...register('identifier')}
           type="text"
-          className={`w-full ${errors.identifier ? 'border-red-500' : ''}`}
-          placeholder="Email "
+          className={`w-full py-6 ${errors.identifier ? 'border-red-500 ring-red-500' : ''}`}
+          placeholder="Email or username"
         />
         {errors.identifier && (
           <p className="text-red-500 text-sm mt-1">{errors.identifier.message}</p>
@@ -78,18 +106,18 @@ export function LoginForm() {
           <Input
             {...register('password')}
             type={showPassword ? "text" : "password"}
-            className={`w-full pr-10 ${errors.password ? 'border-red-500' : ''}`}
+            className={`w-full pr-10 py-6 ${errors.password ? 'border-red-500 ring-red-500' : ''}`}
             placeholder="Enter your password"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
           >
             {showPassword ? (
-              <EyeOff className="w-4 h-4" />
+              <EyeOff className="w-5 h-5" />
             ) : (
-              <Eye className="w-4 h-4" />
+              <Eye className="w-5 h-5" />
             )}
           </button>
         </div>
@@ -105,24 +133,29 @@ export function LoginForm() {
             checked={rememberMe}
             onCheckedChange={(checked) => setValue('rememberMe', checked as boolean)}
           />
-          <label htmlFor="remember" className="text-sm text-gray-600">
+          <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer select-none">
             Remember me
           </label>
         </div>
         <a
           href="/forgot-password"
-          className="text-sm text-[#4A5FBF] hover:underline"
+          className="text-sm font-medium text-[#4A5FBF] hover:text-[#3A4FAF] transition-colors"
         >
-          Forgot Password
+          Forgot Password?
         </a>
       </div>
 
       <Button
         type="submit"
-        className="w-full bg-[#4A5FBF] hover:bg-[#3A4FAF] text-white py-3"
+        className="w-full bg-[#4A5FBF] hover:bg-[#3A4FAF] text-white py-6 text-lg font-semibold rounded-lg shadow-md transition-all active:scale-[0.98]"
         disabled={isSubmitting || loginMutation.isPending}
       >
-        {isSubmitting || loginMutation.isPending ? "Logging in..." : "Log In"}
+        {isSubmitting || loginMutation.isPending ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Logging in...
+          </span>
+        ) : "Log In"}
       </Button>
     </form>
   );

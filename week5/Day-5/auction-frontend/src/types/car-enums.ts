@@ -45,3 +45,12 @@ export const CAR_MODELS_BY_MAKE: Record<string, string[]> = {
 
     Other: ['Other'],
 };
+
+export const BODY_TYPES = [
+    'sedan',
+    'sports',
+    'hatchback',
+    'convertible',
+    'suv',
+    'coupe'
+] as const;
