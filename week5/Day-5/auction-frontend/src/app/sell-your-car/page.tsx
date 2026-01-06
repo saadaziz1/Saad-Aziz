@@ -139,7 +139,7 @@ function SellYourCarContent() {
 
       // Timestamps
       formData.append('startTime', new Date().toISOString());
-      formData.append('endTime', new Date(Date.now() + 1000).toISOString()); // 7 days default
+      formData.append('endTime', new Date(Date.now() +  5 * 60 * 1000).toISOString()); // 7 days default
 
       // Additional Specs
       formData.append('vin', data.vin);

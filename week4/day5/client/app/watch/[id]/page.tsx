@@ -28,8 +28,8 @@ const WatchPage = () => {
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
- const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const movieId = params.id as string;
   const { data: movie, isLoading: movieLoading } = getMovie(movieId);
   const { data: streamUrl, isLoading: streamLoading } = getStreamUrl(movieId);
@@ -38,7 +38,7 @@ const WatchPage = () => {
     const handleFullscreenChange = () => {
       const isFs = !!document.fullscreenElement;
       setIsFullscreen(isFs);
-      
+
       const header = document.querySelector('header');
       const footer = document.querySelector('footer');
       if (header) header.style.display = isFs ? 'none' : 'block';
@@ -133,7 +133,7 @@ const WatchPage = () => {
   }
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
-  const hasAccess = isSuperAdmin || (subscription && (subscription.status === 'active' || subscription.status === 'trial'));
+  const hasAccess = isSuperAdmin || (subscription && (subscription.status?.toLowerCase() === 'active' || subscription.status?.toLowerCase() === 'trial'));
 
   if (!hasAccess) {
     return (
@@ -141,7 +141,7 @@ const WatchPage = () => {
         <Card className="bg-[#1A1A1A] border-[#262626] p-8 text-center max-w-md">
           <h2 className="text-white text-2xl font-bold mb-4">Subscription Required</h2>
           <p className="text-gray-300 mb-6">
-            You need an active subscription to watch this content. 
+            You need an active subscription to watch this content.
             Start your free trial or choose a plan to continue.
           </p>
           <div className="space-y-3">
@@ -150,7 +150,7 @@ const WatchPage = () => {
                 View Subscription Plans
               </Button>
             </Link>
-            <Button 
+            <Button
               onClick={() => router.back()}
               className="w-full bg-gray-600 hover:bg-gray-700 text-white"
             >
@@ -163,7 +163,7 @@ const WatchPage = () => {
   }
 
   return (
-    <div 
+    <div
       className={`bg-black ${isFullscreen ? 'fixed inset-0 z-50' : 'min-h-screen py-25'}`}
       onMouseMove={handleMouseMove}
       onClick={togglePlayPause}
@@ -171,8 +171,8 @@ const WatchPage = () => {
       <div className="relative h-full">
         <div className={`transition-opacity duration-300 ${showControls || !isFullscreen ? 'opacity-100' : 'opacity-0'}`}>
           <button
-            onClick={(e) => { 
-              e.stopPropagation(); 
+            onClick={(e) => {
+              e.stopPropagation();
               if (isFullscreen) {
                 document.exitFullscreen?.();
               } else {
@@ -183,7 +183,7 @@ const WatchPage = () => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          
+
           <button
             onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
             className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
@@ -191,7 +191,7 @@ const WatchPage = () => {
             {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
           </button>
         </div>
-        
+
         <div className={isFullscreen ? "w-full h-full" : "w-full h-[calc(100vh-4rem)]"}>
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
@@ -201,7 +201,7 @@ const WatchPage = () => {
               </div>
             </div>
           )}
-          
+
           <video
             ref={videoRef}
             autoPlay
@@ -224,12 +224,12 @@ const WatchPage = () => {
             Your browser does not support the video tag.
           </video>
         </div>
-        
+
         <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent transition-opacity duration-300 ${showControls || !isFullscreen ? 'opacity-100' : 'opacity-0'}`}>
           <div className="p-4">
             <div className="relative mb-4">
               <div className="w-full h-1 bg-gray-600 rounded-lg">
-                <div 
+                <div
                   className="h-1 bg-red-600 rounded-lg transition-all duration-150"
                   style={{ width: `${(currentTime / duration) * 100}%` }}
                 ></div>
@@ -244,7 +244,7 @@ const WatchPage = () => {
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <button
@@ -253,7 +253,7 @@ const WatchPage = () => {
                 >
                   {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
                 </button>
-                
+
                 <div className="flex items-center gap-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleMute(); }}
@@ -263,7 +263,7 @@ const WatchPage = () => {
                   </button>
                   <div className="relative w-20">
                     <div className="w-full h-1 bg-gray-600 rounded-lg">
-                      <div 
+                      <div
                         className="h-1 bg-red-600 rounded-lg transition-all duration-150"
                         style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
                       ></div>
@@ -280,12 +280,12 @@ const WatchPage = () => {
                     />
                   </div>
                 </div>
-                
+
                 <span className="text-white text-xs lg:text-sm">
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
               </div>
-              
+
               <div className="text-right">
                 <h1 className="text-white text-sm lg:text-xl font-bold">{movie.title}</h1>
                 <div className="flex justify-end lg:justify-start items-center gap-2 text-right text-gray-400 text-xs lg:text-sm ">
@@ -297,13 +297,13 @@ const WatchPage = () => {
             </div>
           </div>
         </div>
-        
+
         <div className={`absolute top-1/2 left-8 transform -translate-y-1/2 max-w-md transition-opacity duration-300 ${!isPlaying && showControls ? 'opacity-100' : 'opacity-0'}`}>
           <h1 className="text-white text-xl lg:text-4xl font-bold mb-4">{movie.title}</h1>
           <p className="text-gray-300 text-sm lg:text-lg leading-relaxed">{movie.description}</p>
         </div>
       </div>
-      
+
       <style jsx>{`
         input[type="range"]::-webkit-slider-thumb {
           appearance: none;

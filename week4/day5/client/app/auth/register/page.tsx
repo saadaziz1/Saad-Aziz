@@ -17,10 +17,10 @@ const RegisterPage = () => {
 
   const handleSubmit = () => {
     setError("");
-    
+
     register({ name, email, password }, {
       onSuccess: () => {
-        router.push("/");
+        router.push("/auth/login");
       },
       onError: (err: any) => {
         setError(err?.response?.data?.message || err?.message || "Registration failed");

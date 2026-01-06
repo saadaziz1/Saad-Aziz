@@ -24,9 +24,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? ['https://saad-aziz.onrender.com', 'https://week4-day4-frontend.com'] 
-      : '*',
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true
   },

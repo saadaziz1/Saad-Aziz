@@ -18,12 +18,9 @@ export const useAuth = () => {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (data: RegisterData): Promise<AuthResponse> => {
+    mutationFn: async (data: RegisterData) => {
       const response = await api.post('/auth/register', data);
-      return response.data.data; // Extract nested data
-    },
-    onSuccess: (data) => {
-      setAuth(data.user, data.token);
+      return response.data;
     },
     throwOnError: false,
   });

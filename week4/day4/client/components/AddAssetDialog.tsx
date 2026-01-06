@@ -22,7 +22,7 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
   const [avgPrice, setAvgPrice] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({ symbol: '', amount: '', price: '' });
   const { allCoins } = useSocket();
 
   const filteredCoins = searchTerm.length >= 2 ? allCoins.filter(coin => {
@@ -35,30 +35,39 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
     setSymbol(coin);
     setSearchTerm(coin.replace('USDT', ''));
     setShowDropdown(false);
-    setError('');
+    setErrors(prev => ({ ...prev, symbol: '' }));
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { symbol: '', amount: '', price: '' };
+
+    if (!symbol) {
+      newErrors.symbol = 'Please select a coin';
+      isValid = false;
+    } else if (!allCoins.includes(symbol)) {
+      newErrors.symbol = 'Selected coin does not exist';
+      isValid = false;
+    }
+
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      newErrors.amount = 'Enter a valid positive amount';
+      isValid = false;
+    }
+
+    if (!avgPrice || isNaN(parseFloat(avgPrice)) || parseFloat(avgPrice) <= 0) {
+      newErrors.price = 'Enter a valid positive price';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    
-    if (!symbol) {
-      setError('Please select a coin');
-      return;
-    }
-    
-    if (!allCoins.includes(symbol)) {
-      setError('Selected coin does not exist in our system');
-      return;
-    }
-    
-    if (!amount || parseFloat(amount) <= 0) {
-      setError('Please enter a valid amount');
-      return;
-    }
-    
-    if (!avgPrice || parseFloat(avgPrice) <= 0) {
-      setError('Please enter a valid price');
+
+    if (!validateForm()) {
       return;
     }
 
@@ -67,13 +76,13 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
       amount: parseFloat(amount),
       price: parseFloat(avgPrice)
     };
-    
+
     onAddAsset(transaction);
     setSymbol('');
     setAmount('');
     setAvgPrice('');
     setSearchTerm('');
-    setError('');
+    setErrors({ symbol: '', amount: '', price: '' });
     setOpen(false);
   };
 
@@ -90,11 +99,6 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
           <DialogTitle>Add New Asset</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
-              {error}
-            </div>
-          )}
           <div className="relative">
             <label className="text-sm font-medium mb-2 block text-foreground">Coin</label>
             <div className="relative">
@@ -105,13 +109,16 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   setShowDropdown(true);
-                  setError('');
+                  if (symbol) setSymbol(''); // Clear symbol if user types
+                  setErrors(prev => ({ ...prev, symbol: '' }));
                 }}
                 onFocus={() => setShowDropdown(true)}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
+                className={`pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground ${errors.symbol ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
               />
             </div>
+            {errors.symbol && <p className="text-xs text-red-500 mt-1">{errors.symbol}</p>}
+
             {showDropdown && searchTerm.length >= 2 && (
               <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
                 {filteredCoins.length > 0 ? (
@@ -156,36 +163,44 @@ export default function AddAssetDialog({ onAddAsset }: AddAssetDialogProps) {
             <Input
               type="number"
               step="any"
+              min={0}
               placeholder="0.5"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-              className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+              onChange={(e) => {
+                setAmount(e.target.value);
+                setErrors(prev => ({ ...prev, amount: '' }));
+              }}
+              className={`bg-background border-border text-foreground placeholder:text-muted-foreground ${errors.amount ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
             />
+            {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount}</p>}
           </div>
           <div>
             <label className="text-sm font-medium mb-2 block text-foreground">Average Price (USD)</label>
             <Input
               type="number"
               step="any"
+              min={0}
               placeholder="45000"
               value={avgPrice}
-              onChange={(e) => setAvgPrice(e.target.value)}
-              required
-              className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+              onChange={(e) => {
+                setAvgPrice(e.target.value);
+                setErrors(prev => ({ ...prev, price: '' }));
+              }}
+              className={`bg-background border-border text-foreground placeholder:text-muted-foreground ${errors.price ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
             />
+            {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
           </div>
           <div className="flex gap-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setOpen(false)} 
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
               className="flex-1 border-border hover:bg-muted"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
               disabled={!symbol || !allCoins.includes(symbol)}
             >
