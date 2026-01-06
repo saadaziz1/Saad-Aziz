@@ -21,13 +21,13 @@ import { useSocketContext } from "@/providers/SocketProvider";
 export function NotificationMenu() {
   const user = useAuthStore((s) => s.user);
   const { isConnected } = useSocketContext();
-  
+
   // Only fetch if authenticated AND socket is initialized 
   const effectiveUserId = user?.id || user?._id;
   const { data: notifications = [] } = useNotifications(
     (effectiveUserId && isConnected) ? effectiveUserId : ""
   );
-  
+
   const { mutate: markAllAsRead } = useMarkAllNotificationsAsRead();
   const { mutate: markAsRead } = useMarkNotificationAsRead();
   const { mutate: deleteNotification } = useDeleteNotification();
@@ -36,7 +36,7 @@ export function NotificationMenu() {
   const sortedNotifications = [...notifications].sort((a, b) => {
     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    
+
     if (a.isRead === b.isRead) {
       return timeB - timeA;
     }
@@ -67,7 +67,7 @@ export function NotificationMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors outline-none ring-0 focus:ring-0">
-          <Bell className="w-6 h-6 text-gray-600" />
+          <Bell className="w-6 h-6 text-[#2E3D83]" />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
@@ -84,7 +84,7 @@ export function NotificationMenu() {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-xs text-blue-600 hover:underline px-2"
+              className="text-xs text-[#2E3D83] border border-[#2E3D83] rounded-sm px-2"
             >
               Mark all as read
             </button>
@@ -102,7 +102,7 @@ export function NotificationMenu() {
                 key={notification._id}
                 className={clsx(
                   "flex flex-col items-start gap-1 p-3 cursor-pointer outline-none transition-colors relative group",
-                  !notification.isRead ? "bg-[#E8F2FF] border-l-4 border-blue-600 focus:bg-[#D9EAFF]" : "focus:bg-gray-50 border-l-4 border-transparent"
+                  !notification.isRead ? "bg-[#E8F2FF] border-l-4 border-[#2E3D83] focus:bg-[#D9EAFF]" : "focus:bg-gray-50 border-l-4 border-transparent"
                 )}
                 onClick={() => handleNotificationClick(notification._id, notification.isRead)}
               >
@@ -120,7 +120,7 @@ export function NotificationMenu() {
                 <span className="text-xs text-gray-400">
                   {notification.createdAt ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true }) : 'Just now'}
                 </span>
-                
+
                 {/* Delete Button - only visible on hover */}
                 <button
                   onClick={(e) => handleDelete(e, notification._id)}

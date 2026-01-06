@@ -8,7 +8,7 @@ import { SocketProvider } from "@/providers/SocketProvider";
 
 export const metadata: Metadata = {
   title: "Auction App",
-  description: "Created by Abdullah Jabbar",
+  description: "Created by Saad",
 };
 
 export default function RootLayout({

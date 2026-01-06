@@ -50,7 +50,7 @@ export default function HomePage() {
     <>
       {/* Hero Section */}
       <div
-        className="relative bg-cover bg-center py-32 px-4"
+        className="relative  bg-cover bg-center py-32 px-4"
         style={{
           backgroundImage:
             "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/hero.jpg')",
