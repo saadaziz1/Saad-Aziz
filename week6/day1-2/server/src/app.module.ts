@@ -9,6 +9,7 @@ import { CartModule } from './modules/cart/cart.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -31,6 +32,7 @@ import { APP_GUARD } from '@nestjs/core';
     OrdersModule,
     NotificationsModule,
     LoyaltyModule,
+    PaymentsModule,
   ],
   providers: [
     {

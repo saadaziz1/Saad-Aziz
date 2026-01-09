@@ -102,6 +102,7 @@ export class Order {
             cardHolderName: { type: String },
             cardNumber: { type: String },
             expiryDate: { type: String },
+            stripePaymentIntentId: { type: String, index: true, unique: true, sparse: true },
         },
         required: false,
     })
@@ -110,6 +111,7 @@ export class Order {
         cardHolderName?: string;
         cardNumber?: string;
         expiryDate?: string;
+        stripePaymentIntentId?: string;
     };
 }
 

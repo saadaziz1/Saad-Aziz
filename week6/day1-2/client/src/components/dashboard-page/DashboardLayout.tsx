@@ -42,16 +42,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Auth Guard
-  useEffect(() => {
-    if (!isLoadingProfile) {
-      if (!profile) {
-        router.push('/login');
-      } else if (profile.role !== 'ADMIN' && profile.role !== 'SUPER_ADMIN') {
-        router.push('/');
-      }
-    }
-  }, [profile, isLoadingProfile, router]);
+
 
   useEffect(() => {
     const checkMobile = () => {
@@ -74,10 +65,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // Final check to prevent rendering protected content even for a split second
-  if (!profile || (profile.role !== 'ADMIN' && profile.role !== 'SUPER_ADMIN')) {
-    return null;
-  }
+
 
   const navigation = [
     { name: "DASHBOARD", href: "/dashboard", icon: LayoutDashboard },

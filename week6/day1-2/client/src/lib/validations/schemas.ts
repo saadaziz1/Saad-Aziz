@@ -32,26 +32,11 @@ export const checkoutSchema = yup.object({
   paymentMethod: yup.string().oneOf(['card', 'points']).default('card'),
 
   // Card Details - Conditional
-  cardNumber: yup.string().when('paymentMethod', {
-    is: 'card',
-    then: (schema) => schema.matches(/^\d{16}$/, 'Card number must be 16 digits').required('Card number is required'),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  expiryDate: yup.string().when('paymentMethod', {
-    is: 'card',
-    then: (schema) => schema.matches(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Expiry date must be MM/YY').required('Expiry date is required'),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  cvv: yup.string().when('paymentMethod', {
-    is: 'card',
-    then: (schema) => schema.matches(/^\d{3,4}$/, 'CVV must be 3 or 4 digits').required('CVV is required'),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  cardHolderName: yup.string().when('paymentMethod', {
-    is: 'card',
-    then: (schema) => schema.min(2, 'Name on card is required').required('Name on card is required'),
-    otherwise: (schema) => schema.notRequired(),
-  }),
+  // Card Details - Handled by Stripe Elements
+  cardNumber: yup.string().notRequired(),
+  expiryDate: yup.string().notRequired(),
+  cvv: yup.string().notRequired(),
+  cardHolderName: yup.string().notRequired(),
 }).required();
 
 export type LoginFormData = yup.InferType<typeof loginSchema>;

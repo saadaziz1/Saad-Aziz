@@ -121,6 +121,7 @@ const Footer = () => {
                     height={100}
                     alt="user"
                     className="max-h-[15px]"
+                    style={{ width: "auto", height: "auto" }}
                   />
                 </span>
               ))}

@@ -7,6 +7,8 @@ import { CartModule } from '../cart/cart.module';
 import { ProductsModule } from '../products/products.module';
 import { UsersModule } from '../users/users.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
+import { PaymentsModule } from '../payments/payments.module';
+import { forwardRef } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -20,8 +22,10 @@ import { LoyaltyModule } from '../loyalty/loyalty.module';
     ProductsModule,
     UsersModule,
     LoyaltyModule,
+    forwardRef(() => PaymentsModule),
   ],
   controllers: [OrdersController],
   providers: [OrdersService],
+  exports: [OrdersService],
 })
 export class OrdersModule { }

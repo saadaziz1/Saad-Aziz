@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { DashboardLayout } from '@/components/dashboard-page/DashboardLayout';
+import { RefundButton } from '@/components/dashboard/RefundButton';
 import { useGetOrderQuery, useUpdateOrderStatusMutation } from '@/api/ordersApi';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -126,6 +127,7 @@ export default function OrderDetailsPage() {
                         <button className="p-2.5 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-lg border border-gray-100 transition-colors">
                             <Printer className="w-4 h-4" />
                         </button>
+                        <RefundButton orderId={order._id} currentStatus={order.status} />
                         <button className="bg-[#003B5C] text-white px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center shadow-lg">
                             <Save className="w-4 h-4 mr-2" />
                             Save

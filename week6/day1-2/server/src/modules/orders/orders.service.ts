@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
@@ -11,6 +11,7 @@ import { Role } from '../../common/enums/role.enum';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { LedgerType } from '../loyalty/schemas/loyalty-ledger.schema';
 import { CheckoutDto } from './dto/checkout.dto';
+import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class OrdersService {
@@ -22,6 +23,8 @@ export class OrdersService {
     private productService: ProductService,
     private usersService: UsersService,
     private loyaltyService: LoyaltyService,
+    @Inject(forwardRef(() => PaymentsService))
+    private paymentsService: PaymentsService,
   ) { }
 
   async placeOrder(userId: string, checkoutData: CheckoutDto) {
@@ -32,8 +35,20 @@ export class OrdersService {
       throw new ForbiddenException('Admins and Super Admins are not allowed to place orders');
     }
 
+    // Idempotency check for Stripe payments
+    if (checkoutData.paymentIntentId) {
+      const existingOrder = await this.orderModel.findOne({
+        'paymentInfo.stripePaymentIntentId': checkoutData.paymentIntentId
+      });
+      if (existingOrder) {
+        console.log(`Order for PaymentIntent ${checkoutData.paymentIntentId} already exists. Returning existing order.`);
+        return existingOrder;
+      }
+    }
+
     const cart = await this.cartService.getUserCart(userId);
     if (!cart || !cart.items.length) {
+      console.error(`OrdersService.placeOrder - Cart is empty for user ${userId}`);
       throw new BadRequestException('Cart is empty');
     }
 
@@ -52,6 +67,7 @@ export class OrdersService {
       const product: ProductDocument = await this.productService.findById(prodId.toString());
 
       if (product.stock < item.quantity) {
+        console.error(`OrdersService.placeOrder - Insufficient stock for ${product.name}. Stock: ${product.stock}, Requested: ${item.quantity}`);
         throw new BadRequestException(`Insufficient stock for ${product.name}`);
       }
 
@@ -95,8 +111,28 @@ export class OrdersService {
     // Validate point balance
     const totalPointsNeeded = totalPointsToSpend + pointsUsedAsDiscount;
     if (totalPointsNeeded > user.loyaltyPoints) {
+      console.error(`OrdersService.placeOrder - Insufficient loyalty points. Have: ${user.loyaltyPoints}, Need: ${totalPointsNeeded}`);
       throw new BadRequestException(`Insufficient loyalty points. Have: ${user.loyaltyPoints}, Need: ${totalPointsNeeded}`);
     }
+
+    // Determine initial status
+    let initialStatus = OrderStatus.PENDING;
+
+    // Check Stripe status directly to handle race condition (Webhook firing before Order creation)
+    if (checkoutData.paymentIntentId) {
+      try {
+        const intent = await this.paymentsService.getPaymentIntent(checkoutData.paymentIntentId);
+        if (intent.status === 'succeeded') {
+          console.log(`PaymentIntent ${checkoutData.paymentIntentId} is already succeeded. Marking order as PAID.`);
+          initialStatus = OrderStatus.PAID;
+        }
+      } catch (err) {
+        console.error('Failed to verify payment intent status:', err);
+      }
+    } else if (checkoutData.paymentMethod === 'points' && finalAmountToPay === 0) {
+      initialStatus = OrderStatus.PAID;
+    }
+    // NOTE: If paying with card, status is PENDING until webhook (or above check).
 
     // Calculate points to be earned (based on final paid amount)
     let pointsToEarn = 0;
@@ -112,7 +148,7 @@ export class OrdersService {
       totalAmount: finalAmountToPay,
       pointsUsed: totalPointsNeeded,
       pointsEarned: pointsToEarn,
-      status: OrderStatus.PAID,
+      status: initialStatus,
       shippingAddress: checkoutData ? {
         firstName: checkoutData.firstName,
         email: checkoutData.email,
@@ -124,20 +160,49 @@ export class OrdersService {
       paymentInfo: checkoutData ? {
         method: checkoutData.paymentMethod || 'card',
         cardHolderName: checkoutData.cardHolderName,
-        cardNumber: checkoutData.cardNumber ? `**** **** **** ${checkoutData.cardNumber.slice(-4)}` : undefined, // Masking for safety but saving relevant info
+        cardNumber: checkoutData.cardNumber ? `**** **** **** ${checkoutData.cardNumber.slice(-4)}` : undefined, // Masking
         expiryDate: checkoutData.expiryDate,
+        stripePaymentIntentId: checkoutData.paymentIntentId,
       } : undefined,
     });
 
-    try {
-      await this.processPaymentSuccess(order);
-    } catch (error) {
-      console.error('Failed to process payment success logic:', error);
-      // Note: In real app, we might want to rollback or flag for manual review
+    // If already PAID (Points only), trigger success logic immediately
+    if (initialStatus === OrderStatus.PAID) {
+      try {
+        await this.processPaymentSuccess(order);
+      } catch (error) {
+        console.error('Failed to process payment success logic:', error);
+      }
     }
 
     await this.cartService.clearCart(userId);
     return order;
+  }
+
+  /**
+   * Update order status via Webhook
+   */
+  async updateStatusByPaymentIntent(intentId: string, status: OrderStatus): Promise<void> {
+    const order = await this.orderModel.findOne({ 'paymentInfo.stripePaymentIntentId': intentId });
+    if (!order) {
+      console.warn(`Order not found for PaymentIntent: ${intentId}`);
+      return;
+    }
+
+    console.log(`Updating order ${order._id} status to ${status} via webhook`);
+
+    if (order.status === status) return;
+
+    if (status === OrderStatus.PAID && order.status !== OrderStatus.PAID) {
+      await this.processPaymentSuccess(order);
+      order.status = OrderStatus.PAID;
+      await order.save();
+    } else if (status === OrderStatus.CANCELLED) {
+      // If it was somehow PAID before, we might need refund? Unlikely for webhook sequence unless dispute.
+      // Usually this happens if payment failed.
+      order.status = status; // Just update status
+      await order.save();
+    }
   }
 
   /**
@@ -200,7 +265,22 @@ export class OrdersService {
   }
 
   private async processOrderRefund(order: OrderDocument) {
-    // 1. Return spent points
+    console.log(`Processing refund for order ${order._id}`);
+
+    // 1. Stripe Refund
+    if (order.paymentInfo?.method === 'card' && order.paymentInfo?.stripePaymentIntentId) {
+      try {
+        console.log('Refunding Stripe Payment:', order.paymentInfo.stripePaymentIntentId);
+        await this.paymentsService.refundPayment(order.paymentInfo.stripePaymentIntentId);
+      } catch (error) {
+        console.error('Stripe Refund Failed:', error);
+        // We continue to revert points/internal state even if Stripe fails? 
+        // Or throw? Admin should know.
+        throw new InternalServerErrorException('Stripe Refund Failed: ' + error.message);
+      }
+    }
+
+    // 2. Return spent points
     if (order.pointsUsed > 0) {
       await this.loyaltyService.createEntry(
         order.userId,
@@ -211,7 +291,7 @@ export class OrdersService {
       );
     }
 
-    // 2. Reverse earned points
+    // 3. Reverse earned points
     if (order.pointsEarned > 0) {
       await this.loyaltyService.createEntry(
         order.userId,

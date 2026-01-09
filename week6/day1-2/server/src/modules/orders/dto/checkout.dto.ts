@@ -47,6 +47,11 @@ export class CheckoutDto {
   @IsString()
   expiryDate?: string;
 
+  @ApiPropertyOptional({ example: 'pi_xxxxxxxxxxxxxx' })
+  @IsOptional()
+  @IsString()
+  paymentIntentId?: string;
+
   @ApiPropertyOptional({ example: '123' })
   @IsOptional()
   @IsString()

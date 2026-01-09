@@ -18,7 +18,6 @@ export function middleware(request: NextRequest) {
     const protectedPaths = ['/dashboard', '/profile', '/checkout'];
     const guestPaths = ['/login', '/signup'];
 
-    // DEBUG: console.log(`Middleware matching for ${pathname} | Role: ${role} | Token: ${!!token}`);
 
     // 1. Not authenticated -> Redirect to login if accessing protected routes
     if (protectedPaths.some(path => pathname.startsWith(path)) && !token) {
@@ -57,6 +56,7 @@ export function middleware(request: NextRequest) {
 
 // Export as proxy as well since the user requested this name
 export const proxy = middleware;
+export default middleware;
 
 export const config = {
     matcher: [
