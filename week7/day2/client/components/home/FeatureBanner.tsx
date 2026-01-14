@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 
 const FeatureBanner = () => {
     return (
-        <Box sx={{ py: { xs: 6, md: 10 }, textAlign: 'center', position: 'relative', px: { xs: 2, md: 0 } }}>
-            <div className="absolute z-0 inset-x-1/4 top-0 bg-[#73FDAA] w-32 h-32 rounded-full blur-2xl hidden sm:block"></div>
+        <Box sx={{ py: { xs: 1, md: 10 }, textAlign: 'center', position: 'relative', px: { xs: 2, md: 0 } }}>
+            <div className="absolute z-0 inset-x-1/4 top-0 bg-[#73FDAA] w-32 h-32 rounded-full blur-2xl hidden md:block"></div>
             <Container sx={{ zIndex: 1 }} >
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

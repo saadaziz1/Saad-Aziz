@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import CryptoCard from '../shared/CryptoCard';
 import { motion } from 'framer-motion';
@@ -29,6 +29,9 @@ const cryptoData = [
 ];
 
 const MarketTrend = () => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     return (
         <Box sx={{ py: { xs: 6, md: 12 }, position: 'relative', maxWidth: 1321, mx: 'auto', px: { xs: 2, md: 0 } }}>
 
@@ -52,10 +55,10 @@ const MarketTrend = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{
                                 duration: 0.4,
-                                delay: (index % 4) * 0.1,
+                                delay: isMobile ? 0 : (index % 4) * 0.1,
                                 ease: 'easeOut'
                             }}
-                            viewport={{ once: true, margin: '-50px' }}
+                            viewport={{ once: true, margin: isMobile ? '0px' : '-50px' }}
                         >
                             <CryptoCard {...crypto} />
                         </motion.div>

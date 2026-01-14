@@ -3,6 +3,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { SignupDto, LoginDto } from './dto/auth.dto';
 
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
@@ -18,14 +20,22 @@ export class AuthController {
     }
 
     @Get('google')
-    @UseGuards(AuthGuard('google'))
+    @UseGuards(GoogleAuthGuard)
     async googleAuth(@Req() req) { }
 
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@Req() req, @Res() res) {
         const result = await this.authService.googleLogin(req);
-        const frontendUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        console.log('--- Google Auth Redirect Debug ---');
+        console.log('process.env.FRONTEND_URL:', process.env.FRONTEND_URL);
+        console.log('process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+
+        // Robust fallback: Env Var -> Hardcoded Prod -> Localhost
+        const frontendUrl = process.env.FRONTEND_URL;
+
+        console.log('Final frontendUrl:', frontendUrl);
 
         if (typeof result === 'string') {
             return res.redirect(`${frontendUrl}/login?error=auth_failed`);

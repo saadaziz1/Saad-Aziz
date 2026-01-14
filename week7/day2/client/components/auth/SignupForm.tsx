@@ -10,7 +10,6 @@ import {
     IconButton,
     InputAdornment,
     Link,
-    Alert,
     CircularProgress
 } from '@mui/material';
 import { Visibility, VisibilityOff, Google } from '@mui/icons-material';
@@ -21,13 +20,12 @@ import { signupSchema } from '@/lib/validations/auth';
 import { useSignupMutation } from '@/store/apiSlice';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { toast } from 'react-hot-toast';
 
 const SignupForm = () => {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [signup, { isLoading, error: serverError }] = useSignupMutation();
-    const [clientError, setClientError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(signupSchema),
@@ -38,18 +36,17 @@ const SignupForm = () => {
     };
 
     const onSubmit = async (data: any) => {
-        setClientError(null);
-        setSuccessMessage(null);
         try {
             // Exclude confirmPassword from dynamic data
             const { confirmPassword, ...signupData } = data;
             const result = await signup(signupData).unwrap();
-            setSuccessMessage(result.message || 'Signup successful! Please log in.');
+            toast.success(result.message || 'Signup successful! Please log in.');
             setTimeout(() => {
                 router.push('/login');
             }, 2000);
         } catch (err: any) {
-            setClientError(err?.data?.message || err?.message || 'Signup failed. Please try again.');
+            const message = err?.data?.message || err?.message || 'Signup failed. Please try again.';
+            toast.error(message);
         }
     };
 
@@ -77,18 +74,6 @@ const SignupForm = () => {
                 <Typography variant="body2" sx={{ mb: 4, color: 'rgba(255, 255, 255, 0.7)' }}>
                     Join Decentral and start your crypto journey
                 </Typography>
-
-                {(clientError || serverError) && (
-                    <Alert severity="error" sx={{ mb: 3, borderRadius: '8px' }}>
-                        {clientError || (serverError as any)?.data?.message || 'Something went wrong'}
-                    </Alert>
-                )}
-
-                {successMessage && (
-                    <Alert severity="success" sx={{ mb: 3, borderRadius: '8px' }}>
-                        {successMessage}
-                    </Alert>
-                )}
 
                 <Button
                     fullWidth

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Container } from '@mui/material';
-import BackgroundBlobs from '@/components/shared/BackgroundBlobs';
+
 import SignupForm from '@/components/auth/SignupForm';
 
 const SignupPage = () => {

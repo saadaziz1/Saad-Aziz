@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useNewsletter } from '@/hooks/useNewsletter';
 
 const Newsletter = () => {
-    const { email, setEmail, handleSubscribe, isLoading, message } = useNewsletter();
+    const { email, setEmail, handleSubscribe, isLoading } = useNewsletter();
 
     return (
         <Box sx={{ py: { xs: 8, md: 15 }, position: 'relative' }}>
@@ -28,9 +28,9 @@ const Newsletter = () => {
                             px: { xs: 3, md: 6 },
                             py: { xs: 4, md: 6 },
                             borderRadius: '10px',
-                            background: 'rgba(1, 0, 16, 0.61)',
-                            backdropFilter: 'blur(5px)',
-                            WebkitBackdropFilter: 'blur(5px)',
+                            background: 'rgba(1, 0, 16, 1)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
                             boxShadow: '5px 1px 13px 4px rgba(115, 253, 170, 0.48)',
                             border: '1px solid rgba(115, 253, 170, 0.25)',
                             display: 'flex',
@@ -126,25 +126,14 @@ const Newsletter = () => {
                                 {isLoading ? 'Subscribing...' : 'Subscribe'}
                             </Button>
                         </Box>
-
-                        {message && (
-                            <Typography
-                                sx={{
-                                    mt: 2,
-                                    color: message.type === 'success' ? 'primary.main' : 'error.main',
-                                    fontWeight: 500
-                                }}
-                            >
-                                {message.text}
-                            </Typography>
-                        )}
                     </Paper>
                 </motion.div>
             </Container>
+            <div className="absolute z-0 top-20 right-64 bg-[#73FDAA] w-32 h-32 rounded-full blur-2xl lg:block hidden"></div>
+            <div className="absolute z-0 top-70 left-34 bg-[#73FDAA] w-32 h-32 rounded-full blur-2xl lg:block hidden"></div>
 
-            <div className="absolute z-0 top-10 right-64 bg-[#73FDAA] w-32 h-32 rounded-full blur-2xl md:block hidden"></div>
-            <div className="absolute z-0 top-60 left-64 bg-[#73FDAA] w-32 h-32 rounded-full blur-2xl md:block hidden"></div>
         </Box>
+
     );
 };
 

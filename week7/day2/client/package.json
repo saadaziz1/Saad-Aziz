@@ -23,9 +23,11 @@
     "framer-motion": "^12.26.1",
     "js-cookie": "^3.0.5",
     "next": "16.1.1",
+    "nextjs-toploader": "^3.9.17",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.0",
+    "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
     "recharts": "^3.6.0",
     "yup": "^1.7.1"

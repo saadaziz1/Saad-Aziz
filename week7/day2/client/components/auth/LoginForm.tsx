@@ -10,7 +10,6 @@ import {
     IconButton,
     InputAdornment,
     Link,
-    Alert,
     CircularProgress
 } from '@mui/material';
 import { Visibility, VisibilityOff, Google } from '@mui/icons-material';
@@ -21,12 +20,12 @@ import { loginSchema } from '@/lib/validations/auth';
 import { useLoginMutation } from '@/store/apiSlice';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { toast } from 'react-hot-toast';
 
 const LoginForm = () => {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [login, { isLoading, error: serverError }] = useLoginMutation();
-    const [clientError, setClientError] = useState<string | null>(null);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(loginSchema),
@@ -37,13 +36,14 @@ const LoginForm = () => {
     };
 
     const onSubmit = async (data: any) => {
-        setClientError(null);
         try {
             const result = await login(data).unwrap();
             Cookies.set('token', result.accessToken, { expires: 7 });
+            toast.success('Login successful!');
             window.location.href = '/dashboard';
         } catch (err: any) {
-            setClientError(err?.data?.message || err?.message || 'Login failed. Please check your credentials.');
+            const message = err?.data?.message || err?.message || 'Login failed. Please check your credentials.';
+            toast.error(message);
         }
     };
 
@@ -71,12 +71,6 @@ const LoginForm = () => {
                 <Typography variant="body2" sx={{ mb: 4, color: 'rgba(255, 255, 255, 0.7)' }}>
                     Enter your credentials to access your account
                 </Typography>
-
-                {(clientError || serverError) && (
-                    <Alert severity="error" sx={{ mb: 3, borderRadius: '8px' }}>
-                        {clientError || (serverError as any)?.data?.message || 'Something went wrong'}
-                    </Alert>
-                )}
 
                 <Button
                     fullWidth

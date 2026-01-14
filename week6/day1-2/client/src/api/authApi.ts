@@ -17,7 +17,10 @@ export const authApi = baseApi.injectEndpoints({
             }),
         }),
         getMe: builder.query({
-            query: () => '/users/me',
+            query: (token?: string) => token ? {
+                url: '/users/me',
+                headers: { Authorization: `Bearer ${token}` }
+            } : '/users/me',
             providesTags: ['User'],
         }),
     }),

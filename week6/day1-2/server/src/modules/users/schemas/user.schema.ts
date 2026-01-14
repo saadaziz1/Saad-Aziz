@@ -27,8 +27,20 @@ export class User {
   address?: string;
 
   /** Hashed password */
-  @Prop({ required: true, select: false })
-  password: string;
+  @Prop({ select: false })
+  password?: string;
+
+  /** OAuth provider (google, github, discord, local) */
+  @Prop({ default: 'local' })
+  provider: string;
+
+  /** OAuth provider user ID */
+  @Prop()
+  providerId?: string;
+
+  /** User profile picture URL */
+  @Prop()
+  avatar?: string;
 
   /** Role for RBAC */
   @Prop({

@@ -8,6 +8,7 @@ import "@fontsource/montserrat/600.css";
 import "@fontsource/montserrat/700.css";
 import "@fontsource/outfit/400.css";
 import { Box } from "@mui/material";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 import { ReduxProvider } from "@/store/ReduxProvider";
+import NextTopLoader from 'nextjs-toploader';
 
 export default function RootLayout({
   children,
@@ -39,9 +41,28 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NextTopLoader
+          color="#73FDAA"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={true}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #73FDAA,0 0 5px #73FDAA"
+        />
         <ReduxProvider>
           <ThemeRegistry>
-            <Box sx={{ maxWidth: 1440, mx: 'auto', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Toaster position="bottom-right" toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#0F172A',
+                color: '#fff',
+                border: '1px solid rgba(115, 253, 170, 0.2)',
+              },
+            }} />
+            <Box sx={{ maxWidth: 1440, mx: 'auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', px: 2 }}>
               <Navbar />
               <Box component="main" sx={{ flexGrow: 1 }}>
                 {children}

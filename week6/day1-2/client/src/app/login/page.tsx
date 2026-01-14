@@ -1,14 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { cn } from "@/lib/utils";
 import { integralCF } from "@/styles/fonts";
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from "next/link";
 import { loginSchema, LoginFormData } from '@/lib/validations/schemas';
 import toast from 'react-hot-toast';
+import { FaGoogle, FaGithub, FaDiscord } from 'react-icons/fa';
 
 export default function LoginPage() {
     const { handleLogin, isLoginLoading } = useAuthSession();
@@ -16,6 +18,15 @@ export default function LoginPage() {
     const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginFormData>({
         resolver: yupResolver(loginSchema),
     });
+
+    const searchParams = useSearchParams();
+    const oauthError = searchParams.get('error');
+
+    useEffect(() => {
+        if (oauthError) {
+            toast.error('Authentication failed or was cancelled. Please try again.');
+        }
+    }, [oauthError]);
 
     const onSubmit = async (data: LoginFormData) => {
         try {
@@ -26,6 +37,11 @@ export default function LoginPage() {
             toast.error(message);
             setError('root', { message });
         }
+    };
+
+    const handleSocialLogin = (provider: string) => {
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+        window.location.href = `${backendUrl}/api/auth/${provider}`;
     };
 
     return (
@@ -106,6 +122,39 @@ export default function LoginPage() {
                         </button>
                     </div>
                 </form>
+
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500 uppercase">Or continue with</span>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                    <button
+                        onClick={() => handleSocialLogin('google')}
+                        className="flex items-center justify-center py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all group"
+                        title="Sign in with Google"
+                    >
+                        <FaGoogle className="text-[#DB4437] text-xl group-hover:scale-110 transition-transform" />
+                    </button>
+                    <button
+                        onClick={() => handleSocialLogin('github')}
+                        className="flex items-center justify-center py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all group"
+                        title="Sign in with GitHub"
+                    >
+                        <FaGithub className="text-black text-xl group-hover:scale-110 transition-transform" />
+                    </button>
+                    <button
+                        onClick={() => handleSocialLogin('discord')}
+                        className="flex items-center justify-center py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all group"
+                        title="Sign in with Discord"
+                    >
+                        <FaDiscord className="text-[#5865F2] text-xl group-hover:scale-110 transition-transform" />
+                    </button>
+                </div>
 
                 <div className="text-center mt-4">
                     <p className="text-sm text-gray-600">

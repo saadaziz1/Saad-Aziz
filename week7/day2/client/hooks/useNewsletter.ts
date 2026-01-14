@@ -1,29 +1,26 @@
 import { useState } from 'react';
 import { useSubscribeToNewsletterMutation } from '@/store/apiSlice';
+import { toast } from 'react-hot-toast';
 
 export const useNewsletter = () => {
     const [subscribe, { isLoading, isSuccess, isError, error }] = useSubscribeToNewsletterMutation();
     const [email, setEmail] = useState('');
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
-        setMessage(null);
 
         if (!email) {
-            setMessage({ type: 'error', text: 'Email is required' });
+            toast.error('Email is required');
             return;
         }
 
         try {
             await subscribe({ email }).unwrap();
-            setMessage({ type: 'success', text: 'Subscribed successfully! Check your email.' });
+            toast.success('Subscribed successfully! Check your email.');
             setEmail('');
         } catch (err: any) {
-            setMessage({
-                type: 'error',
-                text: err?.data?.message || 'Failed to subscribe. Please try again.'
-            });
+            const errorMsg = err?.data?.message || 'Failed to subscribe. Please try again.';
+            toast.error(errorMsg);
         }
     };
 
@@ -32,6 +29,5 @@ export const useNewsletter = () => {
         setEmail,
         handleSubscribe,
         isLoading,
-        message,
     };
 };

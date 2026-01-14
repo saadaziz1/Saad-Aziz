@@ -1,11 +1,12 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
-import { Box, Avatar, Typography, Button, TextField, CircularProgress } from '@mui/material';
+import { Box, Avatar, Typography, Button, TextField, CircularProgress, Skeleton } from '@mui/material';
+import { toast } from 'react-hot-toast';
 import { Edit, Save, Cancel } from '@mui/icons-material';
 import { useGetProfileQuery, useUpdateProfileMutation } from '@/store/apiSlice';
+import dynamic from 'next/dynamic';
 
-const ProfileHeader = () => {
+const ProfileHeaderContent = () => {
     const { data: user, isLoading: isFetching } = useGetProfileQuery();
     const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
     const [isEditing, setIsEditing] = useState(false);
@@ -26,12 +27,28 @@ const ProfileHeader = () => {
         try {
             await updateProfile(formData).unwrap();
             setIsEditing(false);
-        } catch (err) {
+            toast.success('Profile updated successfully!');
+        } catch (err: any) {
+            const errorMsg = err?.data?.message || 'Failed to update profile';
+            toast.error(errorMsg);
             console.error('Failed to update profile:', err);
         }
     };
 
-    if (isFetching) return <CircularProgress />;
+    if (isFetching) {
+        return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexDirection: { xs: 'column', sm: 'row' }, textAlign: { xs: 'center', sm: 'left' } }}>
+                <Skeleton variant="circular" width={100} height={100} sx={{ bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
+                <Box sx={{ flex: 1, width: '100%' }}>
+                    <Skeleton variant="text" width="60%" height={60} sx={{ bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
+                    <Skeleton variant="text" width="40%" height={30} sx={{ bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
+                    <Box sx={{ mt: 2 }}>
+                        <Skeleton variant="rectangular" width={150} height={48} sx={{ borderRadius: 3, bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexDirection: { xs: 'column', sm: 'row' }, textAlign: { xs: 'center', sm: 'left' } }}>
@@ -132,5 +149,7 @@ const ProfileHeader = () => {
         </Box>
     );
 };
+
+const ProfileHeader = dynamic(() => Promise.resolve(ProfileHeaderContent), { ssr: false });
 
 export default ProfileHeader;

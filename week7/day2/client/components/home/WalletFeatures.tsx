@@ -5,7 +5,6 @@ import { Box, Typography, Paper } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import BackgroundBlobs from '../shared/BackgroundBlobs';
 
 const features = [
     {
@@ -26,7 +25,7 @@ const WalletFeatures = () => {
     return (
         <Box sx={{ py: { xs: 6, md: 12 }, position: 'relative', maxWidth: 1321, mx: 'auto', px: { xs: 2, md: 0 } }}>
 
-            <div className="absolute z-0 inset-y-1/3 inset-x-20 bg-[#73FDAA] hidden sm:block w-32 h-32 rounded-full blur-2xl "></div>
+            <div className="absolute z-0 inset-y-1/3 inset-x-20 bg-[#73FDAA] hidden md:block w-32 h-32 rounded-full blur-2xl "></div>
 
             <Grid container spacing={{ xs: 4, md: 8 }} alignItems="center" sx={{ zIndex: 1 }}>
                 <Grid size={{ xs: 12, md: 6 }}>

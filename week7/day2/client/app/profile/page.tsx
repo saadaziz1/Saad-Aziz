@@ -3,14 +3,14 @@
 import React from 'react';
 import { Box, Container, Paper, Divider } from '@mui/material';
 import { motion } from 'framer-motion';
-import BackgroundBlobs from '@/components/shared/BackgroundBlobs';
+
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSettings from '@/components/profile/ProfileSettings';
 
 const ProfilePage = () => {
     return (
         <Box sx={{ minHeight: '100vh', py: 12, position: 'relative' }}>
-            <BackgroundBlobs variant="default" />
+
 
             <Container maxWidth="md">
                 <motion.div

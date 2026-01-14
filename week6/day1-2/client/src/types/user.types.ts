@@ -8,6 +8,8 @@ export interface User {
     loyaltyPoints?: number;
     totalOrders?: number;
     totalSpent?: number;
+    avatar?: string;
+    provider?: string;
     createdAt?: string;
 }
 
