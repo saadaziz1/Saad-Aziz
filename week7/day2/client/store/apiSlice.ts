@@ -5,7 +5,7 @@ export const apiSlice = createApi({
     reducerPath: 'api',
     tagTypes: ['User', 'Newsletter'],
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+        baseUrl: process.env.NEXT_PUBLIC_API_URL,
         prepareHeaders: (headers) => {
             const token = Cookies.get('token');
             if (token) {

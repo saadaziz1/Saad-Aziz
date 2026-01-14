@@ -33,7 +33,7 @@ const LoginForm = () => {
     });
 
     const handleGoogleLogin = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/auth/google`;
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
     };
 
     const onSubmit = async (data: any) => {

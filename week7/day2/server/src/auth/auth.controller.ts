@@ -25,7 +25,7 @@ export class AuthController {
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@Req() req, @Res() res) {
         const result = await this.authService.googleLogin(req);
-        const frontendUrl = 'http://localhost:3000';
+        const frontendUrl = process.env.NEXT_PUBLIC_API_URL;
 
         if (typeof result === 'string') {
             return res.redirect(`${frontendUrl}/login?error=auth_failed`);
