@@ -41,16 +41,17 @@ export class AuthController {
             return res.redirect(`${frontendUrl}/login?error=auth_failed`);
         }
 
-        // Set token in cookie
+        // Set token in cookie (for same-domain local dev/testing)
         res.cookie('token', result.accessToken, {
-            httpOnly: false, // Set to false so frontend can read it for now (or use middleware)
-            secure: false, // Set to true in production
-            sameSite: 'lax',
+            httpOnly: false,
+            secure: true, // Always true for sameSite=none
+            sameSite: 'none', // Needed for cross-site if we relied on cookies (but we'll use URL param)
             path: '/',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        res.redirect(`${frontendUrl}/dashboard`);
+        // Pass token in URL for cross-domain (Render -> Vercel)
+        res.redirect(`${frontendUrl}/google-callback?token=${result.accessToken}`);
     }
 
     @Get('profile')

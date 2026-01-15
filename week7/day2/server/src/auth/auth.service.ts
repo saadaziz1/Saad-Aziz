@@ -95,7 +95,7 @@ export class AuthService {
     async updateProfile(userId: string, updateData: any) {
         if (updateData.email) {
             const existingUser = await this.usersService.findByEmail(updateData.email);
-            if (existingUser && existingUser._id.toString() !== userId) {
+            if (existingUser && existingUser._id.toString() !== userId.toString()) {
                 throw new ConflictException('Email already in use by another account');
             }
         }
