@@ -37,31 +37,32 @@ const Footer = () => {
                                 mb: 3,
                             }}
                         >
-                            <Image src="/home/Logo.png" alt="Logo" width={160} height={40} />
+                            <Image src="/home/Logo.png" alt="Logo" width={256} height={58} />
                         </Box>
 
                         <Typography
                             sx={{
-                                color: "rgba(255,255,255,0.7)",
+                                color: "white",
                                 maxWidth: 380,
+                                fontWeight: 700,
+                                fontSize: { lg: "20px", md: "18px", xs: "16px" },
                                 mx: { xs: "auto", md: 0 },
                                 lineHeight: 1.7,
                             }}
                         >
-                            Trade crypto assets with confidence. Real-time market data,
-                            advanced trading tools, and secure blockchain integration.
-                        </Typography>
+                            Amet minim mollit non deserunt ullamco est aliqua dolor do amet sint. Velit officia consequatduis enim velit mollit. Exercitation veniamconsequat sunt nostrud amet. </Typography>
                     </Grid>
 
                     {/* Quick Links */}
-                    <Grid size={{ xs: 12, md: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 3 }}>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <Typography sx={{ mb: 3, color: "white", fontWeight: 700, fontSize: { lg: "36px", md: "25px", xs: "20px" }, }}>
                             Quick Links
                         </Typography>
 
                         <Box
                             sx={{
                                 display: "flex",
+
                                 flexDirection: "column",
                                 gap: 2,
                                 alignItems: { xs: "center", md: "flex-start" },
@@ -71,12 +72,17 @@ const Footer = () => {
                                 <Link
                                     key={item}
                                     href="#"
-                                    style={{
-                                        color: "rgba(255,255,255,0.7)",
-                                        textDecoration: "none",
-                                        fontSize: 14,
-                                    }}
-                                >
+                                    underline="none"
+                                    sx={{
+                                        color: "#fff",
+                                        fontWeight: 500,
+                                        fontSize: { xs: "16px", sm: "18px", md: "20px" },
+                                        transition: "color 0.3s ease",
+
+                                        "&:hover": {
+                                            color: "#73FDAA",
+                                        },
+                                    }}   >
                                     {item}
                                 </Link>
                             ))}
@@ -84,9 +90,9 @@ const Footer = () => {
                     </Grid>
 
                     {/* Social Media */}
-                    <Grid size={{ xs: 12, md: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 3 }}>
-                            Community
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <Typography sx={{ mb: 3, color: "white", fontWeight: 700, fontSize: { lg: "36px", md: "25px", xs: "20px" }, }}>
+                            Social Media
                         </Typography>
                         <Box sx={{
                             mr: 2,

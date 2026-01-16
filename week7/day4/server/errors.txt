@@ -1,0 +1,6 @@
+src/app.controller.spec.ts(2,31): error TS2307: Cannot find module './app.controller' or its corresponding type declarations.
+src/app.controller.spec.ts(3,28): error TS2307: Cannot find module './app.service' or its corresponding type declarations.
+src/hygraph/hygraph.controller.spec.ts(3,32): error TS2307: Cannot find module './hygraph.service' or its corresponding type declarations.
+src/hygraph/hygraph.controller.ts(2,32): error TS2307: Cannot find module './hygraph.service' or its corresponding type declarations.
+src/hygraph/hygraph.module.ts(2,32): error TS2307: Cannot find module './hygraph.service' or its corresponding type declarations.
+src/hygraph/hygraph.service.spec.ts(2,32): error TS2307: Cannot find module './hygraph.service' or its corresponding type declarations.
