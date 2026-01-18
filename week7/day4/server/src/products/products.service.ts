@@ -14,6 +14,7 @@ export class ProductsService {
         name
         price
         image { url }
+        sizes
       }
     }`;
 
@@ -38,6 +39,7 @@ export class ProductsService {
         name
         price
         image { url }
+        sizes
       }
     }`;
 

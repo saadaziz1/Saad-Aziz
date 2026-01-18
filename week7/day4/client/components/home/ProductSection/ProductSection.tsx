@@ -12,23 +12,28 @@ import { useRef } from "react";
 import "swiper/css";
 import "swiper/css/navigation";
 
-const products = [
-    { id: 1, name: "Air Max 97", category: "Men's Shoes", price: "$205.99", image: "/products/green.png" },
-    { id: 2, name: "React Presto", category: "Men's Shoes", price: "$180.99", image: "/products/grey.png" },
-    { id: 3, name: "Air Max 270", category: "Men's Shoes", price: "$150.99", image: "/products/nike-air-max-270.png" },
-    { id: 4, name: "Air Max SE", category: "Men's Shoes", price: "$210.00", image: "/products/red-black-white.png" },
-    { id: 5, name: "Air Max 97", category: "Men's Shoes", price: "$205.99", image: "/products/green.png" },
-    { id: 6, name: "React Presto", category: "Men's Shoes", price: "$180.99", image: "/products/grey.png" },
-];
+import { useGetProductsQuery } from "@/redux/features/products/productsApi";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 export const ProductSection = () => {
     const swiperRef = useRef<any>(null);
+    const { data: productsData, isLoading, error } = useGetProductsQuery();
+
+    if (isLoading) return <LoadingScreen fullScreen={false} />;
+    if (error) return <Box sx={{ py: 10, textAlign: "center" }}><Typography color="error">Failed to load sneakers</Typography></Box>;
+
+    const products = productsData?.map((p: any) => ({
+        ...p,
+        image: p.image?.[0]?.url || "/products/grey.png",
+        price: `$${p.price}`
+    })) || [];
+
 
     return (
         <Box sx={{ py: 6, overflow: "hidden" }}>
             <Container maxWidth="xl">
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, textTransform: "none", fontSize: "40px" }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, textTransform: "uppercase", fontSize: "clamp(24px, 5vw, 40px)", letterSpacing: "1px" }}>
                         Top sneakers
                     </Typography>
                     <Stack direction="row" spacing={2}>

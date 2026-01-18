@@ -38,26 +38,25 @@ export const Hero = () => {
                     width: 370,
                     height: 132,
                     bgcolor: "#fff",
-                    maskImage: "url('/home/nike.png')",
+                    maskImage: "url('/home/Vector (2).png')",
                     maskRepeat: "no-repeat",
                     maskSize: "contain",
                     opacity: 1,
                     zIndex: 1
                 }} />
+
             </Box>
 
             <Container maxWidth="xl" sx={{ position: "relative", zIndex: 10, bottom: 10 }}>
                 <NewCard
                     side="left"
                     title="AIR JORDAN 1 MID LIGHT SMOKE GREY"
-
                     image="/products/nike-air-max-270.png"
                 />
-                <Box sx={{ mt: { md: 20 } }}>
+                <Box sx={{ mt: { lg: 20, xs: 2 } }}>
                     <NewCard
                         side="right"
                         title="Air Max 200 SE"
-
                         image="/products/red-black-white.png"
                     />
                 </Box>

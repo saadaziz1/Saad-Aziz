@@ -28,7 +28,7 @@ export class CartService {
                 productId: product.id,
                 name: product.name,
                 price: product.price,
-                image: product.image?.url || '',
+                image: product.image?.[0]?.url || '',
                 quantity: 1
             });
         }

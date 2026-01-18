@@ -18,30 +18,45 @@ export const NewCard = ({
     return (
         <Box
             sx={{
-                position: { xs: "relative", md: "absolute" },
-                bottom: { md: "clamp(-40px, -3vw, -60px)", xs: "auto" },
+                position: { xs: "relative", lg: "absolute" },
+                bottom: { lg: "clamp(-40px, -3vw, -60px)", xs: "auto" },
 
-                [isLeft ? "left" : "right"]: {
-                    md: "clamp(32px, 5vw, 80px)",
-                    xs: "50%",
+                // Fix: Ensure both cards are centered on xs/sm/md screens
+                // and correctly positioned on lg+ screens
+                left: isLeft
+                    ? { lg: "clamp(32px, 5vw, 80px)", xs: "50%" }
+                    : { lg: "auto", xs: "50%" },
+                right: !isLeft
+                    ? { lg: "clamp(32px, 5vw, 80px)", xs: "auto" }
+                    : "auto",
+
+                transform: { xs: "translateX(-50%)", lg: "none" },
+
+                // Responsive width: more flexible to prevent overlap
+                width: {
+                    xs: "90%",
+                    sm: "80%",
+                    md: "70%",
+                    lg: "clamp(450px, 40vw, 602px)"
                 },
-                transform: { xs: "translateX(-50%)", md: "none" },
-
-                width: { xs: "90%", sm: "85%", md: "clamp(480px, 42vw, 602px)" },
-                height: { xs: "auto", md: "clamp(220px, 22vw, 272px)" },
+                height: {
+                    xs: 200,
+                    sm: 220,
+                    lg: "clamp(220px, 22vw, 272px)"
+                },
 
                 bgcolor: "#EFEFEF",
                 backdropFilter: "blur(12px)",
                 p: { xs: 2, md: 3 },
-                borderRadius: { xs: "16px", md: "18px" },
+                borderRadius: { xs: "20px", md: "18px" },
                 boxShadow: "0 20px 50px rgba(0,0,0,0.1)",
                 zIndex: 2,
 
                 display: "flex",
-                flexDirection: { xs: "column", md: "column" },
-                justifyContent: "flex-end",
-                alignItems: { xs: "center", md: "flex-start" },
-                mb: { xs: 6, md: 0 },
+                flexDirection: { xs: "row", lg: "column" },
+                justifyContent: { xs: "space-between", lg: "flex-end" },
+                alignItems: { xs: "center", lg: "flex-start" },
+                mb: { xs: 4, lg: 0 },
             }}
         >
             {/* Text + Icon */}
@@ -49,18 +64,19 @@ export const NewCard = ({
                 sx={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: { xs: 1, md: 1 },
-                    maxWidth: { xs: "100%", md: "228px" },
-                    ml: { xs: 0, md: "66px" },
-                    textAlign: { xs: "center", md: "left" },
+                    gap: 1,
+                    maxWidth: { xs: "55%", lg: "228px" },
+                    zIndex: 2,
+                    textAlign: "left",
+                    ml: { xs: 0, lg: "66px" },
                 }}
             >
                 <Typography
                     sx={{
                         color: "#FF3939",
-                        fontWeight: 700,
+                        fontWeight: 900,
                         fontStyle: "italic",
-                        fontSize: { xs: "32px", sm: "36px", md: "48px" },
+                        fontSize: { xs: "24px", sm: "32px", lg: "48px" },
                         lineHeight: 1,
                     }}
                 >
@@ -70,12 +86,12 @@ export const NewCard = ({
                 <Typography
                     sx={{
                         color: "#000",
-                        fontWeight: 400,
+                        fontWeight: { xs: 600, lg: 400 },
                         textTransform: "uppercase",
                         letterSpacing: "1%",
-                        fontSize: { xs: "16px", sm: "18px", md: "20px" },
-                        lineHeight: "110%",
-                        mb: { xs: 2, md: "15px" },
+                        fontSize: { xs: "12px", sm: "14px", lg: "20px" },
+                        lineHeight: "1.2",
+                        mb: { xs: 1, lg: "15px" },
                     }}
                 >
                     {title}
@@ -85,27 +101,38 @@ export const NewCard = ({
                     sx={{
                         bgcolor: "#fff",
                         border: "1px solid #eee",
-                        width: { xs: 40, md: 45 },
-                        height: { xs: 40, md: 45 },
-                        alignSelf: { xs: "center", md: "flex-start" },
+                        width: { xs: 35, lg: 45 },
+                        height: { xs: 35, lg: 45 },
                         "&:hover": { bgcolor: "#f5f5f5" },
                     }}
                 >
-                    <NorthEastIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                    <NorthEastIcon sx={{ fontSize: { xs: 16, lg: 20 } }} />
                 </IconButton>
             </Box>
 
             {/* Shoe Image */}
             <Box
                 sx={{
-                    position: { xs: "relative", md: "absolute" },
-                    right: { md: -25, xs: "auto" },
-                    top: { md: 0, xs: "auto" },
-                    width: { xs: "80%", md: "409px" },
-                    height: { xs: 180, md: "231px" },
-                    transform: { md: "rotate(-28.75deg)", xs: "none" },
-                    filter: "drop-shadow(0 30px 20px rgba(0,0,0,0.2))",
-                    mt: { xs: 3, md: 0 },
+                    position: "absolute",
+                    right: { xs: -10, lg: -25 },
+                    top: { xs: -50, lg: 0 },
+                    transform: "rotate(-28.75deg)",
+                    // Image responsiveness: using clamp to scale between sizes
+                    width: {
+                        xs: "180px",
+                        sm: "240px",
+                        md: "300px",
+                        lg: "clamp(350px, 30vw, 409px)"
+                    },
+                    height: {
+                        xs: "140px",
+                        sm: "180px",
+                        md: "220px",
+                        lg: "clamp(200px, 18vw, 231px)"
+                    },
+                    filter: "drop-shadow(0 20px 30px rgba(0,0,0,0.15))",
+                    zIndex: 1,
+                    pointerEvents: "none"
                 }}
             >
                 <Image
@@ -118,3 +145,4 @@ export const NewCard = ({
         </Box>
     );
 };
+

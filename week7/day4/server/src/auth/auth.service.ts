@@ -21,9 +21,17 @@ export class AuthService {
         const hashedPassword = await bcrypt.hash(dto.password, 10);
         const user = await this.usersService.create(dto.email, hashedPassword, dto.name);
 
+        const payload = { sub: user._id, email: user.email };
+        const token = this.jwtService.sign(payload);
+
         return {
+            access_token: token,
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+            },
             message: 'User registered successfully',
-            userId: user._id,
         };
     }
 

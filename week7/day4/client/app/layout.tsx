@@ -6,6 +6,10 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import theme from "@/lib/theme";
 import { Montserrat } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import { ReduxProvider } from "@/components/providers/ReduxProvider";
+
+
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -25,10 +29,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${montserrat.variable} antialiased`}>
         <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            {children}
-          </ThemeProvider>
+          <ReduxProvider>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Toaster position="top-right" reverseOrder={false} />
+              {children}
+            </ThemeProvider>
+          </ReduxProvider>
         </AppRouterCacheProvider>
       </body>
     </html>
