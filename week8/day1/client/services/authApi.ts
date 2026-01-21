@@ -28,7 +28,7 @@ const setCookie = (name: string, value: string, days = 7) => {
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: fetchBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_SERVER}auth` }),
+  baseQuery: fetchBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_SERVER}/auth` }),
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, LoginDto>({
       query: (body) => ({
