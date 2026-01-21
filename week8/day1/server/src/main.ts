@@ -8,11 +8,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   app.enableCors({
-    origin: [
-      'https://career-craft-client-beta.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:3001',
-    ],
+    origin: "*",
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'], // list of actual headers
     credentials: false, // set true if you plan to use cookies/sessions
