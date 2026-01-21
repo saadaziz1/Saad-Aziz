@@ -8,6 +8,9 @@ import { RawMaterialUnit } from './src/modules/raw-materials/schema/raw-material
 import * as bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
+import { getModelToken } from '@nestjs/mongoose';
+import { Product } from './src/modules/products/schema/product.schema';
+import { Model } from 'mongoose';
 
 async function bootstrap() {
     const app = await NestFactory.createApplicationContext(AppModule);
@@ -18,6 +21,7 @@ async function bootstrap() {
     const usersService = app.get(UsersService);
     const ordersService = app.get(OrdersService);
     const configService = app.get(ConfigService);
+    const productModel = app.get<Model<Product>>(getModelToken(Product.name));
 
     // Get DB Connection to clear collections
     const mongoUri = configService.get<string>('MONGO_URI');
@@ -70,7 +74,7 @@ async function bootstrap() {
 
     // 3. Seed Products
     console.log('🍕 Seeding Products...');
-    const categories = ["Category 1", "Category 2", "Category 3", "Category 4", "Category 5", "Other"];
+    const categories = ["Cat 1", "Cat 2", "Cat 3", "Cat 4", "Cat 5", "Other"];
     const products: any[] = [];
 
     const productTemplates = [
@@ -82,17 +86,21 @@ async function bootstrap() {
     for (const cat of categories) {
         for (let i = 0; i < productTemplates.length; i++) {
             const template = productTemplates[i];
-            const p = await productService.create({
+
+            // Bypass service to allow direct image URL and avoid name length issues
+            const recipe = [
+                { rawMaterial: (rawMaterialsMap['Material Alpha'] as any)._id, quantity: 10 * (i + 1) },
+                { rawMaterial: (rawMaterialsMap['Material Beta'] as any)._id, quantity: 5 * (i + 1) },
+            ];
+
+            const p = await productModel.create({
                 name: `${cat} ${template.name} ${i + 1}`,
                 price: template.priceBase + (i * 2.5),
                 category: cat,
                 image: `https://picsum.photos/seed/${cat}${i}/400/400`,
                 isActive: true,
-                recipe: [
-                    { rawMaterial: (rawMaterialsMap['Material Alpha'] as any)._id.toString(), quantity: 10 * (i + 1) },
-                    { rawMaterial: (rawMaterialsMap['Material Beta'] as any)._id.toString(), quantity: 5 * (i + 1) },
-                ],
-            }, undefined as any);
+                recipe: recipe,
+            });
             products.push(p);
         }
     }
