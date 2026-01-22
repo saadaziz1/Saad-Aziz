@@ -1,0 +1,22 @@
+{
+  "name": "day2",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@openai/agents": "^0.4.1",
+    "dotenv": "^17.2.3",
+    "openai": "^6.16.0",
+    "readline": "^1.3.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^25.0.9",
+    "tsx": "^4.19.2",
+    "typescript": "^5.0.0"
+  }
+}
