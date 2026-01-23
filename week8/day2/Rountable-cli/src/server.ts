@@ -37,41 +37,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // --- API Endpoints ---
 
-/**
- * @swagger
- * /hello:
- *   get:
- *     summary: Simple greeting from a basic agent
- *     description: Runs a basic assistant agent that answers "Hello, who are you?"
- *     responses:
- *       200:
- *         description: Greeting returned successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       500:
- *         description: Server error
- */
-app.get("/hello", async (req, res) => {
-    try {
-        const assistant = new Agent({
-            name: "Assistant",
-            instructions: "You are a helpful assistant",
-            model: "models/gemini-2.0-flash", // Using the updated version
-        });
 
-        const runner = new Runner({ modelProvider } as any);
-        const result = await runner.run(assistant, "Hello, who are you?");
-
-        res.json({ message: result.finalOutput });
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 /**
  * @swagger
