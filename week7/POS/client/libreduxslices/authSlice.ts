@@ -13,8 +13,27 @@ const getSafeItem = (key: string) => {
     return item;
 };
 
+const setCookie = (name: string, value: string, days: number = 7) => {
+    if (typeof window === 'undefined') return;
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+};
+
+const deleteCookie = (name: string) => {
+    if (typeof window === 'undefined') return;
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
+const getCookie = (name: string) => {
+    if (typeof window === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+    return null;
+};
+
 const initialState: AuthState = {
-    token: getSafeItem('token'),
+    token: getSafeItem('token') || getCookie('token'),
     user: (() => {
         const item = getSafeItem('user');
         if (!item) return null;
@@ -24,7 +43,7 @@ const initialState: AuthState = {
             return null;
         }
     })(),
-    isAuthenticated: !!getSafeItem('token'),
+    isAuthenticated: !!(getSafeItem('token') || getCookie('token')),
 };
 
 const authSlice = createSlice({
@@ -41,6 +60,7 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             localStorage.setItem('token', access_token);
             localStorage.setItem('user', JSON.stringify(user));
+            setCookie('token', access_token);
         },
         logout: (state) => {
             state.user = null;
@@ -48,6 +68,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            deleteCookie('token');
         },
     },
 });

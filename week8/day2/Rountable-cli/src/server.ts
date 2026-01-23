@@ -24,7 +24,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: `http://localhost:${port}`,
+                url: "https://saad-aziz-13.onrender.com",
                 description: "Local server",
             },
         ],
@@ -109,13 +109,17 @@ app.post("/discuss", async (req, res) => {
             console.log(`>>> [Agent Start] ${agent.name}`);
         });
 
+        runner.on("agent_tool_start", (_, agent, tool) => {
+            history.push({ event: "agent_tool_start", tool: tool.name });
+            console.log(`<<< [Agent Tool Start] ${tool.name}`);
+        });
         runner.on("agent_handoff", (_, from, to) => {
             history.push({ event: "handoff", from: from.name, to: to.name });
             console.log(`<<< [Handoff] ${from.name} -> ${to.name}`);
         });
 
         // Run the discussion
-        const result = await runner.run(moderator, topic, { maxTurns: 30 });
+        const result = await runner.run(moderator, topic, { maxTurns: 15 });
 
         console.log("[API] Discussion concluded.");
 
