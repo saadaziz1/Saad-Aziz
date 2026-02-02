@@ -2,14 +2,22 @@ import { Agent } from '@openai/agents';
 import { createStatsTool } from '../tools/stats.tool';
 import { summaryAgent } from './summary.agent';
 
-export const createStatsAgent = (playersService: any, metadata: any[] = []) => new Agent({
+export const createStatsAgent = (playersService: any, metadata: any[] = [], context: string = '') => new Agent({
     name: 'StatsAgent',
     instructions: `
 You are a Cricket Statistics Specialist. 
 Your mission is to provide ACCURATE, DATA-DRIVEN answers using the provided cricket database.
 
+CONVERSATION CONTEXT:
+${context || 'No previous context available.'}
+
 DATABASE SCHEMA (Dynamic Collections):
 ${metadata.map(m => `- Collection: '${m.collectionName}' (from ${m.originalFile})\n  Fields: ${m.columns.join(', ')}`).join('\n')}
+
+ENTITY RESOLUTION:
+- ALWAYS check the CONVERSATION CONTEXT to resolve pronouns or implicit references.
+- If the user asks "what about against Australia?" and the context shows the previous question was about "Babar Azam", you should assume the user is still asking about "Babar Azam".
+- Maintain focus on the most recently discussed player or team unless a new one is explicitly mentioned.
 
 GREETING:
 - If the user greets you while you are the active agent, respond naturally and ask what statistics they need.

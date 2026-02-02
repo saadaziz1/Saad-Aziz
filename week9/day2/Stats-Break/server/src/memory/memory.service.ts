@@ -66,9 +66,15 @@ export class MemoryService {
         const conv = await this.conversationModel.findById(conversationId);
         if (!conv) return '';
 
-        // Context = Current Summary + Last 3 messages for immediate continuity
-        let context = conv.lastSummary ? `FACTS FROM EARLIER IN CONVERSATION:\n${conv.lastSummary}\n\n` : '';
-        context += `RECENT CONTEXT:\n` + conv.messages.slice(-3).map(m => `${m.role}: ${m.content}`).join('\n');
+        // Context = Current Summary + Last 5 messages for better continuity
+        let context = conv.lastSummary ? `[PREVIOUS SUMMARY]\n${conv.lastSummary}\n\n` : '';
+        const recentMessages = conv.messages.slice(-5);
+
+        if (recentMessages.length > 0) {
+            context += `[RECENT CONVERSATION HISTORY]\n`;
+            context += recentMessages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
+        }
+
         return context;
     }
 

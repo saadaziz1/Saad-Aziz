@@ -27,8 +27,8 @@ export class AiService {
 
         const contextText = await this.memoryService.getContext(conversationId);
         const metadata = await this.playersService.getMetadata();
-        const statsAgent = createStatsAgent(this.playersService, metadata);
-        const routerAgent = createRouterAgent(statsAgent, summaryAgent, this);
+        const statsAgent = createStatsAgent(this.playersService, metadata, contextText);
+        const routerAgent = createRouterAgent(statsAgent, summaryAgent, this, contextText);
 
         const executionContext: any = {
             userId,

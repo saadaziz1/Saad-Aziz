@@ -1,7 +1,7 @@
 import { Agent } from '@openai/agents';
 import { createDomainGuard } from '../guards/domain.guard';
 
-export const createRouterAgent = (statsAgent: Agent, summaryAgent: Agent, aiService: any) => {
+export const createRouterAgent = (statsAgent: Agent, summaryAgent: Agent, aiService: any, context: string = '') => {
     const domainGuardrail = createDomainGuard(aiService);
 
     return new Agent({
@@ -10,10 +10,14 @@ export const createRouterAgent = (statsAgent: Agent, summaryAgent: Agent, aiServ
 You are the central Routing Agent for the Cricket Intelligence Platform.
 Your ONLY job is to analyze user intent and delegate to the correct specialist agent.
 
+CONVERSATION CONTEXT:
+${context || 'No previous context available.'}
+
 INTENT CLASSIFICATION RULES:
 1. **Cricket Statistics & Data Retrieval** → StatsAgent
    - Questions like: "Who has the most runs?", "What was the result of the 2011 final?", "Show me stats for Kohli."
    - Any query seeking factual numbers or historical match data.
+   - **CONTEXTUAL RESOLUTION**: If a query is ambiguous or uses pronouns (e.g., "what about him?", "where was that?"), resolve the target based on the CONVERSATION CONTEXT provided above before delegating.
 
 2. **Conversation Summary & Context** → SummaryAgent
    - Questions like: "Summarize our chat", "What was the first thing I asked?", "Give me a recap."
