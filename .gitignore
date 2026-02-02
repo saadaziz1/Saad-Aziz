@@ -1,6 +1,9 @@
 # Ignore all node_modules recursively
 **/node_modules/
 
+**/.agent/
+
+
 # Ignore all .env files recursively
 **/.env
 **/.env.*

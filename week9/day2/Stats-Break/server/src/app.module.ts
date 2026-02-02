@@ -1,0 +1,26 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/user.module';
+import { AiModule } from './ai/ai.module';
+import { PlayersModule } from './players/players.module';
+import { MemoryModule } from './memory/memory.module';
+import { ChatModule } from './chat/chat.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    MongooseModule.forRoot(process.env.MONGO_URI!),
+    AuthModule,
+    UsersModule,
+    AiModule,
+    PlayersModule,
+    MemoryModule,
+    ChatModule,
+  ],
+})
+export class AppModule { }
