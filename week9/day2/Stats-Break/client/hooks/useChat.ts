@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAskQuestionMutation, useGetConversationQuery } from "../services/chatApi";
 import { Message } from "../types/types";
+import { toast } from "react-hot-toast";
 
 export const useChat = (initialConversationId: string | null) => {
     const [conversationId, setConversationId] = useState<string | null>(initialConversationId);
@@ -46,8 +47,10 @@ export const useChat = (initialConversationId: string | null) => {
             }
 
             setHistory((h) => [...h, { role: "assistant", payload: data }]);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
+            const message = err.data?.message || "COMMUNICATION FAILURE: RE-ESTABLISHING LINK...";
+            toast.error(message.toUpperCase());
             setHistory((h) => [
                 ...h,
                 {

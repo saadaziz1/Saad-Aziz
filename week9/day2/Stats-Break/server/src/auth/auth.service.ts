@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/user.service';
 import * as bcrypt from 'bcrypt';
@@ -39,7 +39,7 @@ export class AuthService {
   async register(email: string, password: string, name?: string): Promise<any> {
     const exists = await this.usersService.findByEmail(email);
     if (exists) {
-      throw new UnauthorizedException('Email already registered');
+      throw new ConflictException('Email already registered in core database');
     }
     const user = await this.usersService.create({ email, password, name });
     const { password: _, ...rest } = user.toObject ? user.toObject() : user;

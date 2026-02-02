@@ -20,16 +20,21 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{ token: string; user?: any; roles?: string[] }>
     ) => {
-      state.token = action.payload.token;
+      const { token } = action.payload;
+
+      // Guard against invalid tokens
+      if (!token || token === "undefined" || token === "null") return;
+
+      state.token = token;
       state.user = action.payload.user || null;
       state.roles = action.payload.roles || null;
 
       // persist in localStorage and cookies
       if (typeof window !== "undefined") {
-        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(action.payload.user || null));
         localStorage.setItem("roles", JSON.stringify(action.payload.roles || null));
-        document.cookie = `token=${action.payload.token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
       }
     },
     logout: (state) => {

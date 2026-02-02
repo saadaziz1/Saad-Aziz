@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   // ✅ Register a new user
   @Post('register')
@@ -24,7 +24,7 @@ export class AuthController {
   ) {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      return { message: 'Invalid credentials' };
+      throw new UnauthorizedException('Invalid identifier link or access cypher');
     }
     return this.authService.login(user);
   }
