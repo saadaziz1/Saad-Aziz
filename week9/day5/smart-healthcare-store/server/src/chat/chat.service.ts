@@ -4,6 +4,10 @@ import { AgentRunner } from '../agents/runner';
 import { createProductSearchTool } from '../agents/tools/product-search.tool';
 import { createProductRecommendationAgent } from '../agents/definitions/product-recommendation.agent';
 import { createGeneralChatAgent } from '../agents/definitions/general-chat.agent';
+import { openai } from '../agents/client';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
 @Injectable()
 export class ChatService {
@@ -97,5 +101,37 @@ export class ChatService {
         ];
         const lowerMessage = message.toLowerCase();
         return productKeywords.some(keyword => lowerMessage.includes(keyword));
+    }
+
+    // Transcribe audio file to text
+    async transcribeAudio(file: any) {
+        if (!file) {
+            return { text: '' };
+        }
+
+        try {
+            // Save buffer to a temporary file because OpenAI API expects a File object or readable stream with a path
+            const tempDir = os.tmpdir();
+            const tempPath = path.join(tempDir, `upload-${Date.now()}.wav`);
+            fs.writeFileSync(tempPath, file.buffer);
+
+            const transcription = await openai.audio.transcriptions.create({
+                file: fs.createReadStream(tempPath),
+                model: 'whisper-1',
+            });
+
+            // Clean up
+            fs.unlinkSync(tempPath);
+
+            return { text: transcription.text };
+        } catch (error) {
+            console.error('[ChatService] Transcription error:', error);
+            // Fallback: If OpenAI/OpenRouter fails, return a mock or error message
+            // Since the frontend uses Web Speech API primarily, this backend endpoint is a backup
+            return {
+                text: '',
+                error: 'Transcription failed. Please try typing or using the browser microphone.'
+            };
+        }
     }
 }

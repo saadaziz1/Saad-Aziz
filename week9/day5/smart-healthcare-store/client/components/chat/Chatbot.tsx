@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Sparkles, Mic, MicOff, Volume2, VolumeX, Volume1 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
+import { useSpeechToText } from '@/hooks/useSpeechToText';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { MiniProductCard } from '@/components/products/MiniProductCard';
 import { GoogleLoader } from '@/components/ui/GoogleLoader';
 import ReactMarkdown from 'react-markdown';
@@ -22,6 +24,9 @@ export const Chatbot = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { messages, isSending: isApiSending, send, clearMessages } = useChat();
     const { isAuthenticated } = useAuth();
+    const [autoSpeak, setAutoSpeak] = useState(true);
+    const { isListening, transcript, startListening, stopListening, error: speechError, setTranscript } = useSpeechToText();
+    const { speak, stop, isSpeaking } = useTextToSpeech();
 
     const suggestions = [
         "Suggest vitamins for energy",
@@ -39,13 +44,45 @@ export const Chatbot = () => {
         if (!isAuthenticated) {
             setIsOpen(false);
             clearMessages();
+            stop();
         }
-    }, [isAuthenticated, clearMessages]);
+    }, [isAuthenticated, clearMessages, stop]);
+
+    // Handle auto-speak for new messages
+    useEffect(() => {
+        const lastMessage = messages[messages.length - 1];
+        if (autoSpeak && lastMessage?.role === 'assistant' && !isApiSending) {
+            speak(lastMessage.content);
+        }
+    }, [messages, autoSpeak, speak, isApiSending]);
+
+    // Stop speech immediately when autoSpeak is turned off
+    useEffect(() => {
+        if (!autoSpeak) {
+            stop();
+        }
+    }, [autoSpeak, stop]);
 
     // Scroll to bottom effect
     useEffect(() => {
         scrollToBottom();
     }, [messages, isApiSending]);
+
+    // Handle speech-to-text result
+    useEffect(() => {
+        if (transcript) {
+            setInput(transcript);
+            // Optionally auto-send if you want, but better to let user review
+            setTranscript('');
+        }
+    }, [transcript, setTranscript]);
+
+    // Handle speech error
+    useEffect(() => {
+        if (speechError) {
+            toast.error(speechError);
+        }
+    }, [speechError]);
 
     const handleSend = async () => {
         if (!input.trim() || isApiSending) return;
@@ -105,9 +142,18 @@ export const Chatbot = () => {
                                     </div>
                                 </div>
                             </div>
-                            <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform duration-300">
-                                <X size={20} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setAutoSpeak(!autoSpeak)}
+                                    className={`p-2 rounded-lg transition-all ${autoSpeak ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                    title={autoSpeak ? "Auto-read On" : "Auto-read Off"}
+                                >
+                                    {autoSpeak ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                                </button>
+                                <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform duration-300">
+                                    <X size={20} />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Messages Area */}
@@ -149,10 +195,19 @@ export const Chatbot = () => {
                                                     }`}
                                             >
                                                 {msg.role === 'assistant' ? (
-                                                    <div className="[&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1 [&_strong]:font-bold [&_strong]:text-slate-900">
-                                                        <ReactMarkdown>
-                                                            {msg.content}
-                                                        </ReactMarkdown>
+                                                    <div className="relative group">
+                                                        <div className="[&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1 [&_strong]:font-bold [&_strong]:text-slate-900 pr-6">
+                                                            <ReactMarkdown>
+                                                                {msg.content}
+                                                            </ReactMarkdown>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => speak(msg.content)}
+                                                            className="absolute top-0 right-0 p-1 text-slate-300 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                                                            title="Read out loud"
+                                                        >
+                                                            <Volume1 size={16} />
+                                                        </button>
                                                     </div>
                                                 ) : (
                                                     msg.content
@@ -201,13 +256,23 @@ export const Chatbot = () => {
                                 <input
                                     type="text"
                                     maxLength={500}
-                                    placeholder="Ask for health advice..."
-                                    className="flex-1 pl-4 pr-12 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all text-slate-800 text-sm font-medium placeholder:text-slate-400 shadow-sm"
+                                    placeholder={isListening ? "Listening..." : "Ask for health advice..."}
+                                    className={`flex-1 pl-4 pr-20 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all text-slate-800 text-sm font-medium placeholder:text-slate-400 shadow-sm ${isListening ? 'border-primary ring-2 ring-primary/20 animate-pulse' : ''}`}
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                     disabled={isApiSending}
                                 />
+                                <div className="absolute right-14 flex items-center gap-1">
+                                    <button
+                                        onClick={isListening ? stopListening : startListening}
+                                        disabled={isApiSending}
+                                        className={`p-2 rounded-lg transition-all ${isListening ? 'text-red-500 bg-red-50 animate-bounce' : 'text-slate-400 hover:text-primary hover:bg-slate-100'}`}
+                                        title={isListening ? "Stop Listening" : "Start Voice Input"}
+                                    >
+                                        {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                                    </button>
+                                </div>
                                 <button
                                     onClick={handleSend}
                                     disabled={!input.trim() || isApiSending}

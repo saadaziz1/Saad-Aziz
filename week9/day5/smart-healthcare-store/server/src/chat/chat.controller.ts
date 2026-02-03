@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -15,5 +16,12 @@ export class ChatController {
     @Post()
     async chat(@Body('message') message: string) {
         return this.chatService.generalChat(message);
+    }
+
+    // Speech-to-text (transcribe audio file)
+    @Post('speech-to-text')
+    @UseInterceptors(FileInterceptor('audio'))
+    async speechToText(@UploadedFile() file: any) {
+        return this.chatService.transcribeAudio(file);
     }
 }

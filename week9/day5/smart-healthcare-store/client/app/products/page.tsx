@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Sparkles, SlidersHorizontal, Loader2, X } from 'lucide-react';
+import { Search, Sparkles, SlidersHorizontal, Loader2, X, Mic, MicOff, Volume2, VolumeX, Volume1 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Navbar } from '@/components/layout/Navbar';
 import { ProductCard } from '@/components/products/ProductCard';
 import { GoogleLoader } from '@/components/ui/GoogleLoader';
 import { useProducts } from '@/hooks/useProducts';
+import { useSpeechToText } from '@/hooks/useSpeechToText';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const CATEGORIES = ['Vitamins', 'Bone Health', 'Heart Health', 'Hair & Skin', 'Minerals'];
 
@@ -17,6 +20,10 @@ export default function ProductsPage() {
     const [aiQuery, setAiQuery] = useState(''); // For explicit AI search trigger
     const [isAiSearch, setIsAiSearch] = useState(false);
     const [activeCategory, setActiveCategory] = useState('All');
+    const [autoSpeak, setAutoSpeak] = useState(true);
+
+    const { isListening, transcript, startListening, stopListening, error: speechError, setTranscript } = useSpeechToText();
+    const { speak, stop, isSpeaking: isTtsPlaying } = useTextToSpeech();
 
     // Debounce search query only for normal search
     useEffect(() => {
@@ -28,24 +35,26 @@ export default function ProductsPage() {
         }
     }, [searchQuery, isAiSearch]);
 
-    // Clear AI query when switching modes to avoid stale results
     useEffect(() => {
         if (!isAiSearch) {
             setAiQuery('');
         }
     }, [isAiSearch]);
 
-    const handleSearchTrigger = () => {
-        if (isAiSearch && searchQuery.trim()) {
-            setAiQuery(searchQuery);
+    // Handle speech-to-text result
+    useEffect(() => {
+        if (transcript) {
+            setSearchQuery(transcript);
+            setTranscript('');
         }
-    };
+    }, [transcript, setTranscript]);
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleSearchTrigger();
+    // Handle speech error
+    useEffect(() => {
+        if (speechError) {
+            toast.error(speechError);
         }
-    };
+    }, [speechError]);
 
     // Use either AI query or debounced query depending on mode
     const finalQuery = isAiSearch ? aiQuery : debouncedQuery;
@@ -60,6 +69,39 @@ export default function ProductsPage() {
         if (activeCategory === 'All') return products;
         return products.filter(p => p.category === activeCategory);
     }, [products, activeCategory]);
+
+    // Handle auto-speak for explanation
+    useEffect(() => {
+        if (autoSpeak && explanation && isAiSearch && !isLoading) {
+            speak(explanation);
+        }
+    }, [explanation, autoSpeak, speak, isAiSearch, isLoading]);
+
+    // Stop speech immediately when autoSpeak is turned off
+    useEffect(() => {
+        if (!autoSpeak) {
+            stop();
+        }
+    }, [autoSpeak, stop]);
+
+    // Stop speaking when navigating or changing mode
+    useEffect(() => {
+        return () => stop();
+    }, [stop]);
+
+    const handleSearchTrigger = () => {
+        if (isAiSearch && searchQuery.trim()) {
+            setAiQuery(searchQuery);
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSearchTrigger();
+        }
+    };
+
+
 
     return (
         <main className="min-h-screen pt-32 pb-12 px-4 md:px-8 max-w-7xl mx-auto">
@@ -89,21 +131,30 @@ export default function ProductsPage() {
                         <input
                             type="text"
                             maxLength={150}
-                            placeholder={isAiSearch ? "Try 'I have weak bones' or 'Supplements for heart' (Press Enter)..." : "Search products, brands..."}
-                            className="w-full pl-12 pr-12 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
+                            placeholder={isListening ? "Listening..." : isAiSearch ? "Try 'I have weak bones' or 'Supplements for heart' (Press Enter)..." : "Search products, brands..."}
+                            className={`w-full pl-12 pr-24 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium ${isListening ? 'ring-2 ring-primary/20 animate-pulse' : ''}`}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyPress={handleKeyPress}
                         />
-                        {isAiSearch && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
                             <button
-                                onClick={handleSearchTrigger}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors"
-                                title="Search"
+                                onClick={isListening ? stopListening : startListening}
+                                className={`p-2 rounded-lg transition-all ${isListening ? 'text-red-500 bg-red-50 animate-bounce' : 'text-slate-400 hover:text-primary hover:bg-slate-100'}`}
+                                title={isListening ? "Stop Listening" : "Start Voice Input"}
                             >
-                                <Search size={16} />
+                                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
                             </button>
-                        )}
+                            {isAiSearch && (
+                                <button
+                                    onClick={handleSearchTrigger}
+                                    className="p-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors"
+                                    title="Search"
+                                >
+                                    <Search size={18} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3 w-full md:w-auto">
@@ -113,6 +164,13 @@ export default function ProductsPage() {
                         >
                             <Sparkles size={18} />
                             AI Search
+                        </button>
+                        <button
+                            onClick={() => setAutoSpeak(!autoSpeak)}
+                            className={`p-4 rounded-2xl font-bold transition-all shadow-md ${autoSpeak ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400'}`}
+                            title={autoSpeak ? "Auto-read On" : "Auto-read Off"}
+                        >
+                            {autoSpeak ? <Volume2 size={20} /> : <VolumeX size={20} />}
                         </button>
                         <button className="flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-md">
                             <SlidersHorizontal size={18} />
@@ -135,15 +193,25 @@ export default function ProductsPage() {
                                     <Sparkles size={16} />
                                     <span>AI Recommendation</span>
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        setAiQuery('');
-                                        setIsAiSearch(false);
-                                    }}
-                                    className="p-1 hover:bg-primary/10 rounded-full transition-colors"
-                                >
-                                    <X size={16} />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => speak(explanation)}
+                                        className="p-1.5 hover:bg-primary/10 text-primary rounded-lg transition-colors"
+                                        title="Read out loud"
+                                    >
+                                        <Volume1 size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setAiQuery('');
+                                            setIsAiSearch(false);
+                                            stop();
+                                        }}
+                                        className="p-1 hover:bg-primary/10 rounded-full transition-colors"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
                             </div>
                             <div className="text-slate-600 leading-relaxed text-[15px] [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_li]:mb-1 [&_strong]:font-bold [&_strong]:text-slate-800">
                                 <ReactMarkdown>
