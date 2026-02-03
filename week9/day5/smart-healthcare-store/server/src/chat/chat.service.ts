@@ -21,8 +21,10 @@ export class ChatService {
     async getProductRecommendations(message: string) {
         const result = await AgentRunner.run(this.productRecommendationAgent, message, {});
 
-        // Also fetch products directly to return full product data
-        const products = await this.productsService.findAll(message);
+        // Extract keywords and find relevant products to display
+        const keywords = this.productsService.extractKeywords(message);
+        const products = await this.productsService.searchByKeywords(keywords);
+
         const formattedProducts = products.slice(0, 5).map((p: any) => ({
             _id: p._id?.toString() || p.id,
             name: p.name,
@@ -59,7 +61,7 @@ export class ChatService {
             console.log(`[ChatService] Fetching products for query: "${message}"`);
 
             // Extract keywords to avoid searching for the full sentence
-            const keywords = this.extractKeywords(message);
+            const keywords = this.productsService.extractKeywords(message);
             console.log(`[ChatService] Extracted keywords: ${keywords.join(', ')}`);
 
             const searchResults = await this.productsService.searchByKeywords(keywords);
@@ -95,15 +97,5 @@ export class ChatService {
         ];
         const lowerMessage = message.toLowerCase();
         return productKeywords.some(keyword => lowerMessage.includes(keyword));
-    }
-
-    // Extract meaningful keywords from a natural language query
-    private extractKeywords(message: string): string[] {
-        const stopWords = ['i', 'have', 'need', 'want', 'for', 'my', 'the', 'a', 'an', 'and', 'or', 'with', 'to', 'help', 'me', 'recommend', 'show', 'is', 'are', 'do', 'does', 'can', 'please'];
-        return message
-            .toLowerCase()
-            .replace(/[^\w\s]/g, '') // Remove punctuation
-            .split(/\s+/)
-            .filter(word => word.length > 2 && !stopWords.includes(word));
     }
 }

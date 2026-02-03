@@ -2,6 +2,8 @@
 
 import React, { useState, use } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, Star, ShoppingCart, ShieldCheck, Truck, RotateCcw, Loader2 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { useProduct } from '@/hooks/useProducts';
@@ -13,11 +15,20 @@ export default function SingleProductPage({ params }: { params: Promise<{ id: st
     const { id } = use(params);
     const { product, isLoading, error } = useProduct(id);
     const { addToCart, isAdding } = useCart();
+    const router = useRouter();
+    const { isAuthenticated } = useAuth();
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState(0);
 
     const handleAddToCart = async () => {
         if (!product) return;
+
+        if (!isAuthenticated) {
+            toast.error('Please login to add items to cart');
+            router.push('/login');
+            return;
+        }
+
         try {
             await addToCart(product._id, quantity);
             toast.success(`${product.name} added to cart!`);

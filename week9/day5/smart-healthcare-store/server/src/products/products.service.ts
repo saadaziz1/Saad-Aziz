@@ -45,11 +45,7 @@ export class ProductsService {
         }).limit(10).exec();
     }
 
-    // Seed dummy data
-    async seedProducts(products: Partial<Product>[]) {
-        await this.productModel.deleteMany({});
-        return this.productModel.insertMany(products);
-    }
+
 
     // Shared keyword extraction logic
     extractKeywords(query: string): string[] {

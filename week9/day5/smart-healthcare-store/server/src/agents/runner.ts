@@ -1,5 +1,6 @@
 import { Runner } from '@openai/agents';
 import { modelProvider } from './client';
+import { log } from 'console';
 
 export interface AgentResult {
     finalOutput: string;
@@ -17,16 +18,19 @@ export class AgentRunner {
         runner.on('agent_start', (ctx, agent) => {
             history.push({ role: 'assistant', name: agent.name, event: 'agent_start' });
             console.log(`>>> [Agent Start] ${agent.name}`);
+            console.log("tokens:", ctx.usage.totalTokens)
         });
 
         runner.on('agent_handoff', (ctx, from, to) => {
             history.push({ role: 'assistant', event: 'handoff', from: from.name, to: to.name });
             console.log(`<<< [Handoff] ${from.name} -> ${to.name}`);
+            console.log("tokens:", ctx.usage.totalTokens)
         });
 
         runner.on('agent_tool_start', (ctx, agent, tool) => {
             history.push({ role: 'assistant', name: agent.name, event: 'tool_start', tool: tool.name });
             console.log(`    [Tool Start] ${tool.name}`);
+            console.log("tokens:", ctx.usage.totalTokens)
         });
 
         const result = await runner.run(agent, query, {

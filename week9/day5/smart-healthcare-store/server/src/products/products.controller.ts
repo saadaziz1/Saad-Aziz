@@ -49,8 +49,5 @@ export class ProductsController {
         return product;
     }
 
-    @Post('seed')
-    seed(@Body() products: Partial<Product>[]) {
-        return this.productsService.seedProducts(products);
-    }
+
 }

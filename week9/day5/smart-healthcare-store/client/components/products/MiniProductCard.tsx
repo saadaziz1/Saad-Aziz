@@ -4,6 +4,8 @@ import React from 'react';
 import { ShoppingCart, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import toast from 'react-hot-toast';
 
@@ -25,10 +27,18 @@ interface MiniProductCardProps {
  */
 export const MiniProductCard = ({ product }: MiniProductCardProps) => {
     const { addToCart, isAdding } = useCart();
+    const router = useRouter();
+    const { isAuthenticated } = useAuth();
 
     const handleAddToCart = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+
+        if (!isAuthenticated) {
+            toast.error('Please login to add items');
+            router.push('/login');
+            return;
+        }
         try {
             await addToCart(product._id);
             toast.success(`Added to cart!`);
