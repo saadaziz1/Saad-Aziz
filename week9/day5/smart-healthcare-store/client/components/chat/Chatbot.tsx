@@ -202,11 +202,11 @@ export const Chatbot = () => {
                                                             </ReactMarkdown>
                                                         </div>
                                                         <button
-                                                            onClick={() => speak(msg.content)}
-                                                            className="absolute top-0 right-0 p-1 text-slate-300 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
-                                                            title="Read out loud"
+                                                            onClick={() => isSpeaking ? stop() : speak(msg.content)}
+                                                            className={`absolute top-0 right-0 p-1 transition-colors group-hover:opacity-100 ${isSpeaking ? 'opacity-100 text-primary' : 'opacity-0 text-slate-300 hover:text-primary'}`}
+                                                            title={isSpeaking ? "Stop" : "Read out loud"}
                                                         >
-                                                            <Volume1 size={16} />
+                                                            {isSpeaking ? <Volume1 size={16} /> : <VolumeX size={16} />}
                                                         </button>
                                                     </div>
                                                 ) : (

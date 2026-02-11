@@ -195,11 +195,11 @@ export default function ProductsPage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
-                                        onClick={() => speak(explanation)}
-                                        className="p-1.5 hover:bg-primary/10 text-primary rounded-lg transition-colors"
-                                        title="Read out loud"
+                                        onClick={() => isTtsPlaying ? stop() : speak(explanation)}
+                                        className={`p-1.5 rounded-lg transition-colors ${isTtsPlaying ? 'bg-primary/10 text-primary' : 'hover:bg-primary/10 text-primary'}`}
+                                        title={isTtsPlaying ? "Stop" : "Read out loud"}
                                     >
-                                        <Volume1 size={18} />
+                                        {isTtsPlaying ? <Volume1 size={18} /> : <VolumeX size={18} />}
                                     </button>
                                     <button
                                         onClick={() => {
