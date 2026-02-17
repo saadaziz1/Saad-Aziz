@@ -5,6 +5,7 @@ import { useStudentSubmissions } from "@/hooks/useAssignments";
 import ProgressBar from "@/components/atoms/ProgressBar";
 import Button from "@/components/atoms/Button";
 import { toast } from "react-hot-toast";
+import Loader from "@/components/atoms/Loader";
 
 export default function StudentResults() {
     const { data: submissions, isLoading } = useStudentSubmissions();
@@ -27,7 +28,7 @@ export default function StudentResults() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center p-20">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <Loader size="md" />
             </div>
         );
     }

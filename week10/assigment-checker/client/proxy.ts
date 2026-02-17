@@ -19,17 +19,23 @@ export function proxy(request: NextRequest) {
     if (token && isPublicRoute) {
         if (userRole === 'teacher') {
             return NextResponse.redirect(new URL('/teacher', request.url));
+        } else if (userRole === 'moderator') {
+            return NextResponse.redirect(new URL('/moderator', request.url));
+        } else if (userRole === 'student') {
+            return NextResponse.redirect(new URL('/student', request.url));
         }
-        return NextResponse.redirect(new URL('/student', request.url));
     }
 
     // Role-based protection
     if (token) {
         if (pathname.startsWith('/teacher') && userRole !== 'teacher') {
-            return NextResponse.redirect(new URL('/student', request.url));
+            return NextResponse.redirect(new URL('/', request.url));
         }
         if (pathname.startsWith('/student') && userRole !== 'student') {
-            return NextResponse.redirect(new URL('/teacher', request.url));
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+        if (pathname.startsWith('/moderator') && userRole !== 'moderator') {
+            return NextResponse.redirect(new URL('/', request.url));
         }
     }
 

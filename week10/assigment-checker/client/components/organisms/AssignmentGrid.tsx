@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Loader from "@/components/atoms/Loader";
 
 interface AssignmentGridProps {
     assignments: any[];
@@ -12,8 +13,7 @@ const AssignmentGrid: React.FC<AssignmentGridProps> = ({ assignments, searchPara
     if (loading) {
         return (
             <div className="max-w-screen-2xl mx-auto py-20 text-center">
-                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                <p className="text-foreground/40 font-bold tracking-widest uppercase text-xs">Loading Assignments...</p>
+                <Loader text="Loading Assignments..." />
             </div>
         );
     }

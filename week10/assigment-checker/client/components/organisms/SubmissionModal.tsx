@@ -1,5 +1,6 @@
 import React from "react";
 import ProgressBar from "@/components/atoms/ProgressBar";
+import Loader from "@/components/atoms/Loader";
 
 interface SubmissionModalProps {
     student: any;
@@ -64,7 +65,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
                             >
                                 <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/eval:translate-x-full transition-transform duration-1000" />
                                 {isEvaluating ? (
-                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <Loader size="sm" />
                                 ) : (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />

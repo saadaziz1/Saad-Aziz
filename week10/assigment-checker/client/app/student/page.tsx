@@ -8,6 +8,7 @@ import Button from "@/components/atoms/Button";
 import { useAssignments, useStudentSubmissions } from "@/hooks/useAssignments";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
+import Loader from "@/components/atoms/Loader";
 
 const submissionSchema = z.object({
     file: z.any().refine((files) => files?.length > 0, "PDF file is required"),
@@ -163,7 +164,7 @@ export default function StudentDashboard() {
 
             {loadingAssignments ? (
                 <div className="flex items-center justify-center p-20">
-                    <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <Loader size="md" />
                 </div>
             ) : assignments.length === 0 ? (
                 <div className="py-20 text-center glass rounded-4xl border border-dashed border-white/10">

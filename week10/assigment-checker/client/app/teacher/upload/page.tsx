@@ -1,5 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
+import Loader from "@/components/atoms/Loader";
 import Button from "@/components/atoms/Button";
 import ProgressBar from "@/components/atoms/ProgressBar";
 import Badge from "@/components/atoms/Badge";
@@ -8,7 +9,7 @@ import { useAssignments, useAssignmentDetails } from "@/hooks/useAssignments";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-export default function BatchUpload() {
+function BatchUploadContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const assignmentId = searchParams.get("id");
@@ -287,5 +288,17 @@ export default function BatchUpload() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function BatchUpload() {
+    return (
+        <Suspense fallback={
+            <div className="max-w-screen-2xl mx-auto py-20 text-center">
+                <Loader text="Loading upload interface..." />
+            </div>
+        }>
+            <BatchUploadContent />
+        </Suspense>
     );
 }

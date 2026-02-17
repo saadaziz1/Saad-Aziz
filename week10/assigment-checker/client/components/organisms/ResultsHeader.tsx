@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "@/components/atoms/Button";
 import { useRouter } from "next/navigation";
+import Loader from "@/components/atoms/Loader";
 
 interface ResultsHeaderProps {
     assignmentTitle?: string;
@@ -74,7 +75,7 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
                             className="space-x-3 border-secondary/20 text-secondary py-4 px-6 rounded-2xl hover:bg-secondary/5 transition-all relative overflow-hidden"
                         >
                             {isEvaluating ? (
-                                <div className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin"></div>
+                                <Loader size="sm" />
                             ) : (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 group-hover/eval:translate-x-1 group-hover/eval:-translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />

@@ -21,6 +21,7 @@ const RECENT_ASSIGNMENTS = [
 import { useAssignments, useAIInsights, useDashboardStats } from "@/hooks/useAssignments";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
+import Loader from "@/components/atoms/Loader";
 
 export default function TeacherDashboard() {
     const { assignments, isLoading: loadingAssignments } = useAssignments();
@@ -83,8 +84,7 @@ export default function TeacherDashboard() {
                     <div className="space-y-4 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent flex-1">
                         {loadingAssignments ? (
                             <div className="py-20 text-center">
-                                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                                <p className="text-foreground/40 font-bold tracking-widest uppercase text-xs">Syncing assignments...</p>
+                                <Loader text="Syncing assignments..." />
                             </div>
                         ) : assignments.length === 0 ? (
                             <div className="py-20 text-center space-y-8 glass rounded-3xl border border-dashed border-white/10">

@@ -4,8 +4,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useSubmission } from "@/hooks/useAssignments";
 import ProgressBar from "@/components/atoms/ProgressBar";
 import { toast } from "react-hot-toast";
+import { Suspense } from "react";
+import Loader from "@/components/atoms/Loader";
 
-export default function ReviewPage() {
+function ReviewContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const submissionId = searchParams.get("id");
@@ -22,8 +24,7 @@ export default function ReviewPage() {
     if (isLoading) {
         return (
             <div className="max-w-7xl mx-auto py-32 text-center">
-                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-xl shadow-primary/20"></div>
-                <p className="text-foreground/30 font-bold uppercase text-[10px] tracking-widest animate-pulse">Initializing Neural Review Engine...</p>
+                <Loader text="Initializing Neural Review Engine..." />
             </div>
         );
     }
@@ -104,7 +105,7 @@ export default function ReviewPage() {
                         >
                             <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/eval:translate-x-full transition-transform duration-1000" />
                             {isEvaluating ? (
-                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <Loader size="sm" />
                             ) : (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -225,5 +226,17 @@ export default function ReviewPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ReviewPage() {
+    return (
+        <Suspense fallback={
+            <div className="max-w-7xl mx-auto py-32 text-center">
+                <Loader text="Initializing Neural Review Engine..." />
+            </div>
+        }>
+            <ReviewContent />
+        </Suspense>
     );
 }

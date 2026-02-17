@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Loader from "@/components/atoms/Loader";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAssignmentDetails, useAssignments } from "@/hooks/useAssignments";
 import { toast } from "react-hot-toast";
@@ -11,7 +12,8 @@ import AssignmentGrid from "@/components/organisms/AssignmentGrid";
 import SubmitOnBehalfModal from "@/components/organisms/SubmitOnBehalfModal";
 import ExtendDeadlineModal from "@/components/organisms/ExtendDeadlineModal";
 
-export default function ResultsSheet() {
+
+function ResultsContent() {
     const searchParams = useSearchParams();
     const assignmentId = searchParams.get("id");
     const { assignment, submissions, isLoading, exportResults } = useAssignmentDetails(assignmentId || "");
@@ -83,8 +85,7 @@ export default function ResultsSheet() {
     if (isLoading) {
         return (
             <div className="max-w-screen-2xl mx-auto py-20 text-center">
-                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                <p className="text-foreground/40 font-bold tracking-widest uppercase text-xs">Fetching evaluation data...</p>
+                <Loader text="Fetching evaluation data..." />
             </div>
         );
     }
@@ -143,5 +144,17 @@ export default function ResultsSheet() {
                 autoEvaluation={assignment?.autoEvaluation}
             />
         </div>
+    );
+}
+
+export default function ResultsSheet() {
+    return (
+        <Suspense fallback={
+            <div className="max-w-screen-2xl mx-auto py-20 text-center">
+                <Loader text="Loading page..." />
+            </div>
+        }>
+            <ResultsContent />
+        </Suspense>
     );
 }
