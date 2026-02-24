@@ -1,0 +1,15 @@
+{
+    "name": "Kyojuro Rengoku #6",
+    "description": "A unique Demon Slayer NFT representing Kyojuro Rengoku.",
+    "image": "ipfs://bafybeihhfkfnsuftghhkpvicgxjnrkxxjqfhgjiyzks4cykl3kjad6mup4/6.jpeg",
+    "attributes": [
+        {
+            "trait_type": "Character",
+            "value": "Kyojuro Rengoku"
+        },
+        {
+            "trait_type": "Technique",
+            "value": "Flame Breathing"
+        }
+    ]
+}

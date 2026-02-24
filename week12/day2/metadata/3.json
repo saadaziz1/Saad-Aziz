@@ -1,0 +1,15 @@
+{
+    "name": "Inosuke Hashibira #3",
+    "description": "A unique Demon Slayer NFT representing Inosuke Hashibira.",
+    "image": "ipfs://bafybeihhfkfnsuftghhkpvicgxjnrkxxjqfhgjiyzks4cykl3kjad6mup4/3.jpeg",
+    "attributes": [
+        {
+            "trait_type": "Character",
+            "value": "Inosuke Hashibira"
+        },
+        {
+            "trait_type": "Technique",
+            "value": "Beast Breathing"
+        }
+    ]
+}

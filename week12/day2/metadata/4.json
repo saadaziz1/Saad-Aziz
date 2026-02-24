@@ -1,0 +1,15 @@
+{
+    "name": "Shinobu Kocho #4",
+    "description": "A unique Demon Slayer NFT representing Shinobu Kocho.",
+    "image": "ipfs://bafybeihhfkfnsuftghhkpvicgxjnrkxxjqfhgjiyzks4cykl3kjad6mup4/4.jpeg",
+    "attributes": [
+        {
+            "trait_type": "Character",
+            "value": "Shinobu Kocho"
+        },
+        {
+            "trait_type": "Technique",
+            "value": "Insect Breathing"
+        }
+    ]
+}
