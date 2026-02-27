@@ -43,6 +43,18 @@ function App() {
   const [tokenASymbol, setTokenASymbol] = useState('TKN-A');
   const [tokenBSymbol, setTokenBSymbol] = useState('TKN-B');
 
+  // Reset all user data on disconnect
+  useEffect(() => {
+    if (!isConnected) {
+      setBalances(['0', '0']);
+      setAmountIn('');
+      setAmountOut('0.0');
+      setLiqAmountA('');
+      setLiqAmountB('');
+      setReserves(['0', '0']);
+    }
+  }, [isConnected]);
+
   const getContracts = async (needSigner = false) => {
     if (!window.ethereum) return null;
     const provider = new ethers.BrowserProvider(window.ethereum);
